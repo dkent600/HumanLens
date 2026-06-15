@@ -1,0 +1,332 @@
+# Build Context (SMI — Module 1 build workstream)
+
+Operational memory for the chat that owns `build_approach.md`. This file is for
+resuming cleanly across chats/containers. It is NOT the design deliverable —
+`build_approach.md` is. Keep design detail there; keep process, state, and lane
+rules here.
+
+## What this workstream is
+The engineering/architecture side of Human Lens (SMI's AI-assisted qualitative
+synthesis tool for Inclusity). It designs and captures the build, starting with
+Module 1, the Listening Brief. Doug engineers; Claude is architect/thinking
+partner and the writer of `build_approach.md`.
+
+## File ownership (whole project — one writer per file)
+- `build_approach.md` — written ONLY by this build chat. Reference-only elsewhere.
+- `build_implementation.md` — written ONLY by this build chat (design-of-
+  implementation; the bridge to the eventual code repo, NOT the code itself).
+  Reference-only elsewhere. Architecture (`build_approach.md`) wins on conflict.
+- `build_context.md` (this file) — written ONLY by this build chat.
+- `identification_workflow.md` — written ONLY by this build chat. Boundary-spanning
+  workflow spec (Inclusity's process + the Inclusity↔Human Lens contract). Owns
+  the Inclusity-side process and the contract; defers to `build_approach.md` on
+  Human Lens internals. Reference-only elsewhere.
+- `identification_questions_for_inclusity.md` — written ONLY by this build chat.
+  Derived artifact: the `identification_workflow.md` open questions translated into
+  a plain-language conversation guide for Doug to take to Maria/Mitchell. Outreach-
+  facing (no build jargon); not a durable spec — refresh if the open questions change.
+- `AI_Development_Plan.md` (the proposal) — written ONLY by the proposal chat.
+  Reference-only here; never edit it.
+- `SMI_Project_Context.md` (project source of truth) — written/maintained by the
+  proposal chat. Reference-only here. Build-side changes are handed to Doug as
+  prompts to run in the proposal chat — never edited from here.
+- Enforcement is by file, not chat name: each file says who may edit it; a chat
+  only edits the file given to it as its working copy. Doug is the only human in
+  all chats.
+
+## Working conventions
+- Discuss placement before editing; propose specific insertion points first.
+- Targeted edits, one at a time, with confirmation between. Never wholesale rewrites.
+- Present/show the file after each edit so Doug holds the durable copy (the
+  container is ephemeral and can reset).
+- Match the doc's existing voice; avoid generic AI/DEI language; preserve the
+  "AI surfaces, humans decide" framing throughout.
+- House style: "Sasha Markova Inc." (no comma); singular they/them for everyone;
+  "first version" not "first MVP"; full name + title at first reference, first
+  name after. The word "prompts" must not appear in the client-facing proposal
+  (it is fine in the internal build doc).
+
+## State of `build_approach.md` (as of last good edit)
+- ~926 lines. New section **"## Module 1 System Architecture"** inserted before
+  "## Version Roadmap", with 11 subsections: pipeline spine; engagement & actor
+  scoping; identity & authorization seams; de-identification gate; the Unit; lens
+  processing (staged pipeline); the Finding; the two-layer output; human review &
+  capture; evaluation; open questions & deferred decisions.
+- Three Mermaid diagrams now embedded as fenced ```mermaid blocks: (1) macro
+  pipeline spine — after the pipeline-spine prose; (2) lens processing, 5
+  dependency layers — end of the staged-pipeline subsection; (3) version
+  progression V0→V4 — top of "## Version Roadmap". Standalone `.mermaid` copies
+  also in `/mnt/user-data/outputs/` (module1_macro_spine, module1_lens_pipeline,
+  module1_version_progression). Source carries no theme directive — renders per
+  viewer theme; force `neutral`/white at export time if printing.
+- Version Roadmap re-derived (V0–V4 revised; V1 retitled "The Trustworthy
+  Engine", V2 "Reliability and Refinement").
+- Auth/authz seam captured in the V1 text AND now fully designed in its own
+  subsection (see locked decision below); deferred register's auth entry updated
+  to point at it (only policy behind the seams remains deferred).
+- DONE: owner banner stamped as line 1 (`> Edited only in the chat where this
+  file is the working copy. All other chats: read-only reference.`).
+- NOTE: `/mnt/user-data/uploads` is READ-ONLY this container. Working copies of
+  `build_approach.md` and `build_context.md` live in `/mnt/user-data/outputs/`;
+  that is the durable copy to re-upload next session.
+
+## State of `identification_workflow.md` (new — boundary-spanning workflow)
+- Created this session. Holds the end-to-end identification workflow as a TARGET
+  model + open questions — NOT a record of Inclusity's actual practice (unmapped).
+- Organizing principle: **re-identification belongs to Inclusity**, via a key held
+  OUTSIDE Human Lens; Human Lens stays key-less. Refined guarantee: "Human Lens
+  cannot re-identify" (precise) replaces the earlier over-broad "no one ever."
+- Pseudonym (`speaker_token`) reframed as Inclusity-supplied/controlled, carried by
+  Human Lens (used internally for source relationships, emitted in output so
+  Inclusity can map back). PROPOSED, pending open questions.
+- Gate's job restated: confirm content is clean AND the pseudonym is opaque (reject
+  self-identifying "pseudonyms"). Detector tech (the "stack") still TBD — settle
+  AFTER this workflow.
+- Open questions for Inclusity (Maria/Mitchell) are load-bearing; the gating one is
+  what participants were promised re: confidentiality/re-identification.
+- Working copy in `/mnt/user-data/outputs/identification_workflow.md`.
+- DERIVED ARTIFACT: `identification_questions_for_inclusity.md` — the open questions
+  as a plain-language conversation guide for Doug → Maria/Mitchell (framing to open
+  with, 5 question groups, framing to close). The participant-promise question is the
+  load-bearing one. Can be recast as an email or split per-person on request.
+
+## State of `build_implementation.md` (new — implementation design)
+- Owner banner, framing header (authority = `build_approach.md`; this doc is
+  design-of-implementation, NOT the code), and section **"## Fundamental components
+  (the stack)"**. TWO organizing views now: a **"### Two stacks at a glance
+  (frontend / backend)"** summary (the axis = *where code runs*) sits atop the
+  concern-based inventory grouped in four layers (A AI core; B application shell;
+  C data layer; D dev & ops).
+- STACK NOW LARGELY DECIDED — full detail under "## Locked stack & implementation
+  decisions" below. In brief: TypeScript full-stack; Aurelia 2 frontend; Fastify +
+  Awilix HTTP/service layer; persistence mocked behind a repository seam (in-memory);
+  export via `docx`. STILL TBD: only the de-id detector (parked pending Inclusity).
+- A **"### Proposed topology"** subsection is embedded: one fenced ```mermaid
+  block showing what-runs-where + payload flow. Framed as proposed/illustrative;
+  product boxes are TBD, while the architecture-level facts it depicts are locked
+  in `build_approach.md` (see below). Store node now shows in-memory behind the
+  repository seam; DAL relabeled "Repository seam." Standalone copy:
+  `/mnt/user-data/outputs/module1_topology_proposed.mermaid`.
+- No separate context file — this file is tracked here in `build_context.md`
+  (one context file per lane, not per deliverable).
+- Working copy in `/mnt/user-data/outputs/build_implementation.md`.
+
+## Locked architecture decisions
+- Engagement- and actor-scoped on every record. Isolation invariant (engagement
+  A never bleeds into B; reviews attributed to actor). Tested with mocked
+  engagements/users; NO auth enforcement in V1–V4.
+- De-identification is a HARD GATE on the pipeline. Raw material never ingested
+  (human de-identifies before entry); the gate is a verifying backstop that
+  scans/flags residual identifiers. `deid_status` (pending/cleared/flagged);
+  a unit can't reach the lenses unless cleared. Simple first (scan + human-
+  confirmed checkpoint).
+- Common **Unit** interface (unit_id, engagement_id, ingest actor+time,
+  source_ref+position, language, de-identified content, deid_status,
+  speaker_token, capabilities) + one type-specific extension per unit declaring
+  capabilities. Lenses capability-match (run only over units that support them;
+  omit rather than fabricate; no-op + "insufficient material" when too few).
+  `speaker_token` keeps support honest: count "N units across M sources/segments",
+  never "N people".
+- Lens processing = STAGED PIPELINE. The 7 Module-1 lenses form 5 dependency
+  layers: Evidence (Listening, Human Meaning) → Aggregate (Culture Pattern,
+  Tension) → Interpret (Inclusity Objective) → Guardrail (Facilitator
+  Discernment) → Openings (Action Opening). Each lens is a separate, versioned
+  prompt. Discernment runs late so it can audit prior findings; its flags drive
+  the two-layer split. Independent lenses within a layer may run in parallel.
+  (Rejected: single composite call; seven independent passes.)
+- Common **Finding** interface (lens, content, evidence_links → unit_ids,
+  support_set, layer_hint, sensitivity, finding_kind, parent). Rules:
+  interpretive findings MUST be anchored (validation, not a prompt ask;
+  unanchored = defect surfaced by Discernment); a sanctioned `absence`
+  finding_kind is exempt (findings about silence); strength is DERIVED from the
+  support_set, never an asserted confidence label; `sensitivity` (handling) is
+  distinct from de-identification (identifiability); `parent` nests subthemes.
+- Two-layer output = two PROJECTIONS of one finding set. Internal = full candid
+  set. Client-safe = filtered (layer_hint + sensitivity), rephrased, voice-
+  calibrated subset, with evidence_links preserved. Integrity guarantee:
+  client-safe ⊆ internal. Voice applies at Assemble, on the client-safe layer.
+- Human review by 3 actors (facilitator; Mitchell — internal layer vs evidence;
+  Maria — client-safe voice). Rating signals: useful / generic / overreaching /
+  missing nuance / unsafe. Capture keys edits+signals to finding+lens+unit,
+  engagement/actor-scoped; keeps learning (patterns), not raw voices.
+- Evaluation = two tiers. STRUCTURAL (automated invariants: anchoring,
+  projection integrity, sensitivity populated + gate enforced, language tagged /
+  no dropped units, subtheme hierarchy, capacity) — regression guards once the
+  pipeline exists. QUALITATIVE (Mitchell's rubric, expressed via the rating
+  signals; capture and eval are the same data). Criterion 7 (sensitive flagging)
+  gets a stricter RECALL regime: seeded known-sensitive cases + conservative
+  bias (when in doubt, flag). Seeded reference set (sensitive, bilingual,
+  contradictions) built with Mitchell = regression fixtures. V0's true
+  deliverable is the rubric, co-defined with Mitchell.
+- Re-derived build sequence: V0 prove the thinking + the rubric (manual);
+  V1 "The Trustworthy Engine" (spine in code; trust properties present but
+  simple); V2 reliability & refinement (stronger de-id, multilingual fidelity,
+  eval harness + seeded set, output comparison); V3 Inclusity calibration
+  (context → Objective lens & voice); V4 pilot-ready. Platform layer (auth,
+  access control, shared workspaces) deferred BEYOND V4.
+- Auth/authz: identity + authorization exist as SEAMS from V1, exercised on every
+  access path, but resolve trivially (identity assumed, access always granted).
+  Callers depend on the abstraction (dependency inversion). Seam inputs committed
+  = (actor, engagement, action); policy stays encapsulated/behind the seam and is
+  deferred to the platform layer. Tests stub identity/access data and MOCK the
+  seams to prove call-site wiring. Guard against over-designing the interface
+  SIGNATURE (distinct from hiding policy).
+- Auth/authz SEAM SIGNATURES (now designed; four scoping Qs resolved):
+  (1) TWO separate seams — identity ("who is acting?", returns assumed actor in
+  this cycle) and authorization ("is actor allowed this action in this
+  engagement?", always allows this cycle). Design as a pair, settle IDENTITY
+  FIRST (it produces the actor authz consumes). Committed inputs = (actor,
+  engagement, action), nothing more.
+  (2) SHAPES NOW, CONCRETE TYPES LATER — fields + meaning fixed, not bound to
+  language types yet (stack not settled; shape ripples through call sites, type
+  doesn't).
+  (3) DENY is a first-class return value — small decision object (allow/deny +
+  reason slot), NOT a bare boolean (loses the why) or exception (deny is normal,
+  not a breakage). Every call site branches + has a real deny path even though
+  this cycle always allows; test by MOCKING the seam to return deny and asserting
+  the call site refuses to proceed.
+  (4) `action` = structured identifier (not free string), expressive enough for
+  LAYER-SCOPED READ (Maria→client-safe; facilitator/Mitchell→internal), the most
+  consequential authz in the system; action set NOT enumerated now (over-design
+  trap).
+  Call sites at ACTOR-INITIATED boundaries only — Intake; layer view/export;
+  human review & capture. Machine steps (Normalize, de-id gate, lens processing,
+  Assemble) run inside an already-authorized request, stamp engagement+actor
+  (scoping invariant — separate mechanism), do NOT re-call the seams. Identity
+  resolves once per request, threaded through. Framing principle: get the
+  interfaces right the FIRST time — a wrong shape forces every call site to
+  change; that (not the policy) is the rework to avoid.
+- Seam PLACEMENT (settled while building the topology diagram; refines the above):
+  the two seams sit in DIFFERENT places. IDENTITY (authn) is resolved at the WEB
+  layer — once per request, from the session/credential → actor, threaded inward
+  (the engine never parses HTTP/sessions). AUTHORIZATION (authz) is enforced by
+  the ENGINE at each operation boundary, so the engine is SELF-PROTECTING (the
+  check holds regardless of caller; the web layer does NOT make authz decisions).
+  Rejected: front-door-only authz (engine would trust its caller) and a separate
+  service-facade layer (re-introduces "trusts its caller" one level up). NOTE:
+  `build_approach.md`'s seam subsection is currently silent on web-vs-engine
+  placement — DONE: reconciled in the seam subsection (a "Where each seam is
+  invoked" paragraph now states identity-at-web / authz-at-engine, self-protecting).
+- Voice calibration design constraint (from A2): a single, swappable voice-
+  configuration source applied at Assemble, so self-serve voice editing later is
+  a UI over an existing seam — not a rebuild.
+
+Terminology agreed: a *stub* supplies fake data/state; a *mock* stands in for a
+collaborator's interface and carries behavioral expectations. You can only mock
+an interface that exists — so authn/authz mocking becomes possible once the seam
+exists (V1), enforcement testing once the platform layer exists.
+
+## Locked stack & implementation decisions
+The stack settled this session — *product/library* choices (sibling to the *design*
+invariants above). The whole project is the **case study**; its first built version is
+**V1** ("The Trustworthy Engine"). Only the de-identification detector remains open
+(parked — see queue).
+- **Language / runtime:** **TypeScript**, full-stack. Builder fluency + operating model
+  decide it; Human Lens does no training/retrieval/custom-ML, so Python's ML edge
+  doesn't bind.
+- **Frontend (the webapp):** **Aurelia 2** (TS); **TailwindCSS** + **Aurelia Headless
+  UI** (`@aurelia-ui-toolkits/headless` + Tailwind companion) for accessible,
+  headless/light-DOM primitives (Tailwind styles directly, no Shadow DOM); **DaisyUI**
+  as the mature framework-agnostic FALLBACK; **Axios** HTTP client; **Vite** (pin 7.x);
+  **Vitest**. The combination is a stock scaffold preset. Fluent UI Web Components
+  DROPPED (Shadow-DOM styling friction). Watch: Aurelia Headless UI is brand new (1.0.0,
+  small community) — lean where it earns its place, DaisyUI is the net; pin Vite 7.x
+  (Vite 8 / Rolldown had an Aurelia plugin glitch in beta).
+- **HTTP/service layer (backend front door):** **Node.js**; **Fastify** +
+  **@fastify/swagger(-ui)** (OpenAPI from route schemas); **Awilix** DI (explicit
+  registration, NO decorators / reflect-metadata — off the legacy-decorator track,
+  actively maintained, per-request scoping suits Fastify; the **composition root wires
+  the seams** — repository, identity/authz, provider); **Vitest**; **tsc → ES modules**
+  (no server-side bundler; type:module + NodeNext + .js specifiers). A thin wrapper
+  around the engine, NOT the lenses (those are the AI core, built first). TSyringe
+  considered + REJECTED (low-maintenance; pins to legacy experimentalDecorators /
+  emitDecoratorMetadata).
+- **Persistence:** a **repository seam** with an **in-memory (Map-backed)**
+  implementation — NOT a database (AI-focused case study; persistence proves nothing
+  about the core claim). Interface real-DB-ready (async + engagement/actor scope on
+  every op); the mock still ENFORCES the engagement+actor isolation invariant. Concrete
+  DB DEFERRED — the SQLite-vs-Postgres question dissolves. Durability spectrum behind the
+  same interface if a demo must survive a restart: in-memory → JSON snapshot → single
+  SQLite file. PARKED ANALYSIS (preserved, NOT the path): SQLite-now→Postgres-later was
+  the prior lean — SQLite fits relational / low-concurrency / single-host / low-ops but
+  needs a durable disk (poor on serverless) and is single-writer; managed Postgres
+  avoids a future migration and is stronger on security; either way an ORM targeting
+  both (Drizzle lean — type inference off the schema, no codegen) makes the swap cheap.
+- **Export:** an **export seam**; case-study implementation renders the assembled brief
+  model → **.docx** via **`docx`** (dolanmiu — TS-first, zero deps, MIT). Programmatic
+  generation over template-fill (variable brief structure); **per-client branding as a
+  config** (logo / palette / fonts / header-footer / cover) at generation, structure
+  uniform, branding param reserved from the start. **PDF out of case-study scope** (was
+  a docx→PDF stage via headless LibreOffice; dropped — pulled a heavy containerized host
+  dependency the case study doesn't need); seam keeps it addable later. docx is pure
+  Node, adds NO host requirements. docxtemplater considered + rejected (variable
+  structure + per-client branding favor code generation; advanced features paid).
+- **Hosting:** a **capability profile, not a product**: a host that runs a **long-lived
+  Node process** + **public web hosting (inbound HTTPS)** + **outbound HTTPS** to the
+  model API + a place for **secrets**. The long-lived process is the only hard
+  constraint (holds in-memory repo state across requests; FaaS would reset it — rules
+  out pure serverless / edge, allows any always-on container / VM / app service). One
+  Fastify process serves Aurelia static assets (@fastify/static) + API on one
+  port/origin; host adds ingress + TLS. Persistent disk now OPTIONAL (only for the
+  durability-spectrum JSON/SQLite to survive a restart). PDF/LibreOffice being out of
+  scope is what relaxed this from the earlier sidecar-binary + persistent-disk profile.
+  Specific PRODUCT deferred.
+- **Still open (stack):** only the **de-identification detector** — parked pending the
+  Inclusity conversation (see queue + Open / deferred).
+
+## Handoff decisions (locked)
+- A1 access control: PHASE IT — full per-engagement access model arrives as the
+  tool moves from pilot to firm-wide; proposal reframes accordingly.
+- A2 voice: SOFTEN — Maria reviews voice, SMI recalibrates; self-serve voice is a
+  clearly-intended later option (pilot designed so it's not hard to add later).
+- A3 "starts smarter than the last": tied to open S5-2; don't harden.
+- A4: verify bios/attributed quotes against the live Inclusity site.
+- A5: optional — soften the "twenty minutes" performance number.
+- B1 (context doc): module numbers — William White 7→8, Terrance Collins 6→7.
+
+## Open / deferred (resume triggers)
+- Learning loop mechanism (S5-2): human-authored prompt edits; prompts as
+  versioned, engagement-aware artifacts. Auto-vs-manual unresolved.
+- Scope of a learned edit: engagement-scoped vs graduates to baseline
+  ("starts smarter than the last"). Unresolved.
+- De-identification detector sophistication (gate position fixed).
+- Voice-calibration mechanism (single-source constraint noted above).
+- When the structural eval tier gets automated (depends on pipeline existing).
+- Lens orchestration detail (parallelism, finding-passing) — implementation.
+- Auth/authz IMPLEMENTATION (seam settled; real login/roles/grant-revoke deferred
+  to platform layer).
+
+## Queued next steps (immediate)
+Stack decisions from this session now live under "## Locked stack & implementation
+decisions" above. Genuinely-open work remaining:
+1. Identification workflow: confirm the open questions with Inclusity (Maria/
+   Mitchell) — esp. what participants were promised re: re-identification — then
+   firm up the `identification_workflow.md` model from TARGET to agreed.
+2. De-identification gate STACK — EXPLORED, now PARKED pending the Inclusity
+   conversation (gate strength depends on how thorough Inclusity's upstream manual
+   de-id is). Leaning: a layered detector behind ONE swappable interface — L1
+   regex/patterns (structured identifiers + the pseudonym-opacity check), L2 a
+   LOCAL TS NER lib (PII-PALADIN / openredaction style, offline), recall-biased +
+   human checkpoint; LLM pass as an OPTIONAL reviewer-assist on flagged units only;
+   self-hosted Presidio (Python) behind the seam as the multilingual/strengthening
+   edge. Two decisions left open: (a) BOUNDARY — keep verification fully local
+   (provider only ever sees CLEARED content) vs. allow an LLM pass (sends
+   human-de-identified-but-unverified content out); (b) SPANISH — local TS NER is
+   English-centric, so multilingual needs the LLM pass, a transformers.js
+   multilingual model, or the Presidio service earlier than V2. Steer away from
+   cloud PII APIs (a new external boundary; wrong for a confidentiality-critical
+   tool). Nothing recorded in `build_implementation.md` yet.
+3. Reconcile docs to the re-identification model once agreed: `speaker_token` def
+   in `build_approach.md`; topology framing line in `build_implementation.md`
+   (add "within Human Lens"); locked de-id entry in `build_context.md`; proposal
+   prompt for precise confidentiality language.
+4. Seam IMPLEMENTATION shape against the settled signatures: exact decision-object
+   fields; where identity is resolved/threaded; the deny-path test scaffolding.
+5. Lens orchestration detail (parallelism within a layer, finding-passing between
+   stages) — moves from "deferred" toward design when V1 build begins.
+6. Whether `build_approach.md` needs its own output (PDF/docx) setup, or stays
+   markdown-only as an internal doc.
+
+## Environment
+VSCode on Windows. (Pandoc + MiKTeX / LuaLaTeX / EB Garamond is the *proposal's*
+build pipeline; `build_approach.md` may get its own output setup later if needed.)

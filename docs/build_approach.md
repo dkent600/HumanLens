@@ -1,0 +1,925 @@
+> Edited only in the chat where this file is the working copy. All other chats: read-only reference.
+
+# Build Approach (SMI Internal)
+
+*The following sections describe how SMI will build Human Lens — the development sequence, prompt design, and technical roadmap. They are oriented to the SMI team rather than to the client.*
+
+---
+
+## Why This Plan Fits SMI
+
+*(Internal SMI rationale — why this plan, and this first module, fit SMI and the partnership.)*
+
+### Strategic fit for SMI and the partnership
+
+For **SMI**, it becomes the first artifact of the business under consideration: human-centered AI systems for organizations doing transformational work.
+
+For **Sasha**, it uses her strengths: emotional intelligence, voice, facilitation, story, meaning, integration.
+
+For **Doug**, it uses his: systems, software, AI implementation, workflow architecture, and operational grounding.
+
+That is exactly the "vision + systems" partnership pattern this collaboration is built on.
+
+### Why Listening Brief is the right first build for SMI
+
+**1. It is technically learnable from "near zero"**
+
+You do not need advanced machine learning to start.
+
+Version 0 can be done with:
+- carefully designed prompts
+- sample/de-identified text
+- output templates
+- human evaluation
+- iteration
+
+Then later you add:
+- structured outputs
+- document upload
+- quote extraction
+- anonymization checks
+- evaluation rubrics
+- saved results
+- limited retrieval/context
+
+So it is a perfect learning ramp. It begins simple, but it can grow into serious AI development.
+
+**2. It produces impressive demos quickly**
+
+A good demo could be very concrete:
+
+*Input: 60 anonymous employee comments.*
+
+*Output:*
+- 7 recurring themes
+- 3 hidden tensions
+- 5 representative quotes
+- areas of disagreement
+- facilitator questions
+- leadership implications
+- client-safe summary
+- internal-only notes
+- sensitive items requiring human review
+
+That is the kind of output people can immediately understand. It is much easier to communicate than saying, "We build human-centered AI systems."
+
+**3. It fits SMI's future positioning**
+
+SMI is not trying to become a generic AI shop. The opportunity is more like: human-centered AI systems for organizations doing transformation, culture, brand, retreats, facilitation, and meaning-making work.
+
+Qualitative synthesis is central to that entire category. It applies beyond Inclusity too:
+- retreat feedback analysis
+- participant applications
+- client discovery
+- testimonials
+- brand interviews
+- workshop notes
+- founder voice extraction
+- organizational listening
+
+So the skill transfers directly back into Sasha's business.
+
+**4. The human sensibility is essential, not decorative**
+
+The technical side can make the AI produce structured output. But human judgment is what determines whether the output is emotionally accurate, too generic, too corporate, too confident, missing nuance, ethically awkward, useful to a facilitator, or respectful of human complexity.
+
+That makes this a genuine partnership task — the human/facilitation intelligence becomes part of the system design, not a layer added at the end.
+
+**The deeper reason**
+
+Listening Brief is the best first module because it teaches SMI the core capability it probably needs most: turning messy human reality into structured, useful, humane intelligence.
+
+That is valuable for Inclusity. It is valuable for Sasha's retreat/facilitation business. It is valuable for future brand-systems work. And it is a realistic place to begin building.
+
+---
+
+## Module Development Plan
+
+### Priority Order of Module Development
+
+The module order of priority makes sense as follows:
+
+**Listening Brief** comes first because it creates the core human insight artifact.
+
+**Facilitator Reflection Brief** comes second because it turns that insight into thoughtful preparation.
+
+**Post-Workshop Integration Generator** comes third because it helps ensure the work continues after the session.
+
+**Policy & Practice Review Assistant** comes fourth because it completes the core diagnostic picture: paired with the Listening Brief, it lets Inclusity show the gap between what an organization has formally committed to and what its people actually experience. It is technically self-contained — it needs policy documents and a review rubric, not the artifacts of other modules — but it sits after the first three because it depends on working out the inclusion-review rubric and, critically, the legal/compliance boundary with Inclusity first.
+
+**Inclusity Knowledge Assistant** comes fifth because it can eventually strengthen every other module, but it requires curated internal material and more technical infrastructure.
+
+**Client Discovery / Proposal Assistant** is valuable, but it is earlier in the sales workflow rather than the deepest culture-workflow center.
+
+**Inclusion Scenario / Roleplay Generator** is useful but should probably wait until the system has a stronger sense of Inclusity's voice and methodology.
+
+**Impact Report Generator** is powerful, but it depends on earlier artifacts being generated consistently enough to compare, summarize, and report.
+
+So the build path remains:
+
+> **Listen first. Reflect with care. Support integration. Examine what's written against what's lived. Then deepen the knowledge layer and expand outward.**
+
+---
+
+### Modules by Functional Domain
+
+**Discovery & Framing**
+- Client Discovery / Proposal Assistant
+
+**Listening & Sensemaking**
+- Listening Brief
+- Policy & Practice Review Assistant
+
+**Facilitation Support**
+- Facilitator Reflection Brief
+- Inclusion Scenario / Roleplay Generator
+
+**Integration & Impact**
+- Post-Workshop Integration Generator
+- Impact Report Generator
+
+**Spans all domains**
+- Inclusity Knowledge Assistant — a knowledge layer that supports every domain rather than living in one
+
+---
+
+### What SMI would be learning
+
+These prototypes would teach you the most commercially relevant AI skills without requiring you to become a machine-learning researcher.
+
+You would learn:
+
+- prompt design
+- structured outputs
+- document ingestion
+- summarization
+- qualitative coding
+- embeddings / retrieval
+- source-grounded answers
+- model evaluation
+- human-in-the-loop review
+- privacy-conscious workflow design
+- facilitator-facing UX
+- repeatable AI task architecture
+
+This matches the earlier recommendation that your strongest path is not "AI developer" in the abstract, but **systems architect and AI implementation partner for human-centered businesses**.
+
+---
+
+### Why Each Module Matters for SMI
+
+Beyond what each module does for Inclusity, each one builds a specific capability for SMI. Taken together, these are the skills that turn this engagement into the foundation of SMI's practice. (This is internal SMI rationale, not part of the client-facing case.)
+
+**Module 1. Listening Brief**
+
+This is the best first AI development module because it teaches the core skills SMI needs:
+
+- prompt design
+- structured outputs
+- qualitative synthesis
+- evidence vs. interpretation
+- human-in-the-loop review
+- safety boundaries
+- evaluation of AI usefulness
+- client-safe vs. internal-facing outputs
+
+It is also highly reusable beyond Inclusity. The same pattern could later support retreat feedback, participant applications, client interviews, brand voice extraction, founder story work, and human-centered consulting.
+
+**Module 2. Facilitator Reflection Brief**
+
+This module moves SMI from "AI summarizes material" into "AI supports human practice." That is a more valuable and differentiated development direction.
+
+It teaches:
+
+- context-aware prompt flows
+- synthesis-to-preparation workflows
+- persona-sensitive output
+- tone and risk calibration
+- design of AI outputs for expert users
+
+It also strengthens the philosophical positioning of Human Lens: the AI supports reflection, not replacement.
+
+**Module 3. Post-Workshop Integration Generator**
+
+This module is valuable because it turns human insight into structured follow-through. That is directly relevant to SMI's broader future: retreats, transformational businesses, founder systems, brand systems, and human-centered AI workflows.
+
+Technically, it teaches output generation based on prior artifacts: the Listening Brief, facilitator notes, session outcomes, and client goals.
+
+**Module 4. Policy & Practice Review Assistant**
+
+This module teaches a genuinely different technical skill from the rest of the suite: structured analysis of formal documents against defined criteria, rather than synthesis of open-ended human input.
+
+It teaches:
+
+- document analysis against a rubric or criteria set
+- consistent application of an evaluative lens across long documents
+- structured flagging with evidence and confidence levels
+- careful boundary design around high-sensitivity output
+- separating observation from judgment in a legally delicate domain
+
+It is also highly transferable: many organizations need their formal documents reviewed against a values or compliance lens, making this a reusable capability beyond Inclusity.
+
+**Module 5. Inclusity Knowledge Assistant**
+
+This is a major technical learning module for SMI.
+
+It teaches:
+
+- retrieval-augmented generation
+- embeddings
+- document ingestion
+- semantic search
+- source-grounded answers
+- knowledge architecture
+- permissions and confidentiality thinking
+- internal AI assistant design
+
+It is also highly marketable beyond Inclusity because many human-centered businesses have scattered knowledge and need a humane knowledge assistant.
+
+**Module 6. Client Discovery / Proposal Assistant**
+
+This is commercially valuable because proposal and discovery workflows are useful across many consulting, facilitation, coaching, retreat, and service businesses.
+
+For SMI, it teaches:
+
+- sales-call synthesis
+- proposal structuring
+- client-context extraction
+- risk detection
+- follow-up drafting
+- human review around positioning and scope
+
+It also connects AI development to revenue-generating workflows.
+
+**Module 7. Inclusion Scenario / Roleplay Generator**
+
+This module helps SMI learn controlled generation: generating useful creative material within strict boundaries.
+
+It also bridges Sasha's strengths with AI development:
+
+- storytelling
+- emotional realism
+- group dynamics
+- facilitation
+- tension without caricature
+- scenarios that feel human rather than scripted
+
+**Module 8. Impact Report Generator**
+
+This is a powerful future module because it connects AI to business value, client retention, and strategic reporting.
+
+It teaches:
+
+- longitudinal synthesis
+- comparison across artifacts
+- narrative reporting
+- evidence-based recommendations
+- client-safe language
+- outcome framing
+
+This could become highly valuable in many human-centered consulting contexts.
+
+---
+
+### Sasha: Providing the Human Sensibility
+
+Sasha's contribution should not be "learn to code." It should be the human intelligence layer that makes the AI work valuable.
+
+She could contribute:
+
+**1. Pattern language**
+
+She helps define the categories the AI should notice:
+
+- belonging
+- trust
+- grief
+- resistance
+- defensiveness
+- identity threat
+- leadership avoidance
+- emotional charge
+- repair
+- embodiment
+- integration
+- power dynamics
+- voice/silence
+- safety vs. growth
+
+The AI needs a human taxonomy.
+
+**2. Quality judgment**
+
+She reviews outputs and says:
+
+- this feels true
+- this is too generic
+- this is too corporate
+- this overreaches
+- this misses the emotional center
+- this language is unsafe
+- this would land badly
+- this is useful for a facilitator
+
+That review becomes training data in the practical sense: not model training, but prompt/evaluation improvement.
+
+**3. Facilitation ethics**
+
+She helps define boundaries:
+
+- AI does not diagnose people
+- AI does not label individuals as racist/unsafe/etc.
+- AI does not replace facilitator judgment
+- AI preserves ambiguity where needed
+- AI separates evidence from interpretation
+- AI flags sensitive material for human review
+
+**4. Voice and coherence**
+
+Inclusity will not want generic AI output. But "Inclusity's voice" should not be left as a vibe to be guessed at — it has a definable reference point. It is the empathetic, inclusion-first sensibility Maria Arcocha White founded the company on, captured in her organizing principle: "lead with inclusion, diversity will follow." Sasha's role is to calibrate Human Lens's tone against that reference point — clear, humane, grounded, respectful, non-performative — and to notice when output drifts toward the generic, the corporate, or the performative. Concretely, this means working from real examples of Inclusity's published voice (their materials, their blog, Maria's framing) rather than from an abstract notion of "warmth."
+
+**5. Discovery interviews**
+
+She can talk with Inclusity's people to learn where the real friction is: where time is lost, where quality is hard to maintain, where facilitators need support, where clients fail to integrate.
+
+---
+
+### Key Relationships and Stakeholders
+
+Human Lens depends on the right people inside Inclusity — first the senior leaders who must believe in it, then the functional leads who shape how it gets built. These relationships should be cultivated before product design and development are begun.
+
+**Senior relationship-holders: the door in**
+
+Human Lens does not happen unless **Maria Arcocha White** — Inclusity's founder and CEO — believes in it. Maria founded Inclusity in 2013 after a 35-year career in the field, drawn to the work partly by her formative experiences as a Cuban immigrant. Her philosophy — "lead with inclusion, diversity will follow" — is the organizing idea of the entire company. She is the ultimate decision-maker, and the proposal must ultimately persuade her, on her terms: empathetic, inclusion-first, human before technical.
+
+Alongside Maria, **Kipp Leyser**, VP of Coaching and a Senior Facilitator, is a senior relationship-holder. Clients describe Maria and Kipp together as trusted advisors. Kipp brings 25+ years of executive coaching and deep experience with one-on-one interviewing, leadership development, and personality-based work. His endorsement carries weight internally, and his perspective on how Human Lens fits the coaching and facilitation craft will matter.
+
+These two are the door in.
+
+**Functional leads: who shapes the build**
+
+The first functional conversation is with **Dr. Mitchell Campbell**, Inclusity's Director of Research and Evaluation. He is the internal stakeholder whose work Human Lens most directly supports, and his input on evaluation criteria, acceptable evidence standards, and output format will be essential for building something Inclusity will actually trust and use. This is not a late-stage review step — it is a first-step dependency.
+
+A second functional relationship to cultivate — at a later stage, when the work reaches Module 8 (Impact Report Generator) — is **Dr. William White, CFO**. Dr. White holds a PhD in Economics and is directly responsible for Inclusity's measurement tools and survey analysis. Where Mitchell Campbell sets the qualitative standards, William White sets the quantitative ones. His involvement becomes essential as soon as Human Lens begins producing anything that touches outcome measurement, pre/post analysis, or impact reporting.
+
+These functional conversations happen *within* the relationship that Maria and Kipp anchor — they are not the entry point to it. The sequence matters: secure Maria's belief in the vision first, then engage the functional leads on the build.
+
+**Also key, in their specific areas**
+
+Two further stakeholders are introduced elsewhere in this document, each tied to the specific part of Human Lens where they matter most: **Terrance Collins** (Director of Training) and **Haley Miller** (Director of Operations).
+
+---
+
+## The Prompt Architecture: Listening Brief (Module 1)
+
+This section describes the prompt architecture for the Listening Brief (Module 1) specifically — the lenses through which it processes organizational voice. It is the lens design for that module's voice-synthesis task, not a general architecture for the whole system.
+
+The AI should be an observer, pattern-noticer, meaning-surfacer, and facilitator-support tool — not assuming to be an authority. It should help facilitators hear what is being said, sense what is underneath, identify what matters through Inclusity's culture objectives, and prepare wise human action. Identifying human meanings, tensions, needs, risks, and openings that are present — and how might they matter for inclusion, belonging, leadership, trust, accountability, and culture change?
+
+For the developer, the AI task should be broken into lenses. Each lens becomes a prompt section or output section.
+
+---
+
+### 1. The Listening Lens
+
+**Prompt intention:** What are people actually saying?
+
+**Output:**
+- repeated themes
+- direct concerns
+- hopes
+- frustrations
+- emotional tones
+- representative anonymous quotes
+
+This is the basic "hear the voices" layer.
+
+---
+
+### 2. The Human Meaning Lens
+
+**Prompt intention:** What might these comments mean at the human level?
+
+**Output:**
+- unmet needs
+- fears
+- hopes
+- identity concerns
+- belonging signals
+- trust signals
+- dignity concerns
+- moments of pain or aspiration
+
+This is where Human Lens becomes more than a summary tool.
+
+---
+
+### 3. The Culture Pattern Lens
+
+**Prompt intention:** What patterns appear across the group or organization?
+
+**Output:**
+- recurring dynamics
+- contradictions
+- gaps between stated values and lived experience
+- repeated leadership/culture signals
+- places where experience differs across groups
+
+This is the organizational sensemaking layer.
+
+---
+
+### 4. The Tension Lens
+
+**Prompt intention:** What tensions should a facilitator notice?
+
+**Output:**
+- safety vs. accountability
+- politeness vs. truth
+- intent vs. impact
+- inclusion language vs. lived exclusion
+- leadership optimism vs. employee skepticism
+- desire for belonging vs. fear of conflict
+
+This may be one of the most valuable sections.
+
+---
+
+### 5. The Inclusity Objective Lens
+
+**Prompt intention:** Why does this matter for Inclusity's work?
+
+This is where the system becomes Inclusity-specific. The prompt is calibrated to two complementary vocabularies that Inclusity uses to understand organizational culture and change: their climate survey domains, and the PROSCI change management framework.
+
+Inclusity holds PROSCI certifications, and PROSCI's ADKAR model — which describes where individuals are in a change journey — is part of how Inclusity thinks about behavior change and culture work. Synthesis outputs should be interpreted through both lenses where relevant.
+
+**Calibration targets — Inclusity's core survey domains:**
+- well-being
+- belonging
+- harassment
+- hostile behavior and bias
+- working conditions
+- perceptions of climate
+- personal values alignment
+- diversity opportunities
+- leader support and inclusion
+- retention
+
+**Calibration targets — PROSCI ADKAR change readiness dimensions:**
+- Awareness — do people understand why change is needed?
+- Desire — do people want to support and participate in the change?
+- Knowledge — do people know how to change?
+- Ability — do people have the skills and behaviors needed to change?
+- Reinforcement — are there structures in place to sustain the change?
+
+**Output:**
+- implications for inclusion
+- implications for belonging
+- implications for leadership behavior
+- implications for psychological safety
+- implications for accountability
+- implications for culture change
+- implications for change readiness — where the group may be in the ADKAR journey
+
+Where the input material speaks to one or more of the calibration domains above, the output should name that connection explicitly — so that Inclusity's people can see immediately how raw organizational voice maps onto the culture dimensions and change readiness stages they are working to shift.
+
+---
+
+### 6. The Facilitator Discernment Lens
+
+**Prompt intention:** What should a human facilitator consider before acting?
+
+**Output:**
+- questions to ask
+- areas to approach gently
+- what not to overstate
+- what may need more evidence
+- where human judgment is required
+- what could be risky to name too directly
+
+This keeps the AI humble.
+
+---
+
+### 7. The Action Opening Lens
+
+**Prompt intention:** What openings for next steps appear?
+
+**Output:**
+- possible workshop focus areas
+- possible leadership conversations
+- possible reflection prompts
+- possible team practices
+- possible follow-up inquiries
+- possible client-safe next steps
+
+Not final recommendations. More like intelligent openings.
+
+---
+
+## Lens Architecture Across Modules
+
+The seven lenses above are designed for the Listening Brief, but the lens approach itself is the general method for every module in Human Lens: each module's AI task is broken into a set of lenses, where each lens is a distinct prompt section and output section. What changes from module to module is *which* lenses apply, because the input and purpose differ — voice synthesis, facilitator preparation, policy analysis, and impact reporting are not the same task.
+
+The important design principle is that this is not eight independent lens sets built from scratch. There is a small shared core that runs through the whole system, and each module layers its own specific lenses on top.
+
+### The shared core
+
+Two of the Module 1 lenses are genuinely cross-cutting and should appear, adapted, in essentially every module:
+
+- **The Inclusity Objective Lens** — "Why does this matter for inclusion, belonging, leadership, trust, accountability, and culture change?" Every module's output should connect back to Inclusity's objectives, calibrated to the survey domains and the PROSCI/ADKAR change vocabulary. This is what keeps the whole system Inclusity-specific rather than generic, regardless of which module is running.
+- **The Facilitator Discernment Lens** — "What needs human judgment? What should not be overstated? What is uncertain or needs more evidence?" This is the human-in-the-loop posture made concrete. Because the entire system's stance is "AI surfaces, humans decide," every module needs this lens.
+
+Together with the foundational framing — the AI as observer and pattern-noticer, never authority — these two lenses form the architectural spine of Human Lens.
+
+### Partly reusable lenses
+
+Some Module 1 lenses apply to several modules but not all:
+
+- **The Tension Lens** — valuable wherever contradiction and productive friction matter: Facilitator Reflection Brief, Impact Report Generator, Policy & Practice Review.
+- **The Action Opening Lens** — valuable wherever the work points toward next steps: Post-Workshop Integration, Impact Report, Client Discovery.
+
+### Module-specific lenses
+
+The remaining Module 1 lenses — the Listening Lens, the Human Meaning Lens, and the Culture Pattern Lens — are specific to voice synthesis. They belong to the Listening Brief because its input is human voice. Other modules need their own equivalents suited to their input: a module that reads formal documents, for instance, needs lenses for language, structural barriers, and the gap between stated values and codified practice — none of which exist in Module 1 because the input is entirely different.
+
+### Implication for development
+
+Each module's full lens architecture should be designed when that module is built, not speculatively in advance — consistent with the principle of proving the thinking on Module 1 first. But every such design starts from the same place: inherit the shared core (Objective + Discernment), consider the partly-reusable lenses, then add the module-specific lenses its particular task requires. This keeps the system coherent in voice and posture across modules while letting each module do its own distinct work.
+
+---
+
+## Module 1 System Architecture
+
+The lens sections above describe *what* the Listening Brief notices. This section describes *how* it works as a system — the flow of data through it and the shapes that data takes. It is the engineering counterpart to the lens design, specific to Module 1, and like everything else here it is meant to be proven on Module 1 before being generalized. The whole architecture serves one purpose: to let the AI surface and organize what is in the material while keeping every act of interpretation, decision, and judgment in human hands.
+
+### The pipeline spine
+
+Module 1 is a pipeline. Material enters, passes through a fixed sequence of stages, and leaves as a reviewed two-layer brief plus captured learning. The stages are:
+
+> **Intake → Normalize → De-identify (gate) → Lens processing → Assemble → Human review → Capture**
+
+The single most important property of this spine is what flows through it. It does not carry bare material from one end to the other; it carries material that is always bound to a specific engagement and a specific person doing the work. The data shape is `(engagement, actor, material) → … → (engagement, actor, brief)`, not `material → brief`. Every later decision in this architecture depends on that.
+
+```mermaid
+---
+title: "Module 1 — Pipeline spine (every record carries engagement_id + actor)"
+---
+flowchart TD
+    A["🔒 Intake<br/>actor contributes material"] --> B["Normalize<br/>material → units"]
+    B --> C{"De-identify gate<br/>deid_status"}
+    C -->|"flagged / pending"| R["Human checks<br/>residual identifiers"]
+    R --> C
+    C -->|"cleared"| D["Lens processing<br/>staged pipeline →"]
+    D --> E["Assemble<br/>Inclusity voice applied here"]
+    E --> INT["Internal layer<br/>full candid finding set"]
+    E --> CS["Client-safe layer<br/>filtered · rephrased · voiced"]
+    INT -. "projection<br/>client-safe ⊆ internal" .-> CS
+    INT --> HR
+    CS --> HR
+    subgraph HR["🔒 Human review — AI surfaces, humans decide"]
+        direction LR
+        F["Facilitator<br/>weighs · corrects · adds"]
+        M["Mitchell<br/>internal vs evidence"]
+        MA["Maria<br/>client-safe voice"]
+    end
+    HR --> CAP["🔒 Capture<br/>edits + rating signals<br/>useful / generic / overreaching /<br/>missing-nuance / unsafe"]
+    CAP -. "human-mediated learning<br/>(prompt edits, not automatic)" .-> D
+
+    LEG["🔒 = identity + authorization seam call site<br/>layer view/export is the key one — Maria sees client-safe only"]
+```
+
+### Engagement and actor scoping
+
+Every record the pipeline produces — every unit, every finding, every layer of the brief, every edit and rating — carries the engagement it belongs to and the actor who created or reviewed it. This is true from the first version onward, even though the early versions have a single team and no sign-in.
+
+The reason to build this in from the start is that Module 1 already has multiple distinct roles touching one brief even in a single pilot: the facilitator drafts and reviews, Mitchell checks the internal layer against the evidence, and Maria reads the client-safe layer for voice. "Whose rating is this? Who edited this section? Who signed off on the voice?" only have answers if the system knows who did what.
+
+The invariant to hold — and to test — is **isolation**: material from one engagement can never surface in another engagement's brief, and every review is attributed to the actor who made it. Testing should mock multiple engagements and multiple users and assert that isolation holds *without any authentication system existing yet*. Authentication, the grant-and-revoke-access interface, and shared workspaces are deliberately deferred to a later platform layer that wraps this engine. Building the engine engagement- and actor-aware now means that platform becomes a shell added on top of a correct data shape, rather than a later re-modeling of one that was not.
+
+### Identity and authorization seams
+
+Scoping records *who did what*; the seams described here govern *who may act at all*. They are the other half of what lets the platform layer arrive as a shell rather than a remodel. A **seam** is a place where the pipeline asks a question it does not answer itself; the **interface** is the contract at that place — the inputs it takes and the shape it returns. The aim is to get these interfaces as right as possible the first time. The signature is the one thing every call site depends on, so if the shape is wrong, every call site has to change — and that, not the policy behind the seam, is the expensive rework we are trying to avoid. The discipline that follows is to commit only to the minimal shape every caller truly needs, get that shape right, and hide all policy behind it.
+
+There are two questions, so two seams, kept separate because they are different concerns with different eventual implementations:
+
+- The **identity seam** answers *who is acting?* It resolves the current actor. In this build cycle it returns an assumed identity.
+- The **authorization seam** answers *is this actor allowed to take this action in this engagement?* Given an actor, an engagement, and an action, it returns a decision. In this build cycle it always allows.
+
+Identity is settled first because it produces the actor that authorization consumes: there is no asking "is this actor allowed" without an actor in hand. The committed inputs are exactly `(actor, engagement, action)` — nothing more. The interfaces are defined as **shapes now, concrete types later**: the fields and their meaning are fixed, but they are deliberately not yet bound to language-level types, because the stack for this cycle is not fully settled and a shape is what ripples through call sites — a type is cheap to pin later and ripples through nothing.
+
+Two further commitments make the seams safe to build against before any policy exists:
+
+- **A deny is a first-class return value, not an exception.** The authorization seam returns a small decision object — an allow-or-deny outcome with a slot for the reason — rather than a bare boolean (which discards the *why* the moment real policy starts denying) or an exception (which would wrongly treat "not allowed," a normal expected outcome, as a breakage). Every call site branches on the decision and has a real deny path, even though this cycle always returns allow. The test for it is exactly that: mock the seam to *return deny* and assert the call site refuses to proceed. The deny branch is built and proven before any policy exists.
+- **The `action` input is a structured identifier, not a free string, but its set is not enumerated now.** The most consequential authorization in the whole system is layer-scoped read — Maria may see the client-safe layer, the facilitator and Mitchell the internal one — so `action` must be expressive enough to name "view internal layer" versus "view client-safe layer." We commit that it can carry that distinction; we do not pre-model the full action set, which would be the over-designing the interface guards against.
+
+The seams are called at **actor-initiated boundaries** — where an actor performs an action on engagement-scoped data — not at every internal step. In Module 1 that is three places: at **Intake**, when an actor contributes material to an engagement; at **layer view and export**, the output screen's choice of which layer to read or export, where authorization carries its real future weight; and at **human review and capture**, where edits, ratings, and sign-off are read and written by actor. The machine steps in between — Normalize, the de-identification gate, lens processing, Assemble — run inside an already-authorized request: they stamp every record with engagement and actor (the scoping invariant, which is a separate mechanism from the seam calls) but do not re-call the seams. Identity resolves once per actor-initiated request and is threaded through.
+
+Where each seam is invoked follows from this. Identity is resolved at the request boundary — the web layer turns a session into an actor once per request and threads it inward; the engine never parses sessions. Authorization, by contrast, is enforced by the engine itself: each of the three operations above asks the authorization seam, at its own boundary, whether the actor may proceed. The effect is that the engine is **self-protecting** — the authorization decision holds whatever calls the engine, rather than relying on the web layer to have filtered first — which is the more faithful reading of dependency inversion here, since the engine depends on the authorization abstraction with policy still deferred behind it. Folding the check into the engine's own operations is the deliberate choice over a front-door-only check, which any other caller could bypass, and over a separate enforcement layer, which would only move the "trusts its caller" problem up a level.
+
+### The de-identification gate
+
+Confidentiality is the property the whole engagement rests on, so de-identification is a **gate on the pipeline, not a feature added later**. Nothing reaches the lenses until it has passed through it.
+
+The cleanest way to honor the rule that Human Lens never retains the raw voices of individuals is for raw material never to enter the system at all. Qualitative material is de-identified by a human *before* it is brought in, which means what the pipeline ingests is already de-identified text — there is no separate raw copy to store or to leak. The gate is therefore a verifying backstop: it scans for identifying language a human may have missed and flags it for human review before processing continues. Each unit carries a `deid_status` — pending, cleared, or flagged — and a unit cannot flow to lens processing unless it is cleared.
+
+This can start simple — a basic scan plus a human-confirmed checkpoint — and grow more capable over time, including across languages, without ever changing its position in the flow. What matters first is that the gate exists on the path, and that the lenses can never see material that has gone around it.
+
+### The Unit
+
+If a finding is something a lens noticed, a **unit** is the thing it read: one de-identified piece of qualitative material — a single survey comment, one passage from an interview, one workshop reflection. The Normalize stage turns whatever was brought in, however heterogeneous, into a set of these units. This matters because everything downstream depends on the material being addressable: the gate clears units one at a time, the lenses cite the units that support a finding, and a quote in the finished brief can be traced back to the exact thing a person said. Treated as one undifferentiated block of text, none of that is possible.
+
+Every unit, whatever its source, honors one **common interface** — the fields it always carries:
+
+- `unit_id` — a stable handle, so findings can anchor to it and a quote can be traced back to it
+- `engagement_id`, plus the actor and time it was ingested — the scoping described above
+- `source_ref` and position — which brought-in source it came from, and where in it
+- `language` — detected per unit, since input may be English, Spanish, or mixed
+- `content` — the de-identified text
+- `deid_status` — pending, cleared, or flagged: the gate's enforcement handle
+- `speaker_token` — an anonymized, stable-within-engagement identity for the source
+- `capabilities` — what this unit can support (see below)
+
+On top of the common interface, each unit carries exactly one **type-specific extension** suited to where it came from, and that extension declares the unit's capabilities. A survey comment can carry a segment attribute and is verbatim participant voice. An interview passage is verbatim voice, but many passages share one speaker. A workshop reflection is verbatim and belongs to a group. A facilitator's note is an observation, not a participant's words — so it is *not* verbatim voice. Not all material suits all lenses, and this is expected rather than a problem to design around.
+
+The mechanism that handles it is **capability-matching**: each lens declares what it needs, and runs only over the units that provide it. The consequences are concrete:
+
+- The Listening Lens draws representative quotes only from units that are verbatim participant voice, so a facilitator's paraphrased note is never quoted as if it were someone's own words.
+- The Culture Pattern Lens looks for differences across groups only over units that carry a segment or group attribute; on material that lacks it, the lens still finds recurring dynamics and contradictions but omits the cross-group comparison rather than inventing one.
+- When too few qualifying units exist for a lens to say anything responsible, the lens does not strain — it notes insufficient source material and produces nothing. The "not enough material to draw on" caution falls out of the architecture rather than being a special case.
+
+The `speaker_token` is what keeps later counting honest. When the brief reports how much support a finding has, it counts units across distinct sources and segments — "appears in twelve comments across three teams" — never "twelve people." Whether a unit maps to one person depends on its type: survey comments usually do, interview passages usually do not, since one person produces many. Sharing a `speaker_token` across an interview's passages is what prevents one person's voice from being counted as many.
+
+### Lens processing: a staged pipeline
+
+The seven lenses are defined above, but defining them does not say how they run. The temptation is to treat them as seven independent passes over the units, or to fold all seven into a single prompt. Both are wrong, for the same reason: **the lenses are not peers — they form five dependency layers**, and some lenses cannot do their work until earlier ones have produced something to work from.
+
+Read in that light, the seven lenses sort into layers:
+
+- **Evidence** — the Listening Lens and the Human Meaning Lens, which read the units directly.
+- **Aggregate** — the Culture Pattern Lens and the Tension Lens, which work across the whole set of units rather than one at a time.
+- **Interpret** — the Inclusity Objective Lens, which maps what has been found onto the survey domains and the PROSCI/ADKAR change vocabulary.
+- **Guardrail** — the Facilitator Discernment Lens, which reviews everything found so far for overreach, thin evidence, and what should be handled with care.
+- **Openings** — the Action Opening Lens, which points toward possible next steps.
+
+Each stage reads the units and the findings of the stages above it. This is what makes a **staged pipeline** the right structure rather than the two alternatives. A single composite prompt would collapse all seven lenses into one, so no lens could be revised or evaluated on its own, evidence and interpretation would blur together in a single pass, and the Discernment Lens could not do its job — it is meant to scrutinize the other findings, which it cannot do if they do not yet exist. Seven fully independent passes would avoid that but waste the structure: the Tension Lens would re-derive what the Culture Pattern Lens already found, and the Objective and Discernment lenses would be working from raw material instead of from the findings they are supposed to interpret and check.
+
+The staged pipeline keeps each lens a separate, individually versioned prompt — which matters for both evaluation and the later learning loop, since a single lens can be revised without disturbing the others — while letting later lenses build on earlier ones. Two further properties follow:
+
+- The **Discernment Lens runs late**, so it can actually audit the accumulated findings. Its flags are not advisory notes; they drive what happens at Assemble, deciding which findings may appear in the client-safe layer and which are held to the internal one.
+- Within a layer, lenses that do not depend on each other can run in parallel. This matters because a staged pipeline is inherently slower than a single call, and the Listening and Human Meaning lenses, or the Culture Pattern and Tension lenses, need not wait on each other.
+
+```mermaid
+---
+title: "Module 1 — Lens processing: seven lenses, five dependency layers"
+---
+flowchart TD
+    U["Cleared units<br/>(de-identified)"]
+
+    subgraph L1["Evidence — read units directly"]
+        direction LR
+        LIS["Listening Lens"]
+        HM["Human Meaning Lens"]
+    end
+
+    subgraph L2["Aggregate — work across the whole set"]
+        direction LR
+        CP["Culture Pattern Lens"]
+        TEN["Tension Lens"]
+    end
+
+    L3["Interpret — Inclusity Objective Lens<br/>maps findings to survey domains + ADKAR"]
+    L4["Guardrail — Facilitator Discernment Lens<br/>runs late · audits all prior findings"]
+    L5["Openings — Action Opening Lens<br/>points toward possible next steps"]
+
+    U --> L1 --> L2 --> L3 --> L4 --> L5
+    L4 -->|"sensitivity + layer_hint flags<br/>drive the two-layer split"| OUT["→ Assemble"]
+    L5 --> OUT
+
+    NOTE["Each layer reads the units AND every finding above it.<br/>Lenses within a layer are independent — may run in parallel.<br/>Every finding shares one interface; interpretive findings must be<br/>evidence-anchored (validation rule). Absence findings are exempt."]
+```
+
+### The Finding
+
+A **finding** is the counterpart to a unit: if a unit is something a person said, a finding is something a lens noticed. Every lens, in every layer, emits findings of one **common interface**, so that findings can flow down the pipeline and later lenses can read earlier ones. A finding carries:
+
+- `lens` — which lens produced it
+- `content` — what was noticed
+- `evidence_links` — the `unit_id`s that support it
+- `support_set` — the distinct sources and segments behind those units, from which strength and spread are derived
+- `layer_hint` — whether it leans toward the internal layer, the client-safe layer, or both
+- `sensitivity` — whether it needs careful handling (see below)
+- `finding_kind` — an ordinary finding, or a sanctioned *absence* finding
+- `parent` — the finding it nests under, so themes can carry subthemes
+
+The most important rule on this interface is what makes the evidence-versus-interpretation distinction real rather than hoped-for. **Any finding from an interpretive layer must be anchored to the units that support it.** An inferred pattern or tension with no `evidence_links` is treated as a defect the pipeline catches and the Discernment Lens surfaces — not as something we trust the prompt to have done well. This is the difference between asking a prompt to separate evidence from interpretation and making the separation a property the output must satisfy. It also pulls a capability the roadmap had placed later into the core, where it belongs, because it is the heart of what Mitchell's evidence standards demand.
+
+Two clarifications keep the rule honest. First, some of the most valuable findings are **about silence** — "no one mentioned psychological safety," or "leaders spoke of trust while front-line voices did not." These have no supporting quote by their nature, so the `absence` finding kind is exempt from the anchoring rule: the architecture must be able to notice the dog that did not bark. Second, **strength is derived, not asserted.** Because a finding's support is the `support_set` behind its `evidence_links`, "how much evidence" is something the system can show and a reviewer can check — counted across distinct sources and segments, never as a bare confidence label and never inflated into a count of people.
+
+The `sensitivity` flag is deliberately separate from de-identification. De-identification asks whether material could expose who said it, and is handled upstream at the gate. Sensitivity asks whether a finding, even when fully anonymous and true, is charged enough that surfacing it bluntly — or surfacing it to the client at all — could do harm. That is a property of a finding, judged late by the Discernment Lens, and it is the signal the two-layer assembly relies on.
+
+### The two-layer output
+
+Assemble produces the deliverable: a brief with two layers, an internal facilitator-only layer and a client-safe layer. The defining decision here is that these are **not two separate generations of text — they are two views of one set of findings.** The client-safe layer is a filtered, rephrased, voice-calibrated projection of the internal one.
+
+The internal layer is the full candid set: every finding, including low-confidence inferences, unresolved tensions, findings about silence, and the Discernment Lens's cautions about what is uncertain or should not be overstated. It is written for the people who can hold that candor — the facilitator and Mitchell.
+
+The client-safe layer is built from the same findings, narrowed and shaped. A finding appears in it only if its `layer_hint` allows and its `sensitivity` flag does not hold it back; its phrasing is softened, and Inclusity's voice is applied here rather than at any earlier stage. A finding's `evidence_links` are preserved as it moves into the client-safe layer, so traceability survives into the version a client might see.
+
+This projection relationship buys an integrity guarantee that matters for Mitchell's standards: because the client-safe layer is provably a subset of the candid internal analysis, nothing can appear in front of a client that is not grounded in what the facilitator saw. Findings the Discernment Lens held back for sensitivity are simply absent from the client-safe layer — never quietly reworded so they can slip through. The split is a property of how the brief is assembled, not a manual cleanup step performed afterward.
+
+Voice calibration attaches at this stage, to the client-safe layer. How that calibration is actually expressed and adjusted is left open for now, and is recorded among the open questions below.
+
+### Human review and capture
+
+The brief that Assemble produces is a draft. Review is not a final formality bolted onto the system — it is the stage where the system's entire posture, "AI surfaces, humans decide," becomes literal. Three actors meet one artifact, each with a distinct role: the facilitator weighs, corrects, and adds; Mitchell checks the internal layer against the evidence; Maria reads the client-safe layer for voice. Because every record is actor-scoped, each of these acts is attributed to the person who made it.
+
+Review is where the reviewer's judgment re-enters the material. Sections are editable, and reviewers mark findings with a small set of signals — useful, generic, overreaching, missing nuance, unsafe — which name the ways a finding can fall short of what the work needs.
+
+The Capture stage records what review produced: the edits, and those signals, keyed to the specific finding, lens, and units they concern, and scoped to the engagement and actor. What is kept is organizational learning — patterns and judgments about what the system got right or wrong — not the raw voices of individuals, consistent with the rule that Human Lens never retains them.
+
+What Capture does *not* yet do is feed that learning back into the system automatically. For now, learning is a human act: a person reads the captured signals and decides what, if anything, to change — most likely by revising a lens's prompt. That keeps even the system's own improvement inside the "humans decide" posture. The mechanism for that feedback, and the questions it raises, are recorded below rather than settled here.
+
+### Evaluation
+
+The eight success criteria below are the bar Module 1 must clear, but they are not all the same kind of bar. Some describe **structural** properties a machine can check, pass or fail, with no judgment involved. Others describe **qualitative** properties that need Mitchell's or the facilitator's judgment and cannot be reduced to a check. Keeping these two apart is what makes evaluation both rigorous and affordable: the structural tier exists precisely so that the scarce, essential resource — human judgment, and Mitchell's in particular — is spent only on what actually requires it, never on confirming what a machine could have confirmed.
+
+The **structural tier** checks invariants the architecture has already made checkable, and runs on every pipeline execution:
+
+- interpretive findings are anchored to evidence, or are sanctioned absence findings
+- the client-safe layer is a subset of the internal one, with evidence links preserved and sensitivity-held findings absent
+- the `sensitivity` field is populated, and the de-identification gate was enforced
+- language is tagged and no Spanish units were silently dropped
+- themes carry their subtheme hierarchy, and the tool accepts the expected volume of comments
+
+The value of these checks compounds over time. Once lenses are revised by hand under the learning approach, the structural tier is what catches a prompt edit the moment it breaks evidence anchoring or layer integrity — it is the regression guard that lets the prompts change safely.
+
+The **qualitative tier** is rooted in a rubric and expressed through the review signals already described. Whether the themes are the right ones, whether an interpretation is sound rather than merely anchored, whether nuance was preserved or flattened, whether the facilitator questions are worth bringing into a room, whether meaning survived translation — these are judgments, and the useful / generic / overreaching / missing-nuance / unsafe signals are how they are recorded. Evaluation and capture are therefore the same data seen twice: the signals a reviewer gives in the course of normal review are the evaluation, and aggregated per lens across many briefs they show whether a lens is working.
+
+One criterion needs a stricter regime than the rest. **Flagging sensitive or high-risk material cannot be judged only on fresh material,** because its dangerous failure is invisible: a missed flag does not produce a complaint, it produces sensitive material reaching a client. So this criterion is tested for *recall* against seeded cases with known sensitive content, and the lens is given a deliberately conservative bias — when in doubt, flag. The asymmetry is the point: a false positive costs a reviewer a few seconds, while a false negative is the failure the tool's trustworthiness rests on avoiding. The seeded cases — sensitive content, bilingual material with known meaning, material with known contradictions — are built with Mitchell and become permanent regression fixtures, because on real client data there is no way to measure what should have been caught.
+
+This is what the first version is really for. Version 0 has no pipeline to run structural checks against, so its evaluation is almost entirely the qualitative tier, run by hand. Its true deliverable is therefore **the rubric itself, defined with Mitchell** — what sound interpretation looks like, what threshold makes a flag credible, what counts as flattened nuance. The rubric cannot be automated before it is written, and it cannot be written without him. This is the concrete form of the principle that engaging Mitchell is a first-step dependency, not a later review: the first shared artifact of that collaboration is the standard that everything automatable later will enforce.
+
+### Open questions and deferred decisions
+
+Several decisions were deliberately set aside while this architecture was settled, so that it could be settled without waiting on them. They are recorded here so they are not lost, and so they can be entered into the project's deferred-item and open-question tracking. Where an item already carries an identifier in the project record, it is noted.
+
+- **The learning loop (S5-2).** Capture records reviewer feedback now, but how that feedback feeds back into the system is not settled. The working assumption is that it is a human act expressed as edits to lens prompts, with prompts treated as versioned, engagement-aware artifacts. The open part is how far this can become automatic rather than manual.
+- **The scope of a learned edit.** A specific sub-question of the above: when a lens prompt is revised based on what was learned in one engagement, does that revision stay scoped to that engagement, or graduate to the baseline that every future engagement starts from? This is the mechanism behind the client-facing promise that each engagement "starts smarter than the last," and it is unresolved.
+- **The de-identification detector.** The gate's position in the pipeline is fixed, but the detector behind it is deliberately simple at first — a basic scan plus a human-confirmed checkpoint — and is expected to grow more capable over time, including across languages. How capable, and by when, is open.
+- **Authentication and authorization.** The approach is settled: identity and authorization exist as seams from Version 1, exercised on every access path but resolving trivially in this cycle — identity assumed, access always granted — with callers depending only on the abstractions. What is deferred to the platform layer is the implementation behind them: real login, the role and permission model, and per-engagement grant and revoke, none of which changes the seam's inputs (actor, engagement, action). The seam interfaces themselves are now designed — see *Identity and authorization seams* above; what remains deferred is only the policy that sits behind them.
+- **Voice calibration.** Inclusity's voice is applied at Assemble, to the client-safe layer, but how that calibration is expressed — and in particular how directly a non-engineer can adjust it — is undecided. This bears directly on what has been described to Inclusity about configuring the system's voice, and should be reconciled with it.
+- **When the structural evaluation tier is automated.** Version 0 has no pipeline, so its checks are manual. The point at which the structural checks become automated regression guards depends on when the pipeline itself exists, and should be settled as part of the build sequence.
+- **Lens orchestration detail.** The staged-pipeline structure is fixed, but the orchestration within it — how independent lenses in a layer are run in parallel, how findings are passed between stages — is build-out detail left for implementation.
+- **Re-deriving the build sequence (done).** The Version Roadmap below was originally sketched before this architecture was worked out. It has now been re-derived from the architecture and reconciled against the original — most notably by moving the trust-critical properties out of Version 2 and into Version 1, correcting the two-layer output to a single projected finding set, and parking the platform layer beyond the first build cycle.
+
+---
+
+## Version Roadmap
+
+This roadmap is derived from the architecture above: each version brings a defined set of those commitments online, sequenced to prove the riskiest assumption as early and as cheaply as possible. The trust-critical properties — the de-identification gate, the separation of evidence from interpretation, the two-layer output, sensitivity flagging — are not deferred improvements. They are foundational, and they appear as soon as there is software to hold them.
+
+```mermaid
+---
+title: "Version progression — one structure: V1 brings it online, V2–V4 refine"
+---
+flowchart TD
+    V0["V0 · Manual Prompt Lab<br/>no pipeline — prove the thinking,<br/>and define the rubric WITH Mitchell (V0's real deliverable)"]
+
+    V1["V1 · THE TRUSTWORTHY ENGINE — full spine online<br/>• scoping (engagement + actor) on every record<br/>• de-identify gate (basic scan + human checkpoint)<br/>• staged lens pipeline — 7 lenses, 5 layers<br/>• Finding with enforced evidence anchoring<br/>• two-layer output as ONE projection (client-safe ⊆ internal)<br/>• human review + capture<br/>• structural evaluation tier<br/>• auth/authz SEAMS present (resolve trivially: identity assumed, access granted)"]
+
+    V2["V2 · Reliability & Refinement — same spine, components stronger<br/>• cross-language de-identification detector<br/>• multilingual fidelity (meaning preserved, not just detected)<br/>• evaluation harness + seeded set with Mitchell → recall test on sensitive flags<br/>• output comparison + per-lens prompt versioning"]
+
+    V3["V3 · Limited Inclusity Context — same spine + one new input<br/>• small context store (framing docs, tone guide, preferred/avoided terms, rubric, sample brief)<br/>• calibrates the Objective lens + gives the client-safe layer Inclusity's actual voice"]
+
+    V4["V4 · Pilot-Ready — same spine, declared shippable as a narrow prototype<br/>(platform layer — real auth, per-engagement access control, shared workspaces —<br/>sits BEYOND this cycle, wrapping the engine rather than changing it)"]
+
+    V0 -.-> V1 --> V2 --> V3 --> V4
+```
+
+### Version 0: Manual Prompt Lab
+
+No app yet. You run the lens pipeline by hand on pasted, de-identified sample data. The de-identification discipline applies even at this stage: raw material is never entered, so what you work with is already de-identified.
+
+**Purpose:** Learn what outputs are useful — and define what "good" means — before building software.
+
+**Input:** 25–100 anonymized comments or notes.
+
+**Output:** A synthesis brief with:
+- themes
+- subthemes
+- tensions
+- emotionally charged signals
+- bright spots
+- possible risks
+- facilitator questions
+- "do not overclaim" notes
+- human-review flags
+
+Version 0 has two deliverables, not one. The first is evidence that the lenses produce output Inclusity's people find useful, specific, and trustworthy. The second is **the evaluation rubric itself, defined with Mitchell** — what sound interpretation looks like, what threshold makes a flag credible, what counts as flattened nuance. The rubric cannot be automated before it is written, and it cannot be written without him; this is why engaging him is a first-step dependency, not a later review.
+
+This version is about proving the thinking, not the software.
+
+---
+
+### Version 1: The Trustworthy Engine
+
+Still only Module 1. Now Doug/SMI builds the pipeline as software — not merely a UI around the task, but the engine itself: the spine end to end, scoped to engagement and actor from the first line of code.
+
+Because Inclusity's team is geographically distributed, the UI must be web-based and accessible from any location without requiring local installation or network-specific access. This is a design constraint, not a future enhancement.
+
+Inclusity's size reinforces this. As a small firm of roughly 17 people, they have no dedicated IT team or tool administrator to maintain complex software. Human Lens must be lightweight and low-maintenance: simple to access, simple to use, and not dependent on ongoing technical babysitting. A tool that requires significant upkeep will not survive in an organization this size, no matter how good its output.
+
+What comes online here is the architecture's spine, with the trust-critical properties present but deliberately simple. Material is normalized into units; the de-identification gate runs as a basic scan plus a human-confirmed checkpoint; the seven lenses run as the staged pipeline; findings carry their evidence links, so the separation of evidence from interpretation is enforced rather than hoped for; the Discernment lens sets sensitivity flags; and Assemble produces the two layers as one projected finding set. Review and capture work, and the structural evaluation tier comes online — because now there is a pipeline for it to check. Authentication and authorization are present here as seams, not as implementations. Every access path calls an identity seam — who is this — and an authorization seam — is this allowed — but in this cycle those seams resolve trivially: identity is assumed, and access is always granted. Callers depend only on the abstractions, so when the platform layer beyond this cycle supplies real login, roles, and per-engagement grant and revoke, it replaces what sits behind the seams without touching the call sites. The seams commit only to inputs already known — actor, engagement, and action — while all policy stays behind them. Tests stub the assumed identity and the access data, and mock the seams themselves, which proves the call sites are wired correctly long before any real policy exists.
+
+**Input screen:**
+- paste/upload qualitative comments
+- choose context: survey, workshop notes, interview notes, discovery notes
+- choose which layer to view or export: the internal facilitator brief or its client-safe projection
+- optional notes about client/audience
+
+**AI output screen:**
+- generated synthesis
+- editable sections
+- rating buttons: useful / generic / overreaching / missing nuance / unsafe language
+- export to doc or copy to clipboard
+
+This is still not a knowledge assistant, not a prep copilot, not a proposal tool. It is the synthesis workflow made real and trustworthy — and nothing more.
+
+---
+
+### Version 2: Reliability and Refinement
+
+Still only Module 1. With the trust-critical properties already in place from Version 1, this version makes them stronger and the tool more reliable — it does not add them late.
+
+**Add:**
+- a stronger de-identification detector, including across languages
+- multilingual fidelity: meaning preserved across English, Spanish, and mixed input, not merely language detected
+- the evaluation harness — the seeded reference set built with Mitchell, run as regression fixtures, with sensitive-content flagging tested for recall
+- comparison between AI outputs, and tooling to manage saved prompt versions per lens
+- support strength surfaced clearly — "appears in twelve comments across three teams," derived from the evidence rather than asserted as a confidence label
+
+The items the original roadmap placed here — anonymization, evidence-versus-interpretation separation, sensitive-content flags, quote extraction, contradiction detection — do not appear, because they are foundational and already live in Version 1. What remains is the work that builds on them: rigorous evaluation, regression safety, and the discipline of improving a lens's prompt without breaking what already works.
+
+---
+
+### Version 3: Module 1 with Limited Inclusity Context
+
+Still mostly Module 1. You are not yet building the full Inclusity Knowledge Assistant module.
+
+But Module 1 may need a small amount of reference context so its synthesis is aligned with Inclusity's language.
+
+For example, you might add:
+- 1–3 Inclusity framing documents
+- a tone guide
+- a list of preferred terms
+- a list of terms to avoid
+- a synthesis rubric
+- a sample "excellent" facilitator brief
+
+This is not yet a general searchable knowledge base. It is just enough context to make the Module 1 synthesis less generic. Concretely, this is what *calibrates* the Inclusity Objective lens — which has been running since Version 1, but against generic framing — and what gives the client-safe layer Inclusity's actual voice. The lens exists early; its calibration arrives here.
+
+---
+
+### Version 4: Module 1 Pilot-Ready
+
+Still only Module 1. At this stage, Human Lens can be shown as a narrow prototype:
+
+*"Here is a private AI-assisted qualitative synthesis tool for Inclusity-style culture work."*
+
+It can:
+- accept de-identified qualitative data
+- generate a structured internal synthesis and its client-safe projection
+- flag risks and ambiguities
+- preserve human review
+- export useful drafts
+- collect reviewer feedback
+
+That is the end of the first build cycle. The platform layer — authentication, per-engagement access control, and the shared workspaces described to Inclusity — sits beyond it, wrapping this engine rather than changing it.
+
+---
+
+### The Key Design Rule
+
+Every AI task should have this structure:
+
+> **Input → AI draft → human review → refined output → reusable learning**
+
+Not:
+
+> Input → AI answer → done
+
+That distinction matters enormously for DEI/culture/facilitation work.
+
+---
+
+### Success Criteria
+
+1. It accepts 25–100 open-ended comments.
+2. It groups them into themes and subthemes.
+3. It distinguishes direct evidence from interpretation.
+4. It preserves nuance and contradiction.
+5. It identifies facilitator questions, not just conclusions.
+6. It produces a client-safe summary and an internal facilitator-only summary.
+7. It flags sensitive or high-risk material for human review.
+8. It handles multilingual input — English, Spanish, or mixed — without losing fidelity, and produces outputs that are legible to the facilitator regardless of source language.
