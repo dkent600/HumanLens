@@ -1,0 +1,16 @@
+{
+  "name": "@humanlens/backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsc -b --watch",
+    "clean": "tsc -b --clean",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@humanlens/shared": "*"
+  }
+}

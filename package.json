@@ -1,0 +1,23 @@
+{
+  "name": "humanlens",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Human Lens — AI-assisted qualitative-synthesis tool (Module 1: the Listening Brief).",
+  "workspaces": [
+    "packages/shared",
+    "packages/backend",
+    "packages/frontend"
+  ],
+  "scripts": {
+    "build": "tsc -b packages/shared packages/backend",
+    "clean": "tsc -b --clean packages/shared packages/backend",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
