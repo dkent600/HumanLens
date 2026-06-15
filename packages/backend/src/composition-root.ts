@@ -3,7 +3,9 @@ import type { Actor } from './domain/types.js';
 import { AllowAllAuthorization, type AuthorizationSeam } from './seams/authorization.js';
 import { AssumedIdentity, type IdentitySeam } from './seams/identity.js';
 import { InMemoryUnitRepository, type UnitRepository } from './seams/repository.js';
+import { TrivialDeidDetector, type DeidDetector } from './seams/deid-detector.js';
 import { IntakeService } from './engine/intake.js';
+import { DeidGate } from './engine/deid-gate.js';
 
 /** The single assumed actor for V1 (no sign-in yet). */
 export const ASSUMED_ACTOR: Actor = {
@@ -15,7 +17,9 @@ export interface AppContainer {
   identity: IdentitySeam;
   authorization: AuthorizationSeam;
   unitRepository: UnitRepository;
+  deidDetector: DeidDetector;
   intakeService: IntakeService;
+  deidGate: DeidGate;
 }
 
 /**
@@ -30,9 +34,14 @@ export function buildContainer(): AwilixContainer<AppContainer> {
     identity: asValue(new AssumedIdentity(ASSUMED_ACTOR)),
     authorization: asValue(new AllowAllAuthorization()),
     unitRepository: asValue(new InMemoryUnitRepository()),
+    deidDetector: asValue(new TrivialDeidDetector()),
     intakeService: asFunction(
       ({ authorization, unitRepository }: AppContainer) =>
         new IntakeService(authorization, unitRepository),
+    ).singleton(),
+    deidGate: asFunction(
+      ({ deidDetector, unitRepository }: AppContainer) =>
+        new DeidGate(deidDetector, unitRepository),
     ).singleton(),
   });
   return container;
