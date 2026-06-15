@@ -11,6 +11,14 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@humanlens/shared": "*"
+    "@fastify/swagger": "^9.7.0",
+    "@fastify/swagger-ui": "^6.0.0",
+    "@humanlens/shared": "*",
+    "awilix": "^13.0.5",
+    "fastify": "^5.8.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.21",
+    "vitest": "^2.1.9"
   }
 }

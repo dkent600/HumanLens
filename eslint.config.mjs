@@ -10,6 +10,16 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    // Allow intentionally-unused names when prefixed with an underscore
+    // (e.g. seam methods that satisfy an interface but ignore an argument).
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+    },
+  },
+  {
     // Browser-side code — the Aurelia webapp.
     files: ['packages/frontend/**/*.ts'],
     languageOptions: {

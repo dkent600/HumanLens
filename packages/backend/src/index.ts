@@ -1,11 +1,10 @@
-// @humanlens/backend — the server-side package.
-//
-// Holds two layers that must stay separated by the seam discipline:
-//   - the pipeline ENGINE (lens orchestration, lenses, the de-id gate, assemble)
-//     — plain TypeScript, framework-free; must NOT import Fastify, a database,
-//     or the LLM provider. Runnable directly from tests with no server.
-//   - the HTTP/SERVICE layer (Fastify front door) — thin; calls into the engine.
-// Identity / authorization / persistence / LLM provider each sit behind a seam.
-//
-// Internal folders to come: engine/  service/  seams/. Placeholder for now.
-export const BACKEND_PLACEHOLDER = true;
+import { buildContainer } from './composition-root.js';
+import { buildServer } from './server.js';
+
+// Entry point: wire the container, build the server, listen.
+const container = buildContainer();
+const app = await buildServer(container);
+
+const port = Number(process.env.PORT ?? 3000);
+await app.listen({ port, host: '0.0.0.0' });
+console.log(`Human Lens backend listening on http://localhost:${port} (docs at /docs)`);
