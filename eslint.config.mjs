@@ -33,4 +33,30 @@ export default tseslint.config(
       globals: { ...globals.node },
     },
   },
+  {
+    // Protect the shared boundary: `shared` publishes ONLY client-safe DTOs, so
+    // it must never import from backend or frontend (which would let an
+    // internal-layer type migrate in and quietly breach client-safe ⊆ internal).
+    // Catches package-name imports and relative-path escapes, type imports too.
+    files: ['packages/shared/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@humanlens/backend',
+                '@humanlens/frontend',
+                '**/backend/**',
+                '**/frontend/**',
+              ],
+              message:
+                'shared must stay client-safe: do not import from backend or frontend. Only client-safe DTOs belong in @humanlens/shared.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 );

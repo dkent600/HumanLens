@@ -133,3 +133,21 @@ flowchart TB
 ---
 
 *Decisions below are filled in one at a time as they are settled, with rationale, in the same discuss-then-record discipline used for the architecture.*
+
+### Repository layout & code structure (settled)
+*Decided:* an **npm-workspaces monorepo** (one GitHub repo, `dkent600/HumanLens`) with three packages under `packages/`: **frontend** (`@humanlens/frontend`), **backend** (`@humanlens/backend`), **shared** (`@humanlens/shared`). A VS Code multi-root `.code-workspace` surfaces the three packages plus the repo root. The two build pipelines stay separate as designed — **Vite** for frontend, **`tsc`** for backend/shared.
+
+**`shared` carries only the client-safe contract** — the DTOs that cross backend→frontend — consumed by both sides via its package exports. This makes the package boundary *enforce* the two-layer invariant: because only client-safe shapes are published in `shared`, the frontend cannot import an internal-layer type (client-safe ⊆ internal, realized in code). Internal domain types stay in `backend` (`domain/types.ts`) and must never enter `shared`.
+
+**`backend` is one package, not split** — seam discipline is enforced by internal folders, not package boundaries:
+- `engine/` — the framework-free pipeline engine (plain TS; imports no Fastify / DB / provider): `IntakeService` (self-protecting — asks the authorization seam at its boundary; deny is first-class) and the de-id gate.
+- `seams/` — identity; authorization (deny = decision object with a reason; AllowAll in V1); repository (async, engagement + actor scope on every op; in-memory Map-backed, enforces the isolation invariant); deid-detector (the parked, swappable detector behind one interface; trivial + configurable stub).
+- `routes/` + `server.ts` — the thin Fastify front door (`@fastify/swagger(-ui)`; resolves the actor once per request via the identity seam, threads it inward).
+- `composition-root.ts` — the Awilix composition root; explicit registration, no decorators.
+- `domain/types.ts` — the internal domain shapes.
+
+*Rationale:* promoting `engine` to its own package later is a cheap, non-breaking move if the seam discipline holds, so the split is deferred; the only cross-package boundary that earns its keep now is `shared`, because both sides genuinely consume the client-safe contract. ESLint (flat) + Stylelint are hoisted to the repo root so all packages share one config.
+
+**De-id gate placement (code):** the gate is an **engine machine step** (`engine/deid-gate.ts`), *not* an authorization call site. `clearedUnitsForLenses` is the single sanctioned source of units for lens processing, so a non-cleared unit cannot reach the lenses; the detector sits behind the `deid-detector` seam, parked. *(As actor-facing operations are added — fetch brief, submit review, export — each gets its own authorization check at its boundary, the same pattern as `IntakeService`; internal pipeline steps do not each need one.)*
+
+*Scaffold state (V1 skeleton):* frontend (Aurelia 2 rc.1 + Vite + Tailwind v4), backend (Fastify 5 + Awilix), shared (client-safe contract). The three seams (identity / authorization with first-class deny / in-memory repository enforcing engagement + actor isolation) and the de-id gate (parked swappable detector; `clearedUnitsForLenses` as the hard gate) are implemented. 11 Vitest tests green (deny path, isolation invariant, identity, detector, gate); root ESLint + Stylelint clean; live smoke test passes.
