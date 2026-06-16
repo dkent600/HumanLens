@@ -1,29 +1,25 @@
-import { describe, it } from 'vitest';
-import { MyApp } from '../src/my-app';
+import { describe, it, expect } from 'vitest';
 import { createFixture } from '@aurelia/testing';
+import { MyApp } from '../src/my-app';
+// my-app's @route config eagerly kicks off import() of these route modules.
+// Import them statically here so they evaluate while the jsdom environment is
+// alive — otherwise they resolve after teardown and throw "document is not
+// defined".
+import '../src/welcome-page';
+import '../src/about-page';
 
 describe('my-app', () => {
-  it('should render message', async () => {
-    const { assertText } = await createFixture(
+  it('renders the navigation links', async () => {
+    const { appHost } = await createFixture(
       '<my-app></my-app>',
       {},
       [MyApp],
     ).started;
 
-    // For TailwindCSS templates, just check that the text is present
-    // The assertText function will throw if no text is found at all
-    try {
-      assertText('Hello World!', { compact: true });
-    } catch (e) {
-      // If exact match fails, check if the text contains 'Hello World!'
-      // This handles TailwindCSS templates with additional text
-      const message = e instanceof Error ? e.message : String(e);
-      if (message.includes('Hello World!')) {
-        // Text is present, test passes
-        return;
-      }
-      throw e; // Re-throw if the text isn't found at all
-    }
+    const links = Array.from(appHost.querySelectorAll('nav a')).map(
+      (a) => a.textContent?.trim(),
+    );
+    expect(links).toContain('Welcome');
+    expect(links).toContain('About');
   });
-
 });
