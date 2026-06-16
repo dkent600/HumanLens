@@ -1,0 +1,4 @@
+interface:
+  display_name: "Aurelia 2"
+  short_description: "Build and maintain Aurelia 2 apps"
+  default_prompt: "Use $aurelia2 to scaffold, debug, or review an Aurelia 2 app."
