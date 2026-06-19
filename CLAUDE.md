@@ -1,6 +1,6 @@
 # CLAUDE.md — Human Lens (SMI, Module 1)
 
-Guidance for AI coding agents working in this repository. **Read this first, then read the design docs in `docs/` before writing any code.** Do not re-derive the architecture — it is already specified.
+Guidance for AI coding agents working in this repository. **Read this first, then read the design docs in `docs/` before writing _or reading_ any code — and before any other substantive work in this project.** Reading them once at the start of your project work in a session is enough; you need not re-read them per file. Do not re-derive the architecture — it is already specified.
 
 ## What this is
 Human Lens is Sasha Markova Inc.'s AI-assisted qualitative-synthesis tool, built for **Inclusity** (the firm that will use it). This repo initially builds **Module 1 — the Listening Brief**, the first of several modules the project will ultimately comprise; each module has a frontend and a backend layer. The whole project is the **case study**; Module 1's first coded version is **V1** ("The Trustworthy Engine").
