@@ -3,6 +3,7 @@ import { DeidGate } from '../src/engine/deid-gate.js';
 import { LensPipeline } from '../src/engine/lens-pipeline.js';
 import { ListeningLens } from '../src/engine/lenses/listening-lens.js';
 import { TensionLens } from '../src/engine/lenses/tension-lens.js';
+import { CulturePatternLens } from '../src/engine/lenses/culture-pattern-lens.js';
 import { DiscernmentLens } from '../src/engine/lenses/discernment-lens.js';
 import { InMemoryUnitRepository, type Scope } from '../src/seams/repository.js';
 import { TrivialDeidDetector } from '../src/seams/deid-detector.js';
@@ -172,6 +173,37 @@ describe('lens pipeline — staged: Evidence → Aggregate', () => {
 
     const brief = await stagedPipeline(gate).synthesize(scope);
     expect(brief.internal).toHaveLength(0);
+  });
+
+  it('runs the two Aggregate siblings against the same Evidence snapshot — neither sees the other', async () => {
+    const { gate } = await clearedScopeWithUnits();
+
+    // Record the prior-finding ids each Aggregate emit call was handed.
+    const seenPriorIds: string[][] = [];
+    const spy = new FakeLlmProvider((payload) => {
+      if (payload.task !== 'disposition' && (payload.priorFindings?.length ?? 0) > 0) {
+        seenPriorIds.push((payload.priorFindings ?? []).map((f) => f.findingId));
+      }
+      return defaultFakeResponse(payload);
+    });
+
+    const brief = await new LensPipeline(gate, spy, [
+      new ListeningLens(),
+      new TensionLens(),
+      new CulturePatternLens(),
+    ]).synthesize(scope);
+
+    // Both Aggregate lenses ran, each over the SAME Evidence-only snapshot — neither
+    // saw the other's output (no 'tension:0' in culture's view, no 'culture:0' in
+    // tension's). The snapshot-per-layer semantics keep them independent.
+    expect(seenPriorIds).toEqual([['listening:0'], ['listening:0']]);
+
+    // Both produced an Aggregate finding anchored to the same Evidence units.
+    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0', 'tension:0', 'culture:0']);
+    const tension = brief.internal.find((f) => f.findingId === 'tension:0');
+    const culture = brief.internal.find((f) => f.findingId === 'culture:0');
+    expect([...(tension?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
+    expect([...(culture?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
   });
 });
 

@@ -33,7 +33,7 @@ import type { UnitId } from './types.js';
 export type FindingId = string;
 
 /** Which lens produced a finding. Open set; grows as lenses across the layers land. */
-export type LensId = 'listening' | 'human-meaning' | 'tension' | 'discernment';
+export type LensId = 'listening' | 'human-meaning' | 'tension' | 'culture' | 'discernment';
 
 /** A non-empty readonly tuple — at least one element, enforced at the type level. */
 export type NonEmpty<T> = readonly [T, ...T[]];

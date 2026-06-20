@@ -136,8 +136,9 @@ export function defaultFakeResponse(payload: LensPromptPayload): FakeLensRespons
   }
   const priorFindings = payload.priorFindings ?? [];
   if (priorFindings.length > 0) {
-    // An Aggregate+ call: anchor to the units behind the prior findings (deduped),
-    // so the output is provably derived from what earlier stages found.
+    // Any Aggregate+ emit call (Tension, Culture Pattern, ...): anchor to the units
+    // BEHIND the prior findings (deduped), so the output is provably derived from
+    // what earlier stages found. Neutral content — it stands in for any such lens.
     const unitIds = [...new Set(priorFindings.flatMap((f) => f.evidenceUnitIds))];
     if (unitIds.length === 0) {
       return { findings: [] };
@@ -145,7 +146,7 @@ export function defaultFakeResponse(payload: LensPromptPayload): FakeLensRespons
     return {
       findings: [
         {
-          content: 'A tension runs between the surfaced themes.',
+          content: 'A pattern runs across the surfaced findings.',
           evidenceUnitIds: unitIds,
         },
       ],

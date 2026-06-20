@@ -327,6 +327,14 @@ invariants above). The whole project is the **case study**; its first built vers
   (Tension + Discernment), behavior-preserving. 46/46 Vitest green; lints clean.
   (Rejected: verdicts-only-at-Assemble = two sources of truth; general upsert = supersede
   too broad.) Recorded in build_approach.md → staged-pipeline (Discernment bullet).
+- **Culture Pattern lens built (Aggregate) — breadth, no new mechanism.** Sibling of
+  Tension: reads Evidence findings, anchors back to their units, held by default, silent
+  without priors (`culture:0…`); `'culture'` added to `LensId`. Both Aggregate siblings
+  run against the same Evidence-only snapshot and never see each other (tested). Pipeline
+  now `[listening, tension, culturePattern, discernment]`. 52/52 Vitest green; lints
+  clean. No docs/spec changes. Remaining breadth lenses: **Inclusity Objective**
+  (Interpret — reads Aggregate output, a layer not yet exercised) and **Action Opening**
+  (Openings — runs after Discernment; watch ordering vs disposition).
 - **Still open (stack):** only the **de-identification detector** — parked pending the
   Inclusity conversation (see queue + Open / deferred).
 

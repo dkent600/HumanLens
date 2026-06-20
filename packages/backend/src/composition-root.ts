@@ -9,6 +9,7 @@ import { IntakeService } from './engine/intake.js';
 import { DeidGate } from './engine/deid-gate.js';
 import { ListeningLens } from './engine/lenses/listening-lens.js';
 import { TensionLens } from './engine/lenses/tension-lens.js';
+import { CulturePatternLens } from './engine/lenses/culture-pattern-lens.js';
 import { DiscernmentLens } from './engine/lenses/discernment-lens.js';
 import { LensPipeline } from './engine/lens-pipeline.js';
 
@@ -28,6 +29,7 @@ export interface AppContainer {
   deidGate: DeidGate;
   listeningLens: ListeningLens;
   tensionLens: TensionLens;
+  culturePatternLens: CulturePatternLens;
   discernmentLens: DiscernmentLens;
   lensPipeline: LensPipeline;
 }
@@ -56,12 +58,26 @@ export function buildContainer(): AwilixContainer<AppContainer> {
     ).singleton(),
     listeningLens: asFunction(() => new ListeningLens()).singleton(),
     tensionLens: asFunction(() => new TensionLens()).singleton(),
+    culturePatternLens: asFunction(() => new CulturePatternLens()).singleton(),
     discernmentLens: asFunction(() => new DiscernmentLens()).singleton(),
     lensPipeline: asFunction(
       // Registered in layer order for readability; the pipeline groups by each
-      // lens's declared layer and runs the layers in LAYER_ORDER regardless.
-      ({ deidGate, llmProvider, listeningLens, tensionLens, discernmentLens }: AppContainer) =>
-        new LensPipeline(deidGate, llmProvider, [listeningLens, tensionLens, discernmentLens]),
+      // lens's declared layer and runs the layers in LAYER_ORDER regardless. Tension
+      // and Culture Pattern are both Aggregate — independent siblings in one layer.
+      ({
+        deidGate,
+        llmProvider,
+        listeningLens,
+        tensionLens,
+        culturePatternLens,
+        discernmentLens,
+      }: AppContainer) =>
+        new LensPipeline(deidGate, llmProvider, [
+          listeningLens,
+          tensionLens,
+          culturePatternLens,
+          discernmentLens,
+        ]),
     ).singleton(),
   });
   return container;
