@@ -10,6 +10,7 @@ import { DeidGate } from './engine/deid-gate.js';
 import { ListeningLens } from './engine/lenses/listening-lens.js';
 import { TensionLens } from './engine/lenses/tension-lens.js';
 import { CulturePatternLens } from './engine/lenses/culture-pattern-lens.js';
+import { ObjectiveLens } from './engine/lenses/objective-lens.js';
 import { DiscernmentLens } from './engine/lenses/discernment-lens.js';
 import { LensPipeline } from './engine/lens-pipeline.js';
 
@@ -30,6 +31,7 @@ export interface AppContainer {
   listeningLens: ListeningLens;
   tensionLens: TensionLens;
   culturePatternLens: CulturePatternLens;
+  objectiveLens: ObjectiveLens;
   discernmentLens: DiscernmentLens;
   lensPipeline: LensPipeline;
 }
@@ -59,23 +61,28 @@ export function buildContainer(): AwilixContainer<AppContainer> {
     listeningLens: asFunction(() => new ListeningLens()).singleton(),
     tensionLens: asFunction(() => new TensionLens()).singleton(),
     culturePatternLens: asFunction(() => new CulturePatternLens()).singleton(),
+    objectiveLens: asFunction(() => new ObjectiveLens()).singleton(),
     discernmentLens: asFunction(() => new DiscernmentLens()).singleton(),
     lensPipeline: asFunction(
       // Registered in layer order for readability; the pipeline groups by each
       // lens's declared layer and runs the layers in LAYER_ORDER regardless. Tension
-      // and Culture Pattern are both Aggregate — independent siblings in one layer.
+      // and Culture Pattern are both Aggregate — independent siblings in one layer;
+      // Objective (Interpret) runs after them and before Discernment (Guardrail), so
+      // Discernment audits its findings with nothing extra to wire.
       ({
         deidGate,
         llmProvider,
         listeningLens,
         tensionLens,
         culturePatternLens,
+        objectiveLens,
         discernmentLens,
       }: AppContainer) =>
         new LensPipeline(deidGate, llmProvider, [
           listeningLens,
           tensionLens,
           culturePatternLens,
+          objectiveLens,
           discernmentLens,
         ]),
     ).singleton(),

@@ -4,6 +4,7 @@ import { LensPipeline } from '../src/engine/lens-pipeline.js';
 import { ListeningLens } from '../src/engine/lenses/listening-lens.js';
 import { TensionLens } from '../src/engine/lenses/tension-lens.js';
 import { CulturePatternLens } from '../src/engine/lenses/culture-pattern-lens.js';
+import { ObjectiveLens } from '../src/engine/lenses/objective-lens.js';
 import { DiscernmentLens } from '../src/engine/lenses/discernment-lens.js';
 import { InMemoryUnitRepository, type Scope } from '../src/seams/repository.js';
 import { TrivialDeidDetector } from '../src/seams/deid-detector.js';
@@ -258,5 +259,32 @@ describe('lens pipeline — staged with Guardrail (real Discernment disposition)
     const briefA = await fullPipeline(a.gate, promotingProvider(['tension:0'])).synthesize(scope);
     const briefB = await fullPipeline(b.gate, promotingProvider(['tension:0'])).synthesize(scope);
     expect(briefA).toEqual(briefB);
+  });
+});
+
+describe('lens pipeline — Interpret layer (Inclusity Objective)', () => {
+  it('runs Objective after Aggregate and before Guardrail, and Discernment audits it automatically', async () => {
+    const { gate } = await clearedScopeWithUnits();
+    // Promote the Interpret finding — only possible if Objective ran (after Aggregate)
+    // and Discernment then audited its output, with nothing extra wired for that.
+    const provider = promotingProvider(['objective:0']);
+    const brief = await new LensPipeline(gate, provider, [
+      new ListeningLens(),
+      new TensionLens(),
+      new ObjectiveLens(),
+      new DiscernmentLens(),
+    ]).synthesize(scope);
+
+    // Layer order in the accumulated set: Evidence, Aggregate, Interpret.
+    expect(brief.internal.map((f) => f.findingId)).toEqual([
+      'listening:0',
+      'tension:0',
+      'objective:0',
+    ]);
+    // The Interpret finding anchored back to the units behind the prior findings.
+    const objective = brief.internal.find((f) => f.findingId === 'objective:0');
+    expect([...(objective?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
+    // Discernment promoted it — proof it saw and audited the Interpret-layer output.
+    expect(brief.clientSafe.map((f) => f.findingId)).toEqual(['objective:0']);
   });
 });

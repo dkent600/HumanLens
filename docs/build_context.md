@@ -332,9 +332,25 @@ invariants above). The whole project is the **case study**; its first built vers
   without priors (`culture:0…`); `'culture'` added to `LensId`. Both Aggregate siblings
   run against the same Evidence-only snapshot and never see each other (tested). Pipeline
   now `[listening, tension, culturePattern, discernment]`. 52/52 Vitest green; lints
-  clean. No docs/spec changes. Remaining breadth lenses: **Inclusity Objective**
-  (Interpret — reads Aggregate output, a layer not yet exercised) and **Action Opening**
-  (Openings — runs after Discernment; watch ordering vs disposition).
+  clean. No docs/spec changes.
+- **Inclusity Objective lens built (Interpret) — first lens in a new layer.** Reads the
+  Evidence+Aggregate snapshot, interprets it against the objective frame, anchors back to
+  units, held by default, silent without priors (`objective:0…`); `'objective'` added to
+  `LensId`. Pipeline now `[listening, tension, culturePattern, objective, discernment]`;
+  Discernment audits Objective automatically. Differential test proves it reads **Aggregate**
+  output (a `tension:0` finding makes the interpretation reach u2/u3 that Evidence alone
+  never supplies). 58/58 Vitest green; lints clean.
+  **Decision — objective-frame V1 placeholder shape:** a structured `ObjectiveFrame
+  { surveyDomains: readonly string[]; adkarDimensions: readonly string[] }`, empty in V1
+  (`{ [], [] }`), threaded through the lens↔model convention. Grounded directly in
+  build_approach.md → "The Inclusity Objective Lens" (the two named calibration
+  vocabularies: Inclusity's climate survey domains + PROSCI/ADKAR change-readiness), so it
+  mirrors the spec rather than inventing ahead of it. Reserving the shape means **V3
+  ("Limited Inclusity Context") fills values rather than reshaping the convention**; the
+  frame's source (a module placeholder constant now) is the V3 injection point (likely
+  config/seam). Provisional/forward-compatible — V3 may extend additively; blast radius
+  contained to the Objective lens + convention + fake. Remaining breadth lens: **Action
+  Opening** (Openings — runs after Discernment; watch ordering vs disposition).
 - **Still open (stack):** only the **de-identification detector** — parked pending the
   Inclusity conversation (see queue + Open / deferred).
 

@@ -56,6 +56,23 @@ export interface LensPromptFinding {
  */
 export type LensTask = 'emit' | 'disposition';
 
+/**
+ * The Inclusity objective context the Interpret layer calibrates against — the two
+ * complementary vocabularies from build_approach.md: the climate-survey domains and
+ * the PROSCI/ADKAR change-readiness dimensions.
+ *
+ * PLACEHOLDER for V1: the shape is fixed but the real values arrive with the V3
+ * Inclusity-context work (do not build context injection now). The structured shape
+ * — two named vocabularies — is committed so V3 fills values into an existing
+ * contract rather than reshaping it; an empty stub means "objectives not wired yet".
+ */
+export interface ObjectiveFrame {
+  /** Inclusity's core climate-survey domains (e.g. belonging, well-being). Empty until V3. */
+  readonly surveyDomains: readonly string[];
+  /** PROSCI/ADKAR change-readiness dimensions (Awareness…Reinforcement). Empty until V3. */
+  readonly adkarDimensions: readonly string[];
+}
+
 export interface LensPromptPayload {
   readonly instruction: string;
   /** Defaults to `emit` when absent. */
@@ -66,6 +83,11 @@ export interface LensPromptPayload {
    * (which read units directly); present for lenses that build on earlier ones.
    */
   readonly priorFindings?: readonly LensPromptFinding[];
+  /**
+   * The objective context an Interpret-layer lens calibrates against. Present only
+   * for that layer (the Inclusity Objective Lens); omitted by all other lenses.
+   */
+  readonly objectiveFrame?: ObjectiveFrame;
 }
 
 export interface LensResponseCandidate {
@@ -136,9 +158,10 @@ export function defaultFakeResponse(payload: LensPromptPayload): FakeLensRespons
   }
   const priorFindings = payload.priorFindings ?? [];
   if (priorFindings.length > 0) {
-    // Any Aggregate+ emit call (Tension, Culture Pattern, ...): anchor to the units
-    // BEHIND the prior findings (deduped), so the output is provably derived from
-    // what earlier stages found. Neutral content — it stands in for any such lens.
+    // Any emit lens that reads prior findings (Aggregate: Tension, Culture Pattern;
+    // Interpret: Inclusity Objective; ...): anchor to the units BEHIND the prior
+    // findings (deduped), so the output is provably derived from what earlier stages
+    // found. Neutral content — it stands in for any such lens.
     const unitIds = [...new Set(priorFindings.flatMap((f) => f.evidenceUnitIds))];
     if (unitIds.length === 0) {
       return { findings: [] };
