@@ -32,8 +32,8 @@ import type { UnitId } from './types.js';
 
 export type FindingId = string;
 
-/** Which lens produced a finding. Open set; only the Evidence-layer lenses exist so far. */
-export type LensId = 'listening' | 'human-meaning';
+/** Which lens produced a finding. Open set; grows as lenses across the layers land. */
+export type LensId = 'listening' | 'human-meaning' | 'tension';
 
 /** A non-empty readonly tuple — at least one element, enforced at the type level. */
 export type NonEmpty<T> = readonly [T, ...T[]];

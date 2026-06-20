@@ -35,9 +35,27 @@ export interface LensPromptUnit {
   readonly content: string;
 }
 
+/**
+ * A prior-layer finding as a lens hands it to the model — the projection later
+ * lenses (Aggregate and beyond) read instead of the raw units alone. It carries
+ * the finding's own unit anchors so a later lens can follow a finding back to the
+ * units behind it and anchor its own output to those same units.
+ */
+export interface LensPromptFinding {
+  readonly findingId: string;
+  readonly lens: string;
+  readonly content: string;
+  readonly evidenceUnitIds: readonly string[];
+}
+
 export interface LensPromptPayload {
   readonly instruction: string;
   readonly units: readonly LensPromptUnit[];
+  /**
+   * Findings produced by prior layers. Omitted/empty for Evidence-layer lenses
+   * (which read units directly); present for lenses that build on earlier ones.
+   */
+  readonly priorFindings?: readonly LensPromptFinding[];
 }
 
 export interface LensResponseCandidate {
@@ -55,10 +73,16 @@ export interface LensResponsePayload {
  * role a prompted model would: it reads the lens's JSON prompt and returns the
  * findings JSON the lens asked for.
  *
- * Default rule (the Listening lens's case): surface ONE recurring-theme finding
- * that cites every unit it was given — so the derived support set spans all the
- * distinct sources, exercising honest cross-source counting. With no units, it
- * returns no findings. A custom `respond` can script other shapes for tests.
+ * Two default rules, selected by the payload shape so ONE fake drives both an
+ * Evidence-layer lens and a later lens reproducibly:
+ *   - With prior findings (an Aggregate+ call): surface ONE finding that cites the
+ *     units BEHIND those prior findings — proving the later stage read the prior
+ *     findings, not just the units, and that interpretive output stays anchored.
+ *   - Otherwise (the Listening lens's case): surface ONE recurring-theme finding
+ *     that cites every unit it was given — so the derived support set spans all the
+ *     distinct sources, exercising honest cross-source counting.
+ * With nothing to work from it returns no findings. A custom `respond` can script
+ * other shapes for tests.
  */
 export class FakeLlmProvider implements LlmProvider {
   constructor(
@@ -73,6 +97,23 @@ export class FakeLlmProvider implements LlmProvider {
 }
 
 function defaultFakeResponse(payload: LensPromptPayload): LensResponsePayload {
+  const priorFindings = payload.priorFindings ?? [];
+  if (priorFindings.length > 0) {
+    // An Aggregate+ call: anchor to the units behind the prior findings (deduped),
+    // so the output is provably derived from what earlier stages found.
+    const unitIds = [...new Set(priorFindings.flatMap((f) => f.evidenceUnitIds))];
+    if (unitIds.length === 0) {
+      return { findings: [] };
+    }
+    return {
+      findings: [
+        {
+          content: 'A tension runs between the surfaced themes.',
+          evidenceUnitIds: unitIds,
+        },
+      ],
+    };
+  }
   if (payload.units.length === 0) {
     return { findings: [] };
   }

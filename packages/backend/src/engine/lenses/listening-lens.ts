@@ -6,7 +6,7 @@ import type {
   LensResponsePayload,
   LlmProvider,
 } from '../../seams/llm-provider.js';
-import type { Lens } from './lens.js';
+import type { Layer, Lens } from './lens.js';
 
 // The Listening Lens — the first Evidence-layer lens: "what are people actually
 // saying?" (repeated themes, direct concerns, representative quotes). It reads
@@ -29,8 +29,16 @@ const INSTRUCTION =
 
 export class ListeningLens implements Lens {
   readonly id = 'listening';
+  readonly layer: Layer = 'evidence';
 
-  async run(units: readonly Unit[], provider: LlmProvider): Promise<readonly Finding[]> {
+  // Evidence layer: reads the cleared units directly, so it ignores `priorFindings`
+  // (there are none above it anyway). The uniform signature lets the staged
+  // orchestrator treat every lens the same.
+  async run(
+    units: readonly Unit[],
+    _priorFindings: readonly Finding[],
+    provider: LlmProvider,
+  ): Promise<readonly Finding[]> {
     const payload: LensPromptPayload = {
       instruction: INSTRUCTION,
       units: units.map((u) => ({

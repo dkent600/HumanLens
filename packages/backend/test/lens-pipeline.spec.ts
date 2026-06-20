@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DeidGate } from '../src/engine/deid-gate.js';
 import { LensPipeline } from '../src/engine/lens-pipeline.js';
 import { ListeningLens } from '../src/engine/lenses/listening-lens.js';
+import { TensionLens } from '../src/engine/lenses/tension-lens.js';
 import { assembleBrief, projectToClientSafe } from '../src/engine/assemble.js';
 import { InMemoryUnitRepository, type Scope } from '../src/seams/repository.js';
 import { TrivialDeidDetector } from '../src/seams/deid-detector.js';
@@ -102,6 +103,51 @@ describe('lens pipeline — the spine, model stubbed', () => {
     const direct = projectToClientSafe(promoted[0]);
     expect(direct).not.toHaveProperty('clearedToClientSafe');
     expect(direct).not.toHaveProperty('sensitivity');
+  });
+});
+
+describe('lens pipeline — staged: Evidence → Aggregate', () => {
+  function stagedPipeline(gate: DeidGate): LensPipeline {
+    return new LensPipeline(gate, new FakeLlmProvider(), [new ListeningLens(), new TensionLens()]);
+  }
+
+  it('runs layers in order and accumulates prior-stage findings into later stages', async () => {
+    const { gate } = await clearedScopeWithUnits();
+    const brief = await stagedPipeline(gate).synthesize(scope);
+
+    // Both stages produced findings; they accumulate, Evidence before Aggregate.
+    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0', 'tension:0']);
+    const [listening, tension] = brief.internal;
+    expect(listening.lens).toBe('listening');
+    expect(tension.lens).toBe('tension');
+
+    // The Aggregate lens read the Evidence finding and anchored its tension to the
+    // units behind it — interpretive output is still evidence-anchored.
+    expect(isEvidenceAnchored(tension)).toBe(true);
+    expect([...tension.evidenceLinks].sort()).toEqual(['u1', 'u2']);
+    expect(tension.supportSet).toEqual({ sourceCount: 2, unitCount: 2 });
+
+    // Still held by default — promotion is not a lens concern at this stage.
+    expect(brief.clientSafe).toHaveLength(0);
+  });
+
+  it('the deterministic fake drives both lenses reproducibly', async () => {
+    const a = await clearedScopeWithUnits();
+    const b = await clearedScopeWithUnits();
+    const briefA = await stagedPipeline(a.gate).synthesize(scope);
+    const briefB = await stagedPipeline(b.gate).synthesize(scope);
+    expect(briefA.internal).toEqual(briefB.internal);
+  });
+
+  it('produces no Aggregate findings when the Evidence layer found nothing to build on', async () => {
+    // No cleared units -> no Evidence findings -> the Aggregate lens has no prior
+    // findings to synthesize from, so the stage stays silent rather than straining.
+    const repo = new InMemoryUnitRepository();
+    await repo.saveUnit(scope, pendingUnit('u1', 'spk-a', 'a comment')); // left pending
+    const gate = new DeidGate(new TrivialDeidDetector(), repo);
+
+    const brief = await stagedPipeline(gate).synthesize(scope);
+    expect(brief.internal).toHaveLength(0);
   });
 });
 

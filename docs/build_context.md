@@ -299,6 +299,17 @@ invariants above). The whole project is the **case study**; its first built vers
   adjustments landed (held-by-default; disposition unrepresentable-when-violated).
   Tests green: held-by-default end-to-end, promote-one-finding, projection ⊆ internal,
   anchoring, honest-counting support.
+- **Staged pipeline built (minimal orchestrator → real staged structure).** Layers
+  first-class (`Layer` + `LAYER_ORDER`: evidence→aggregate→interpret→guardrail→
+  openings); each lens declares its `layer`; `run(units, priorFindings, provider)`.
+  Orchestrator groups lenses by layer, iterates LAYER_ORDER, runs each layer against a
+  snapshot of **prior-layer findings only** (same-layer lenses never see each other →
+  within-layer parallelizability preserved; concurrency deferred, sequential for now),
+  accumulates into Assemble. Second lens added: **Tension** (Aggregate layer) — reads
+  Evidence findings but anchors back to the units behind them; out-of-scope ids dropped
+  (anchoring enforced on interpretive output); held by default; silent without priors.
+  One deterministic fake drives both lenses. `shared` boundary untouched. 36/36 Vitest
+  green; tsc/eslint/stylelint clean. No `docs/` edits by Claude Code; no spec note.
 - **Still open (stack):** only the **de-identification detector** — parked pending the
   Inclusity conversation (see queue + Open / deferred).
 
@@ -323,6 +334,12 @@ invariants above). The whole project is the **case study**; its first built vers
 - Lens orchestration detail (parallelism, finding-passing) — implementation.
 - Auth/authz IMPLEMENTATION (seam settled; real login/roles/grant-revoke deferred
   to platform layer).
+- Finding→finding provenance: interpretive findings anchor to UNITS (the trust
+  guarantee) and the pipeline passes prior findings live via staging, so no stored
+  "synthesized-from" field exists (only `parent` for subtheme nesting). Whether to
+  add finding→finding lineage is a possible future spec decision — surface it if
+  explainability ("this tension came from these themes") or Discernment's audit /
+  the review UI needs it. Not added speculatively.
 
 ## Queued next steps (immediate)
 Stack decisions from this session now live under "## Locked stack & implementation
