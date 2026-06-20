@@ -525,6 +525,8 @@ This keeps the AI humble.
 
 Not final recommendations. More like intelligent openings.
 
+Because the Openings layer runs last — after the Guardrail layer — the Facilitator Discernment Lens never audits action openings; they are produced after it has run. Their promoter is therefore the *other* affirmative promoter the disposition model names: human review, not Discernment. The facilitator weighs the openings and decides which of them — including any "possible client-safe next steps" — to carry to the client, and that decision is the human-review promotion. Until human review is built, action openings are held internal-only, which is the model's safe failure mode (silence, not exposure). This is intended: an opening is prepared for a person to weigh, not auto-promoted to a client.
+
 ---
 
 ## Lens Architecture Across Modules

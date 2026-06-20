@@ -6,6 +6,7 @@ import { TensionLens } from '../src/engine/lenses/tension-lens.js';
 import { CulturePatternLens } from '../src/engine/lenses/culture-pattern-lens.js';
 import { ObjectiveLens } from '../src/engine/lenses/objective-lens.js';
 import { DiscernmentLens } from '../src/engine/lenses/discernment-lens.js';
+import { OpeningLens } from '../src/engine/lenses/opening-lens.js';
 import { InMemoryUnitRepository, type Scope } from '../src/seams/repository.js';
 import { TrivialDeidDetector } from '../src/seams/deid-detector.js';
 import { FakeLlmProvider, defaultFakeResponse } from '../src/seams/llm-provider.js';
@@ -286,5 +287,55 @@ describe('lens pipeline — Interpret layer (Inclusity Objective)', () => {
     expect([...(objective?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
     // Discernment promoted it — proof it saw and audited the Interpret-layer output.
     expect(brief.clientSafe.map((f) => f.findingId)).toEqual(['objective:0']);
+  });
+});
+
+describe('lens pipeline — Openings layer (Action Opening held internal-only)', () => {
+  it('holds Action Opening even when Discernment promotes everything it audits', async () => {
+    const { gate } = await clearedScopeWithUnits();
+
+    // A Discernment that promotes EVERY finding it audits. It audits the layers above
+    // the Guardrail (Evidence, Aggregate, Interpret); Openings runs after it, so
+    // opening:0 is never in its view and can never be auto-promoted.
+    const promoteAllAudited = new FakeLlmProvider((payload) => {
+      if (payload.task === 'disposition') {
+        return {
+          verdicts: (payload.priorFindings ?? []).map((f) => ({
+            findingId: f.findingId,
+            promote: true,
+          })),
+        };
+      }
+      return defaultFakeResponse(payload);
+    });
+
+    const brief = await new LensPipeline(gate, promoteAllAudited, [
+      new ListeningLens(),
+      new TensionLens(),
+      new ObjectiveLens(),
+      new DiscernmentLens(),
+      new OpeningLens(),
+    ]).synthesize(scope);
+
+    // Openings runs last — the Action Opening finding sits at the end of the set.
+    expect(brief.internal.map((f) => f.findingId)).toEqual([
+      'listening:0',
+      'tension:0',
+      'objective:0',
+      'opening:0',
+    ]);
+
+    // Everything Discernment audited was promoted and reaches the client-safe layer...
+    expect(brief.clientSafe.map((f) => f.findingId)).toEqual([
+      'listening:0',
+      'tension:0',
+      'objective:0',
+    ]);
+
+    // ...but the Action Opening finding is HELD: Discernment ran before it and never
+    // saw it, so nothing auto-promotes it (its promoter is human review, deferred).
+    const opening = brief.internal.find((f) => f.findingId === 'opening:0');
+    expect(opening?.clearedToClientSafe).toBe(false);
+    expect(brief.clientSafe.map((f) => f.findingId)).not.toContain('opening:0');
   });
 });

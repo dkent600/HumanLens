@@ -351,6 +351,29 @@ invariants above). The whole project is the **case study**; its first built vers
   config/seam). Provisional/forward-compatible — V3 may extend additively; blast radius
   contained to the Objective lens + convention + fake. Remaining breadth lens: **Action
   Opening** (Openings — runs after Discernment; watch ordering vs disposition).
+- **Action Opening lens built (Openings, terminal) — pipeline structurally complete,
+  6 of 7 lenses.** Reads the post-Guardrail audited snapshot, anchors openings back to
+  units, held by default, silent without priors (`opening:0…`); `'opening'` added to
+  `LensId`. Pipeline now `[listening, tension, culturePattern, objective, discernment,
+  opening]`. 64/64 Vitest green; lints clean. Dispositional proof test: a pipeline where
+  Discernment promotes everything it audits still leaves `opening:0` held and absent from
+  client-safe — proving Discernment runs before Opening and never sees it.
+  **Clarification (spec note) — Action Opening disposition (V1):** openings are held
+  internal-only in V1 BY DESIGN, not a gap. The disposition model names two affirmative
+  promoters — Discernment (automated) and human review (deferred); Action Opening runs
+  after Guardrail so Discernment cannot audit it, making **human review its promoter**.
+  The facilitator weighs openings and decides which (incl. "possible client-safe next
+  steps") to carry to the client — that act is the human-review promotion. Until human
+  review exists, openings stay internal-only (safe failure mode). Discernment stays the
+  sole AUTOMATED promoter; held-by-default, client-safe ⊆ internal, sensitivity backstop
+  all intact. Recorded in build_approach.md → "The Action Opening Lens."
+- **⚠ Human Meaning Lens NOT built — the one outstanding Module-1 lens.** Module 1 has 7
+  lenses; 6 are built. **Human Meaning** (build_approach `### 2`) sits in the **Evidence
+  layer alongside Listening** ("read the units directly") — Listening's sibling, the
+  Evidence-layer analog of the Culture Pattern + Tension Aggregate pair. It was omitted
+  from the breadth framing (not from the architecture). Routine to build: reads units,
+  anchors to units, held by default, Evidence-layer sibling independent of Listening
+  (same snapshot-independence already proven for the Aggregate pair). No new mechanism.
 - **Still open (stack):** only the **de-identification detector** — parked pending the
   Inclusity conversation (see queue + Open / deferred).
 
@@ -386,6 +409,11 @@ invariants above). The whole project is the **case study**; its first built vers
   keep it on the disposition mechanism. `DiscernmentResponsePayload` reserves room to
   carry them later without disturbing the disposition path; they'd be internal-only
   findings anchored to the concerned finding's units (the already-proven pattern).
+- Openings conditioning on disposition: the prompt projection (`toPromptFinding`)
+  carries content + anchors, not disposition, so Action Opening can't currently see
+  whether a prior finding was held/sensitive. If openings ever need to condition on that
+  (e.g. an opening built on a sensitive finding inheriting caution), thread disposition
+  into the lens↔model projection — additive, out of V1 scope.
 
 ## Queued next steps (immediate)
 Stack decisions from this session now live under "## Locked stack & implementation

@@ -39,7 +39,8 @@ export type LensId =
   | 'tension'
   | 'culture'
   | 'objective'
-  | 'discernment';
+  | 'discernment'
+  | 'opening';
 
 /** A non-empty readonly tuple — at least one element, enforced at the type level. */
 export type NonEmpty<T> = readonly [T, ...T[]];

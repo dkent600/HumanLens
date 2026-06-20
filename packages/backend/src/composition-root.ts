@@ -12,6 +12,7 @@ import { TensionLens } from './engine/lenses/tension-lens.js';
 import { CulturePatternLens } from './engine/lenses/culture-pattern-lens.js';
 import { ObjectiveLens } from './engine/lenses/objective-lens.js';
 import { DiscernmentLens } from './engine/lenses/discernment-lens.js';
+import { OpeningLens } from './engine/lenses/opening-lens.js';
 import { LensPipeline } from './engine/lens-pipeline.js';
 
 /** The single assumed actor for V1 (no sign-in yet). */
@@ -33,6 +34,7 @@ export interface AppContainer {
   culturePatternLens: CulturePatternLens;
   objectiveLens: ObjectiveLens;
   discernmentLens: DiscernmentLens;
+  openingLens: OpeningLens;
   lensPipeline: LensPipeline;
 }
 
@@ -63,12 +65,15 @@ export function buildContainer(): AwilixContainer<AppContainer> {
     culturePatternLens: asFunction(() => new CulturePatternLens()).singleton(),
     objectiveLens: asFunction(() => new ObjectiveLens()).singleton(),
     discernmentLens: asFunction(() => new DiscernmentLens()).singleton(),
+    openingLens: asFunction(() => new OpeningLens()).singleton(),
     lensPipeline: asFunction(
       // Registered in layer order for readability; the pipeline groups by each
       // lens's declared layer and runs the layers in LAYER_ORDER regardless. Tension
       // and Culture Pattern are both Aggregate — independent siblings in one layer;
       // Objective (Interpret) runs after them and before Discernment (Guardrail), so
-      // Discernment audits its findings with nothing extra to wire.
+      // Discernment audits its findings. Opening (Openings) runs LAST — after
+      // Discernment — so its findings are never audited and stay held internal-only
+      // (their promoter is human review, deferred).
       ({
         deidGate,
         llmProvider,
@@ -77,6 +82,7 @@ export function buildContainer(): AwilixContainer<AppContainer> {
         culturePatternLens,
         objectiveLens,
         discernmentLens,
+        openingLens,
       }: AppContainer) =>
         new LensPipeline(deidGate, llmProvider, [
           listeningLens,
@@ -84,6 +90,7 @@ export function buildContainer(): AwilixContainer<AppContainer> {
           culturePatternLens,
           objectiveLens,
           discernmentLens,
+          openingLens,
         ]),
     ).singleton(),
   });

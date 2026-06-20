@@ -159,9 +159,9 @@ export function defaultFakeResponse(payload: LensPromptPayload): FakeLensRespons
   const priorFindings = payload.priorFindings ?? [];
   if (priorFindings.length > 0) {
     // Any emit lens that reads prior findings (Aggregate: Tension, Culture Pattern;
-    // Interpret: Inclusity Objective; ...): anchor to the units BEHIND the prior
-    // findings (deduped), so the output is provably derived from what earlier stages
-    // found. Neutral content — it stands in for any such lens.
+    // Interpret: Inclusity Objective; Openings: Action Opening): anchor to the units
+    // BEHIND the prior findings (deduped), so the output is provably derived from
+    // what earlier stages found. Neutral content — it stands in for any such lens.
     const unitIds = [...new Set(priorFindings.flatMap((f) => f.evidenceUnitIds))];
     if (unitIds.length === 0) {
       return { findings: [] };
