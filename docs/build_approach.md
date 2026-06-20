@@ -703,7 +703,7 @@ flowchart TD
     L5["Openings — Action Opening Lens<br/>points toward possible next steps"]
 
     U --> L1 --> L2 --> L3 --> L4 --> L5
-    L4 -->|"sensitivity + layer_hint flags<br/>drive the two-layer split"| OUT["→ Assemble"]
+    L4 -->|"sensitivity + cleared-to-client-safe<br/>drive the two-layer split"| OUT["→ Assemble"]
     L5 --> OUT
 
     NOTE["Each layer reads the units AND every finding above it.<br/>Lenses within a layer are independent — may run in parallel.<br/>Every finding shares one interface; interpretive findings must be<br/>evidence-anchored (validation rule). Absence findings are exempt."]
@@ -713,11 +713,12 @@ flowchart TD
 
 A **finding** is the counterpart to a unit: if a unit is something a person said, a finding is something a lens noticed. Every lens, in every layer, emits findings of one **common interface**, so that findings can flow down the pipeline and later lenses can read earlier ones. A finding carries:
 
+- `finding_id` — a stable handle, so a finding can be referenced (by `parent`, and by the client-safe projection's correspondence back to its internal finding); analogous to a unit's `unit_id`
 - `lens` — which lens produced it
 - `content` — what was noticed
 - `evidence_links` — the `unit_id`s that support it
-- `support_set` — the distinct sources and segments behind those units, from which strength and spread are derived
-- `layer_hint` — whether it leans toward the internal layer, the client-safe layer, or both
+- `support_set` — the distinct sources behind those units (and, once unit type-specific extensions land, segments), from which strength and spread are derived. V1 derives distinct sources (by `speaker_token`) and unit count; the segment dimension arrives with the type-specific extensions.
+- `cleared_to_client_safe` — whether it has been affirmatively promoted to the client-safe layer; **defaults to held** (internal-only) until the Discernment Lens or human review clears it. Every finding is in the internal layer regardless, so client-safe ⊆ internal holds by construction.
 - `sensitivity` — whether it needs careful handling (see below)
 - `finding_kind` — an ordinary finding, or a sanctioned *absence* finding
 - `parent` — the finding it nests under, so themes can carry subthemes
@@ -734,7 +735,7 @@ Assemble produces the deliverable: a brief with two layers, an internal facilita
 
 The internal layer is the full candid set: every finding, including low-confidence inferences, unresolved tensions, findings about silence, and the Discernment Lens's cautions about what is uncertain or should not be overstated. It is written for the people who can hold that candor — the facilitator and Mitchell.
 
-The client-safe layer is built from the same findings, narrowed and shaped. A finding appears in it only if its `layer_hint` allows and its `sensitivity` flag does not hold it back; its phrasing is softened, and Inclusity's voice is applied here rather than at any earlier stage. A finding's `evidence_links` are preserved as it moves into the client-safe layer, so traceability survives into the version a client might see.
+The client-safe layer is built from the same findings, narrowed and shaped. A finding appears in it only if it has been cleared to the client-safe layer (`cleared_to_client_safe`) and its `sensitivity` flag does not hold it back; its phrasing is softened, and Inclusity's voice is applied here rather than at any earlier stage. The default disposition is to **hold**: `cleared_to_client_safe` stays false — internal-only — unless something affirmatively promotes it — the Discernment Lens, and human review, clearing it for the client-safe layer. The safe failure mode is therefore silence, not exposure: if discernment has not run, or is uncertain, the finding simply does not reach the client layer. A finding's `evidence_links` are preserved as it moves into the client-safe layer, so traceability survives into the version a client might see.
 
 This projection relationship buys an integrity guarantee that matters for Mitchell's standards: because the client-safe layer is provably a subset of the candid internal analysis, nothing can appear in front of a client that is not grounded in what the facilitator saw. Findings the Discernment Lens held back for sensitivity are simply absent from the client-safe layer — never quietly reworded so they can slip through. The split is a property of how the brief is assembled, not a manual cleanup step performed afterward.
 

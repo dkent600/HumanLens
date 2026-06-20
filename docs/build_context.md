@@ -134,17 +134,27 @@ partner and the writer of `build_approach.md`.
   prompt. Discernment runs late so it can audit prior findings; its flags drive
   the two-layer split. Independent lenses within a layer may run in parallel.
   (Rejected: single composite call; seven independent passes.)
-- Common **Finding** interface (lens, content, evidence_links → unit_ids,
-  support_set, layer_hint, sensitivity, finding_kind, parent). Rules:
+- Common **Finding** interface (finding_id, lens, content, evidence_links →
+  unit_ids, support_set, cleared_to_client_safe, sensitivity, finding_kind,
+  parent). Rules:
   interpretive findings MUST be anchored (validation, not a prompt ask;
   unanchored = defect surfaced by Discernment); a sanctioned `absence`
   finding_kind is exempt (findings about silence); strength is DERIVED from the
   support_set, never an asserted confidence label; `sensitivity` (handling) is
   distinct from de-identification (identifiability); `parent` nests subthemes.
+  `finding_id` = stable handle (like `unit_id`) for `parent` refs + client-safe
+  projection correspondence. `support_set` V1 = distinct sources (by speaker_token)
+  + unit count; the segment dimension is deferred with the unit type-specific
+  extensions.
 - Two-layer output = two PROJECTIONS of one finding set. Internal = full candid
-  set. Client-safe = filtered (layer_hint + sensitivity), rephrased, voice-
+  set. Client-safe = filtered (cleared_to_client_safe + sensitivity), rephrased, voice-
   calibrated subset, with evidence_links preserved. Integrity guarantee:
   client-safe ⊆ internal. Voice applies at Assemble, on the client-safe layer.
+  DEFAULT DISPOSITION = HELD: a finding is internal-only unless affirmatively
+  promoted (Discernment + human review) to the client-safe layer — safe failure
+  mode is silence, not exposure. (Surfaced by the V1 slice plan; model the
+  disposition so "held by default" and client-safe-outside-internal-is-impossible
+  are both obvious in the type — e.g. a binary held / cleared, not a 3-value enum.)
 - Human review by 3 actors (facilitator; Mitchell — internal layer vs evidence;
   Maria — client-safe voice). Rating signals: useful / generic / overreaching /
   missing nuance / unsafe. Capture keys edits+signals to finding+lens+unit,
@@ -271,6 +281,24 @@ invariants above). The whole project is the **case study**; its first built vers
   durability-spectrum JSON/SQLite to survive a restart). PDF/LibreOffice being out of
   scope is what relaxed this from the earlier sidecar-binary + persistent-disk profile.
   Specific PRODUCT deferred.
+- **Repository layout (settled) + V1 skeleton scaffolded — coding has begun.**
+  npm-workspaces monorepo (`dkent600/HumanLens`): packages `frontend` / `backend` /
+  `shared`, where **`shared` = the client-safe contract and enforces client-safe ⊆
+  internal at the package boundary** (internal types stay in `backend`). `backend` is
+  one package; seam discipline via folders (`engine/` framework-free + `seams/` + thin
+  Fastify `routes/`+`server.ts` + Awilix `composition-root.ts`). De-id gate is an engine
+  step; `clearedUnitsForLenses` is the hard gate; detector parked behind its seam.
+  Scaffold: 3 seams + gate implemented, 11 Vitest green, root ESLint+Stylelint clean,
+  smoke test passes. Full detail in `build_implementation.md` → "Repository layout &
+  code structure."
+- **Vertical slice built (cleared units → one lens → findings → Assemble →
+  client-safe).** `Finding` (held-by-default `cleared_to_client_safe` binary; support
+  derived, never asserted), LLM provider seam + deterministic fake, Listening lens
+  (Evidence), Assemble (client-safe = `.filter()` over internal; sensitivity kept as a
+  hard backstop), client-safe DTO (omits internal-only fields). Both review
+  adjustments landed (held-by-default; disposition unrepresentable-when-violated).
+  Tests green: held-by-default end-to-end, promote-one-finding, projection ⊆ internal,
+  anchoring, honest-counting support.
 - **Still open (stack):** only the **de-identification detector** — parked pending the
   Inclusity conversation (see queue + Open / deferred).
 
