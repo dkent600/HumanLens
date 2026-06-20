@@ -6,6 +6,16 @@
 
 ---
 
+## Terminology
+
+Two terms recur throughout this document and are used precisely. They are general to the architecture, not specific to any one module.
+
+A **seam** is an interface boundary where the concrete implementation is injected and can be replaced without touching the call sites: callers depend only on the abstraction, while the real policy or implementation sits behind it — and may resolve trivially at first, with a faithful implementation swapped in later. Seams in this architecture include identity, authorization, the repository (persistence), the LLM provider, the de-identification detector, and export; each exists so the engine can depend on an abstraction now and acquire its real implementation later without rework.
+
+A **contract** (specifically, the *client-safe contract*) is the agreed set of client-safe shapes that may cross out of the system to a consumer — the frontend, and ultimately the client-safe brief. It is the realization of *client-safe ⊆ internal*: only client-safe shapes belong to the contract, and internal-layer shapes never enter it. The term is reserved for this boundary; it is **not** a general synonym for "interface." An interface that stays inside the engine is spoken of as a *seam*, not a contract. (In code, the contract is realized as the published client-safe shapes — see `build_implementation.md`.)
+
+---
+
 ## Why This Plan Fits SMI
 
 *(Internal SMI rationale — why this plan, and this first module, fit SMI and the partnership.)*
