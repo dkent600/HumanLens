@@ -17,8 +17,8 @@
 // │ not a substitute for not adding internal shapes here in the first place.│
 // └─────────────────────────────────────────────────────────────────────────┘
 //
-// For now this carries a single placeholder value so the cross-package import
-// is exercised end-to-end; real contract types replace it as the model lands.
+// Real contract types are filled in as the model lands; the placeholder below
+// remains so the cross-package import stays exercised end-to-end.
 
 export interface ContractInfo {
   /** The Human Lens module this contract serves. */
@@ -31,3 +31,42 @@ export const CONTRACT_INFO: ContractInfo = {
   module: 'listening-brief',
   contractVersion: '0',
 };
+
+/** Derived support behind a finding — how much evidence, counted honestly. */
+export interface ClientSafeSupport {
+  /** Distinct sources behind the evidence (counted by speaker token — never "N people"). */
+  readonly sourceCount: number;
+  /** Number of units cited as evidence. */
+  readonly unitCount: number;
+}
+
+/**
+ * The client-safe projection of a finding — the only finding shape that crosses
+ * to the frontend, and ultimately into a client-safe brief.
+ *
+ * This is a DELIBERATELY NARROWED view of the internal finding. It carries what a
+ * client may see and NOTHING that governs the internal/client-safe split:
+ *   - `clearedToClientSafe` and `sensitivity` are internal gating signals — a
+ *     finding's disposition is decided inside the engine, never shipped outward.
+ *   - `content` here is the (eventually voice-calibrated) client-facing phrasing.
+ *   - `evidenceLinks` ARE preserved, so traceability survives into the client view.
+ *
+ * Because the internal layer is *every* finding and the client-safe layer is the
+ * promoted subset of it, this projection can only ever describe a finding that
+ * already exists internally — `client-safe ⊆ internal`, realized in the types.
+ */
+export interface ClientSafeFinding {
+  readonly findingId: string;
+  /** Which lens produced it. */
+  readonly lens: string;
+  /** Client-facing phrasing of what was noticed. */
+  readonly content: string;
+  /** Unit ids supporting the finding — preserved so a quote can be traced back. */
+  readonly evidenceLinks: readonly string[];
+  /** Derived strength; safe to show because it falls out of the evidence. */
+  readonly support: ClientSafeSupport;
+  /** Ordinary finding, or the sanctioned finding about silence/absence. */
+  readonly findingKind: 'ordinary' | 'absence';
+  /** The finding this nests under, if any (so subthemes survive the projection). */
+  readonly parent?: string;
+}

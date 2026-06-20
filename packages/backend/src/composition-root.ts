@@ -4,8 +4,11 @@ import { AllowAllAuthorization, type AuthorizationSeam } from './seams/authoriza
 import { AssumedIdentity, type IdentitySeam } from './seams/identity.js';
 import { InMemoryUnitRepository, type UnitRepository } from './seams/repository.js';
 import { TrivialDeidDetector, type DeidDetector } from './seams/deid-detector.js';
+import { FakeLlmProvider, type LlmProvider } from './seams/llm-provider.js';
 import { IntakeService } from './engine/intake.js';
 import { DeidGate } from './engine/deid-gate.js';
+import { ListeningLens } from './engine/lenses/listening-lens.js';
+import { LensPipeline } from './engine/lens-pipeline.js';
 
 /** The single assumed actor for V1 (no sign-in yet). */
 export const ASSUMED_ACTOR: Actor = {
@@ -18,8 +21,11 @@ export interface AppContainer {
   authorization: AuthorizationSeam;
   unitRepository: UnitRepository;
   deidDetector: DeidDetector;
+  llmProvider: LlmProvider;
   intakeService: IntakeService;
   deidGate: DeidGate;
+  listeningLens: ListeningLens;
+  lensPipeline: LensPipeline;
 }
 
 /**
@@ -35,6 +41,7 @@ export function buildContainer(): AwilixContainer<AppContainer> {
     authorization: asValue(new AllowAllAuthorization()),
     unitRepository: asValue(new InMemoryUnitRepository()),
     deidDetector: asValue(new TrivialDeidDetector()),
+    llmProvider: asValue(new FakeLlmProvider()),
     intakeService: asFunction(
       ({ authorization, unitRepository }: AppContainer) =>
         new IntakeService(authorization, unitRepository),
@@ -42,6 +49,11 @@ export function buildContainer(): AwilixContainer<AppContainer> {
     deidGate: asFunction(
       ({ deidDetector, unitRepository }: AppContainer) =>
         new DeidGate(deidDetector, unitRepository),
+    ).singleton(),
+    listeningLens: asFunction(() => new ListeningLens()).singleton(),
+    lensPipeline: asFunction(
+      ({ deidGate, llmProvider, listeningLens }: AppContainer) =>
+        new LensPipeline(deidGate, llmProvider, [listeningLens]),
     ).singleton(),
   });
   return container;
