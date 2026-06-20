@@ -8,6 +8,7 @@ import { FakeLlmProvider, type LlmProvider } from './seams/llm-provider.js';
 import { IntakeService } from './engine/intake.js';
 import { DeidGate } from './engine/deid-gate.js';
 import { ListeningLens } from './engine/lenses/listening-lens.js';
+import { HumanMeaningLens } from './engine/lenses/human-meaning-lens.js';
 import { TensionLens } from './engine/lenses/tension-lens.js';
 import { CulturePatternLens } from './engine/lenses/culture-pattern-lens.js';
 import { ObjectiveLens } from './engine/lenses/objective-lens.js';
@@ -30,6 +31,7 @@ export interface AppContainer {
   intakeService: IntakeService;
   deidGate: DeidGate;
   listeningLens: ListeningLens;
+  humanMeaningLens: HumanMeaningLens;
   tensionLens: TensionLens;
   culturePatternLens: CulturePatternLens;
   objectiveLens: ObjectiveLens;
@@ -61,6 +63,7 @@ export function buildContainer(): AwilixContainer<AppContainer> {
         new DeidGate(deidDetector, unitRepository),
     ).singleton(),
     listeningLens: asFunction(() => new ListeningLens()).singleton(),
+    humanMeaningLens: asFunction(() => new HumanMeaningLens()).singleton(),
     tensionLens: asFunction(() => new TensionLens()).singleton(),
     culturePatternLens: asFunction(() => new CulturePatternLens()).singleton(),
     objectiveLens: asFunction(() => new ObjectiveLens()).singleton(),
@@ -68,8 +71,9 @@ export function buildContainer(): AwilixContainer<AppContainer> {
     openingLens: asFunction(() => new OpeningLens()).singleton(),
     lensPipeline: asFunction(
       // Registered in layer order for readability; the pipeline groups by each
-      // lens's declared layer and runs the layers in LAYER_ORDER regardless. Tension
-      // and Culture Pattern are both Aggregate — independent siblings in one layer;
+      // lens's declared layer and runs the layers in LAYER_ORDER regardless. The full
+      // seven-lens set: Listening + Human Meaning are both Evidence — independent
+      // siblings in one layer; Tension and Culture Pattern are both Aggregate;
       // Objective (Interpret) runs after them and before Discernment (Guardrail), so
       // Discernment audits its findings. Opening (Openings) runs LAST — after
       // Discernment — so its findings are never audited and stay held internal-only
@@ -78,6 +82,7 @@ export function buildContainer(): AwilixContainer<AppContainer> {
         deidGate,
         llmProvider,
         listeningLens,
+        humanMeaningLens,
         tensionLens,
         culturePatternLens,
         objectiveLens,
@@ -86,6 +91,7 @@ export function buildContainer(): AwilixContainer<AppContainer> {
       }: AppContainer) =>
         new LensPipeline(deidGate, llmProvider, [
           listeningLens,
+          humanMeaningLens,
           tensionLens,
           culturePatternLens,
           objectiveLens,

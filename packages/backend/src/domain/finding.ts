@@ -35,7 +35,7 @@ export type FindingId = string;
 /** Which lens produced a finding. Open set; grows as lenses across the layers land. */
 export type LensId =
   | 'listening'
-  | 'human-meaning'
+  | 'meaning'
   | 'tension'
   | 'culture'
   | 'objective'

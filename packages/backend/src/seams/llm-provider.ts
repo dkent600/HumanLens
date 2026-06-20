@@ -132,9 +132,9 @@ export type FakeLensResponse = LensResponsePayload | DiscernmentResponsePayload;
  *   - With prior findings (an Aggregate+ emit call): surface ONE finding that cites
  *     the units BEHIND those prior findings — proving the later stage read the prior
  *     findings, not just the units, and that interpretive output stays anchored.
- *   - Otherwise (the Listening lens's case): surface ONE recurring-theme finding
- *     that cites every unit it was given — so the derived support set spans all the
- *     distinct sources, exercising honest cross-source counting.
+ *   - Otherwise (an Evidence-layer emit call — Listening, Human Meaning): surface ONE
+ *     finding that cites every unit it was given — so the derived support set spans
+ *     all the distinct sources, exercising honest cross-source counting.
  * With nothing to work from it returns no findings. A custom `respond` can script
  * other shapes for tests (e.g. a verdict that promotes or flags a finding).
  */
@@ -178,10 +178,14 @@ export function defaultFakeResponse(payload: LensPromptPayload): FakeLensRespons
   if (payload.units.length === 0) {
     return { findings: [] };
   }
+  // Any Evidence-layer emit lens that reads the units directly (Listening, Human
+  // Meaning): surface ONE finding that cites every unit it was given — so the derived
+  // support set spans all the distinct sources. Neutral content — it stands in for
+  // any such lens.
   return {
     findings: [
       {
-        content: 'A recurring theme runs across the comments.',
+        content: 'A recurring signal runs across the comments.',
         evidenceUnitIds: payload.units.map((u) => u.unitId),
       },
     ],

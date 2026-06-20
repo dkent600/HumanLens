@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DeidGate } from '../src/engine/deid-gate.js';
 import { LensPipeline } from '../src/engine/lens-pipeline.js';
 import { ListeningLens } from '../src/engine/lenses/listening-lens.js';
+import { HumanMeaningLens } from '../src/engine/lenses/human-meaning-lens.js';
 import { TensionLens } from '../src/engine/lenses/tension-lens.js';
 import { CulturePatternLens } from '../src/engine/lenses/culture-pattern-lens.js';
 import { ObjectiveLens } from '../src/engine/lenses/objective-lens.js';
@@ -206,6 +207,37 @@ describe('lens pipeline — staged: Evidence → Aggregate', () => {
     const culture = brief.internal.find((f) => f.findingId === 'culture:0');
     expect([...(tension?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
     expect([...(culture?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
+  });
+
+  it('runs the two Evidence siblings against the same units — neither sees the other', async () => {
+    const { gate } = await clearedScopeWithUnits();
+
+    // Record the prior-finding ids each emit call was handed (Evidence reads units,
+    // so its prior-findings snapshot is empty).
+    const seenPriorIds: string[][] = [];
+    const spy = new FakeLlmProvider((payload) => {
+      if (payload.task !== 'disposition') {
+        seenPriorIds.push((payload.priorFindings ?? []).map((f) => f.findingId));
+      }
+      return defaultFakeResponse(payload);
+    });
+
+    const brief = await new LensPipeline(gate, spy, [
+      new ListeningLens(),
+      new HumanMeaningLens(),
+    ]).synthesize(scope);
+
+    // Both Evidence lenses ran against an EMPTY prior-findings snapshot — neither saw
+    // the other's output (no 'listening:0' in Human Meaning's view). The analog of the
+    // Aggregate pair's [['listening:0'], ['listening:0']], one layer earlier.
+    expect(seenPriorIds).toEqual([[], []]);
+
+    // Both produced a finding anchored to the same units.
+    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0', 'meaning:0']);
+    const listening = brief.internal.find((f) => f.findingId === 'listening:0');
+    const meaning = brief.internal.find((f) => f.findingId === 'meaning:0');
+    expect([...(listening?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
+    expect([...(meaning?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
   });
 });
 

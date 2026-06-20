@@ -367,13 +367,16 @@ invariants above). The whole project is the **case study**; its first built vers
   review exists, openings stay internal-only (safe failure mode). Discernment stays the
   sole AUTOMATED promoter; held-by-default, client-safe ⊆ internal, sensitivity backstop
   all intact. Recorded in build_approach.md → "The Action Opening Lens."
-- **⚠ Human Meaning Lens NOT built — the one outstanding Module-1 lens.** Module 1 has 7
-  lenses; 6 are built. **Human Meaning** (build_approach `### 2`) sits in the **Evidence
-  layer alongside Listening** ("read the units directly") — Listening's sibling, the
-  Evidence-layer analog of the Culture Pattern + Tension Aggregate pair. It was omitted
-  from the breadth framing (not from the architecture). Routine to build: reads units,
-  anchors to units, held by default, Evidence-layer sibling independent of Listening
-  (same snapshot-independence already proven for the Aggregate pair). No new mechanism.
+- **Human Meaning lens built (Evidence) — Module-1 lens set COMPLETE (7 of 7).**
+  Evidence-layer sibling of Listening: reads cleared units directly (ignores prior
+  findings), anchors to units, held by default, silent without units (`meaning:0…`).
+  Cleanup: a dangling unused `'human-meaning'` placeholder in `LensId` replaced with
+  single-token `'meaning'`, matching the id===lens===namespace convention of every other
+  lens (internal identifier only; doc concept "Human Meaning Lens" unchanged, no spec
+  impact). Evidence pair (Listening + Human Meaning) run against the same units + empty
+  prior snapshot, independent (tested: `[[], []]`). Full set:
+  `[listening, humanMeaning, tension, culturePattern, objective, discernment, opening]`.
+  69/69 Vitest green; lints clean. No spec note.
 - **Still open (stack):** only the **de-identification detector** — parked pending the
   Inclusity conversation (see queue + Open / deferred).
 
