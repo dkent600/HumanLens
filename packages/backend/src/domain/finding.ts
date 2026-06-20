@@ -33,7 +33,7 @@ import type { UnitId } from './types.js';
 export type FindingId = string;
 
 /** Which lens produced a finding. Open set; grows as lenses across the layers land. */
-export type LensId = 'listening' | 'human-meaning' | 'tension';
+export type LensId = 'listening' | 'human-meaning' | 'tension' | 'discernment';
 
 /** A non-empty readonly tuple — at least one element, enforced at the type level. */
 export type NonEmpty<T> = readonly [T, ...T[]];
@@ -176,6 +176,52 @@ export function makeAbsenceFinding(args: MakeAbsenceArgs): AbsenceFinding {
     clearedToClientSafe: args.clearedToClientSafe ?? false,
     ...(args.parent !== undefined ? { parent: args.parent } : {}),
   };
+}
+
+/** A change to a finding's disposition — the only fields the Discernment audit may revise. */
+export interface DispositionChange {
+  readonly clearedToClientSafe?: boolean;
+  readonly sensitivity?: Sensitivity;
+}
+
+/**
+ * Rebuild a finding with a revised disposition — the sanctioned path for the
+ * Facilitator Discernment Lens to promote a finding to the client-safe layer and/or
+ * flag it sensitive WITHOUT mutating it. It is the generalization of the test's old
+ * `promote()` helper: a NEW finding is constructed through the same factories, so
+ * the support set is RE-DERIVED from the unchanged evidence (never hand-set) and the
+ * anchoring invariant is re-enforced. Everything that identifies the finding —
+ * `findingId`, `lens`, `content`, `evidenceLinks`, `parent` — is carried verbatim,
+ * so the revision shares the original's id and the Guardrail stage can supersede the
+ * original in place. Fields the change leaves unset keep the finding's current value.
+ */
+export function reviseDisposition(
+  finding: Finding,
+  change: DispositionChange,
+  units: readonly SupportableUnit[],
+): Finding {
+  const clearedToClientSafe = change.clearedToClientSafe ?? finding.clearedToClientSafe;
+  const sensitivity = change.sensitivity ?? finding.sensitivity;
+  if (finding.findingKind === 'absence') {
+    return makeAbsenceFinding({
+      findingId: finding.findingId,
+      lens: finding.lens,
+      content: finding.content,
+      sensitivity,
+      clearedToClientSafe,
+      ...(finding.parent !== undefined ? { parent: finding.parent } : {}),
+    });
+  }
+  return makeOrdinaryFinding({
+    findingId: finding.findingId,
+    lens: finding.lens,
+    content: finding.content,
+    evidenceLinks: finding.evidenceLinks,
+    units,
+    sensitivity,
+    clearedToClientSafe,
+    ...(finding.parent !== undefined ? { parent: finding.parent } : {}),
+  });
 }
 
 /**

@@ -2,12 +2,12 @@ import type { Unit } from '../../domain/types.js';
 import type { Finding } from '../../domain/finding.js';
 import { makeOrdinaryFinding } from '../../domain/finding.js';
 import type {
-  LensPromptFinding,
   LensPromptPayload,
   LensResponsePayload,
   LlmProvider,
 } from '../../seams/llm-provider.js';
 import type { Layer, Lens } from './lens.js';
+import { toPromptFinding } from './prompt-projection.js';
 
 // The Tension Lens — an Aggregate-layer lens: "what tensions should a facilitator
 // notice?" It is the first lens that reads PRIOR findings rather than units alone:
@@ -82,14 +82,4 @@ export class TensionLens implements Lens {
     });
     return findings;
   }
-}
-
-/** Project a prior finding into the shared lens-prompt convention, carrying its unit anchors. */
-function toPromptFinding(finding: Finding): LensPromptFinding {
-  return {
-    findingId: finding.findingId,
-    lens: finding.lens,
-    content: finding.content,
-    evidenceUnitIds: [...finding.evidenceLinks],
-  };
 }

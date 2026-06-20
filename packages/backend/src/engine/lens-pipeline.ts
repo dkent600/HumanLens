@@ -26,6 +26,16 @@ import { assembleBrief, type AssembledBrief } from './assemble.js';
 // run sequentially — concurrency is deferred, finding-passing between stages is the
 // point. Findings accumulate into the brief in layer order.
 //
+// One stage folds differently: the GUARDRAIL stage (the Facilitator Discernment
+// Lens) may REVISE a prior finding's disposition, which it expresses by emitting a
+// finding that reuses the prior finding_id. So Guardrail output supersedes by
+// finding_id (replace in place; a new id still appends), while every other layer is
+// pure-append. Revising another lens's finding is the auditor's privilege, not a
+// general pipeline capability — scoping it here keeps an accidental id collision
+// elsewhere a visible append rather than a silent drop on the path that gates
+// client exposure. (The revision itself is a new object built through the domain
+// factory, so findings stay immutable and support stays honest.)
+//
 // This is plain TypeScript — no Fastify, no DB, no provider concretion — runnable
 // directly from a test or a small harness with no server running.
 
@@ -58,7 +68,12 @@ export class LensPipeline {
         // later (build_approach.md). The snapshot above is what makes that safe.
         produced.push(...(await lens.run(units, priorFindings, this.provider)));
       }
-      findings.push(...produced);
+
+      if (layer === 'guardrail') {
+        supersedeByFindingId(findings, produced);
+      } else {
+        findings.push(...produced);
+      }
     }
 
     return assembleBrief(scope.engagementId, findings);
@@ -76,5 +91,22 @@ export class LensPipeline {
       }
     }
     return byLayer;
+  }
+}
+
+/**
+ * Fold the Guardrail stage's output into the accumulated findings: a produced
+ * finding that reuses an existing finding_id REVISES it in place (preserving its
+ * position, so layer order is kept and the run stays deterministic); a new id
+ * appends. This is the Discernment audit's privilege and is applied only here.
+ */
+function supersedeByFindingId(accumulated: Finding[], produced: readonly Finding[]): void {
+  for (const finding of produced) {
+    const index = accumulated.findIndex((f) => f.findingId === finding.findingId);
+    if (index >= 0) {
+      accumulated[index] = finding;
+    } else {
+      accumulated.push(finding);
+    }
   }
 }

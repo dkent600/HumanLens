@@ -9,6 +9,7 @@ import { IntakeService } from './engine/intake.js';
 import { DeidGate } from './engine/deid-gate.js';
 import { ListeningLens } from './engine/lenses/listening-lens.js';
 import { TensionLens } from './engine/lenses/tension-lens.js';
+import { DiscernmentLens } from './engine/lenses/discernment-lens.js';
 import { LensPipeline } from './engine/lens-pipeline.js';
 
 /** The single assumed actor for V1 (no sign-in yet). */
@@ -27,6 +28,7 @@ export interface AppContainer {
   deidGate: DeidGate;
   listeningLens: ListeningLens;
   tensionLens: TensionLens;
+  discernmentLens: DiscernmentLens;
   lensPipeline: LensPipeline;
 }
 
@@ -54,11 +56,12 @@ export function buildContainer(): AwilixContainer<AppContainer> {
     ).singleton(),
     listeningLens: asFunction(() => new ListeningLens()).singleton(),
     tensionLens: asFunction(() => new TensionLens()).singleton(),
+    discernmentLens: asFunction(() => new DiscernmentLens()).singleton(),
     lensPipeline: asFunction(
       // Registered in layer order for readability; the pipeline groups by each
       // lens's declared layer and runs the layers in LAYER_ORDER regardless.
-      ({ deidGate, llmProvider, listeningLens, tensionLens }: AppContainer) =>
-        new LensPipeline(deidGate, llmProvider, [listeningLens, tensionLens]),
+      ({ deidGate, llmProvider, listeningLens, tensionLens, discernmentLens }: AppContainer) =>
+        new LensPipeline(deidGate, llmProvider, [listeningLens, tensionLens, discernmentLens]),
     ).singleton(),
   });
   return container;

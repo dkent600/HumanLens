@@ -3,16 +3,36 @@ import { DeidGate } from '../src/engine/deid-gate.js';
 import { LensPipeline } from '../src/engine/lens-pipeline.js';
 import { ListeningLens } from '../src/engine/lenses/listening-lens.js';
 import { TensionLens } from '../src/engine/lenses/tension-lens.js';
-import { assembleBrief, projectToClientSafe } from '../src/engine/assemble.js';
+import { DiscernmentLens } from '../src/engine/lenses/discernment-lens.js';
 import { InMemoryUnitRepository, type Scope } from '../src/seams/repository.js';
 import { TrivialDeidDetector } from '../src/seams/deid-detector.js';
-import { FakeLlmProvider } from '../src/seams/llm-provider.js';
-import {
-  isEvidenceAnchored,
-  makeOrdinaryFinding,
-  type Finding,
-} from '../src/domain/finding.js';
+import { FakeLlmProvider, defaultFakeResponse } from '../src/seams/llm-provider.js';
+import { isEvidenceAnchored } from '../src/domain/finding.js';
 import type { Actor, Unit } from '../src/domain/types.js';
+
+/**
+ * A fake that drives the emit lenses normally (delegating to the default) but
+ * scripts the Discernment audit: it promotes / flags the named finding ids.
+ */
+function promotingProvider(
+  promote: readonly string[],
+  sensitive: readonly string[] = [],
+): FakeLlmProvider {
+  return new FakeLlmProvider((payload) => {
+    if (payload.task === 'disposition') {
+      return {
+        verdicts: (payload.priorFindings ?? [])
+          .filter((f) => promote.includes(f.findingId) || sensitive.includes(f.findingId))
+          .map((f) => ({
+            findingId: f.findingId,
+            promote: promote.includes(f.findingId),
+            sensitive: sensitive.includes(f.findingId),
+          })),
+      };
+    }
+    return defaultFakeResponse(payload);
+  });
+}
 
 // End-to-end proof of the slice's spine, with the model stubbed:
 //   gate.clearedUnitsForLenses -> Listening lens (via the provider seam)
@@ -84,25 +104,29 @@ describe('lens pipeline — the spine, model stubbed', () => {
     expect(briefA.internal).toEqual(briefB.internal);
   });
 
-  it('completes the projection path once a finding is affirmatively promoted', async () => {
-    const { gate, units } = await clearedScopeWithUnits();
-    const brief = await pipeline(gate).synthesize(scope);
+  it('completes the projection path once REAL Discernment affirmatively promotes a finding', async () => {
+    const { gate } = await clearedScopeWithUnits();
+    // Discernment (Guardrail) is the affirmative promoter now — not a test helper.
+    const provider = promotingProvider(['listening:0']);
+    const brief = await new LensPipeline(gate, provider, [
+      new ListeningLens(),
+      new DiscernmentLens(),
+    ]).synthesize(scope);
 
-    // Promotion is the affirmative act the Discernment lens / human review will own;
-    // here the test performs it to exercise the projection end-to-end.
-    const promoted = brief.internal.map((f) => promote(f, units));
-    const projectedBrief = assembleBrief(scope.engagementId, promoted);
-
-    expect(projectedBrief.clientSafe).toHaveLength(1);
-    const [cs] = projectedBrief.clientSafe;
+    expect(brief.clientSafe).toHaveLength(1);
+    const [cs] = brief.clientSafe;
     expect(cs.findingId).toBe('listening:0');
     expect([...cs.evidenceLinks].sort()).toEqual(['u1', 'u2']); // traceability preserved
     expect(cs.support).toEqual({ sourceCount: 2, unitCount: 2 });
 
-    // And the projection itself carries no internal-only gating field.
-    const direct = projectToClientSafe(promoted[0]);
-    expect(direct).not.toHaveProperty('clearedToClientSafe');
-    expect(direct).not.toHaveProperty('sensitivity');
+    // The projection carries no internal-only gating field.
+    expect(cs).not.toHaveProperty('clearedToClientSafe');
+    expect(cs).not.toHaveProperty('sensitivity');
+
+    // client-safe ⊆ internal: the promoted finding is the same id, present internally
+    // and there marked cleared (revised in place — no duplicate appended).
+    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0']);
+    expect(brief.internal[0]?.clearedToClientSafe).toBe(true);
   });
 });
 
@@ -151,19 +175,56 @@ describe('lens pipeline — staged: Evidence → Aggregate', () => {
   });
 });
 
-/** Rebuild a finding as affirmatively promoted (the only lens here emits ordinary findings). */
-function promote(f: Finding, units: readonly Unit[]): Finding {
-  if (f.findingKind === 'absence') {
-    return f; // not produced by the Listening lens; left untouched for completeness
+describe('lens pipeline — staged with Guardrail (real Discernment disposition)', () => {
+  function fullPipeline(gate: DeidGate, provider: FakeLlmProvider): LensPipeline {
+    return new LensPipeline(gate, provider, [
+      new ListeningLens(),
+      new TensionLens(),
+      new DiscernmentLens(),
+    ]);
   }
-  return makeOrdinaryFinding({
-    findingId: f.findingId,
-    lens: f.lens,
-    content: f.content,
-    evidenceLinks: f.evidenceLinks,
-    units,
-    sensitivity: f.sensitivity,
-    clearedToClientSafe: true,
-    parent: f.parent,
+
+  it('holds everything by default when Discernment promotes nothing', async () => {
+    const { gate } = await clearedScopeWithUnits();
+    // The default fake's disposition response is empty verdicts — silence.
+    const brief = await fullPipeline(gate, new FakeLlmProvider()).synthesize(scope);
+
+    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0', 'tension:0']);
+    expect(brief.internal.every((f) => f.clearedToClientSafe === false)).toBe(true);
+    expect(brief.clientSafe).toHaveLength(0);
   });
-}
+
+  it('Discernment runs after Evidence and Aggregate and sees their findings', async () => {
+    const { gate } = await clearedScopeWithUnits();
+    // tension:0 exists only because the Aggregate lens ran before Guardrail; that
+    // Discernment can promote it proves it audited the accumulated Aggregate output.
+    const brief = await fullPipeline(gate, promotingProvider(['tension:0'])).synthesize(scope);
+
+    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0', 'tension:0']); // revised in place
+    expect(brief.clientSafe.map((f) => f.findingId)).toEqual(['tension:0']);
+
+    // client-safe ⊆ internal, end to end: every client-safe id is present internally.
+    const internalIds = new Set(brief.internal.map((f) => f.findingId));
+    expect(brief.clientSafe.every((f) => internalIds.has(f.findingId))).toBe(true);
+  });
+
+  it('keeps a promoted-but-sensitive finding out of the client-safe layer (backstop holds)', async () => {
+    const { gate } = await clearedScopeWithUnits();
+    // Promote BOTH, but flag listening:0 sensitive — it must not cross over.
+    const provider = promotingProvider(['listening:0', 'tension:0'], ['listening:0']);
+    const brief = await fullPipeline(gate, provider).synthesize(scope);
+
+    const sensitive = brief.internal.find((f) => f.findingId === 'listening:0');
+    expect(sensitive?.sensitivity).toBe('sensitive');
+    expect(sensitive?.clearedToClientSafe).toBe(true); // promoted...
+    expect(brief.clientSafe.map((f) => f.findingId)).toEqual(['tension:0']); // ...but held
+  });
+
+  it('is deterministic — same input and verdicts yield the same brief', async () => {
+    const a = await clearedScopeWithUnits();
+    const b = await clearedScopeWithUnits();
+    const briefA = await fullPipeline(a.gate, promotingProvider(['tension:0'])).synthesize(scope);
+    const briefB = await fullPipeline(b.gate, promotingProvider(['tension:0'])).synthesize(scope);
+    expect(briefA).toEqual(briefB);
+  });
+});

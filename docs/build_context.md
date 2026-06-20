@@ -310,6 +310,23 @@ invariants above). The whole project is the **case study**; its first built vers
   (anchoring enforced on interpretive output); held by default; silent without priors.
   One deterministic fake drives both lenses. `shared` boundary untouched. 36/36 Vitest
   green; tsc/eslint/stylelint clean. No `docs/` edits by Claude Code; no spec note.
+- **Discernment built — two-layer split now real (Guardrail layer).** The Facilitator
+  Discernment Lens runs late, audits accumulated findings, and is the real affirmative
+  promoter (sets `cleared_to_client_safe`) and sensitivity-setter — the test's faked
+  `promote()` is gone. **Mechanism = B2:** Discernment sets disposition by re-emitting a
+  finding under its original `finding_id`, rebuilt through the sanctioned factory
+  (`reviseDisposition` → support re-derived, anchoring re-enforced, never hand-set), so
+  disposition lives on the finding (one source of truth) and Assemble is untouched
+  (client-safe ⊆ internal, held-by-default, sensitivity backstop all hold by
+  construction). The orchestrator folds **only the Guardrail stage by supersede-on-
+  `finding_id`** (replace in place, preserving position); every other layer stays pure-
+  append — revision is the auditor's privilege, and a stray id collision elsewhere is a
+  visible append, not a silent drop. Seam stayed domain-agnostic (`complete()→{text}`;
+  task/verdict types in the lens↔model convention). Default fake = empty verdicts
+  (silence). Also: shared `toPromptFinding` extracted to `prompt-projection.ts`
+  (Tension + Discernment), behavior-preserving. 46/46 Vitest green; lints clean.
+  (Rejected: verdicts-only-at-Assemble = two sources of truth; general upsert = supersede
+  too broad.) Recorded in build_approach.md → staged-pipeline (Discernment bullet).
 - **Still open (stack):** only the **de-identification detector** — parked pending the
   Inclusity conversation (see queue + Open / deferred).
 
@@ -340,6 +357,11 @@ invariants above). The whole project is the **case study**; its first built vers
   add finding→finding lineage is a possible future spec decision — surface it if
   explainability ("this tension came from these themes") or Discernment's audit /
   the review UI needs it. Not added speculatively.
+- Discernment's own **caution-findings** (internal notes on overreach / uncertainty /
+  "should not be overstated") — deferred follow-on, held back from this increment to
+  keep it on the disposition mechanism. `DiscernmentResponsePayload` reserves room to
+  carry them later without disturbing the disposition path; they'd be internal-only
+  findings anchored to the concerned finding's units (the already-proven pattern).
 
 ## Queued next steps (immediate)
 Stack decisions from this session now live under "## Locked stack & implementation

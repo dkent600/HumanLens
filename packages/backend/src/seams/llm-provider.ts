@@ -48,8 +48,18 @@ export interface LensPromptFinding {
   readonly evidenceUnitIds: readonly string[];
 }
 
+/**
+ * What the model is being asked to return, so one convention can serve both an
+ * emitting lens and the auditing one. `emit` (default): findings about the
+ * material. `disposition`: a verdict per prior finding (the Discernment audit).
+ * The seam itself stays domain-agnostic — this rides INSIDE the prompt text.
+ */
+export type LensTask = 'emit' | 'disposition';
+
 export interface LensPromptPayload {
   readonly instruction: string;
+  /** Defaults to `emit` when absent. */
+  readonly task?: LensTask;
   readonly units: readonly LensPromptUnit[];
   /**
    * Findings produced by prior layers. Omitted/empty for Evidence-layer lenses
@@ -68,25 +78,47 @@ export interface LensResponsePayload {
 }
 
 /**
+ * The Discernment (Guardrail) convention — a disposition verdict per finding the
+ * audit acts on. It does not EMIT findings about the material; it decides which
+ * prior findings clear to the client-safe layer and which are sensitive. A finding
+ * with no verdict is left untouched (held by default — the safe failure mode).
+ */
+export interface DispositionVerdict {
+  readonly findingId: string;
+  /** Affirmatively clear this finding to the client-safe layer. Absent/false = leave held. */
+  readonly promote?: boolean;
+  /** Flag this finding as sensitive (a hard backstop at Assemble). Absent/false = leave as-is. */
+  readonly sensitive?: boolean;
+}
+
+export interface DiscernmentResponsePayload {
+  readonly verdicts: readonly DispositionVerdict[];
+}
+
+/** Either response shape the fake can play, selected by the prompt's `task`. */
+export type FakeLensResponse = LensResponsePayload | DiscernmentResponsePayload;
+
+/**
  * A deterministic stand-in for a real model — fixed, predictable output so lens
  * behavior is testable and reproducible without choosing a vendor. It plays the
  * role a prompted model would: it reads the lens's JSON prompt and returns the
  * findings JSON the lens asked for.
  *
- * Two default rules, selected by the payload shape so ONE fake drives both an
- * Evidence-layer lens and a later lens reproducibly:
- *   - With prior findings (an Aggregate+ call): surface ONE finding that cites the
- *     units BEHIND those prior findings — proving the later stage read the prior
+ * Default rules, selected by the payload so ONE fake drives every lens reproducibly:
+ *   - `task: 'disposition'` (the Discernment audit): promote nothing, flag nothing —
+ *     the safe default, so held-by-default stands out of the box.
+ *   - With prior findings (an Aggregate+ emit call): surface ONE finding that cites
+ *     the units BEHIND those prior findings — proving the later stage read the prior
  *     findings, not just the units, and that interpretive output stays anchored.
  *   - Otherwise (the Listening lens's case): surface ONE recurring-theme finding
  *     that cites every unit it was given — so the derived support set spans all the
  *     distinct sources, exercising honest cross-source counting.
  * With nothing to work from it returns no findings. A custom `respond` can script
- * other shapes for tests.
+ * other shapes for tests (e.g. a verdict that promotes or flags a finding).
  */
 export class FakeLlmProvider implements LlmProvider {
   constructor(
-    private readonly respond: (payload: LensPromptPayload) => LensResponsePayload = defaultFakeResponse,
+    private readonly respond: (payload: LensPromptPayload) => FakeLensResponse = defaultFakeResponse,
   ) {}
 
   complete(request: LlmRequest): Promise<LlmResponse> {
@@ -96,7 +128,12 @@ export class FakeLlmProvider implements LlmProvider {
   }
 }
 
-function defaultFakeResponse(payload: LensPromptPayload): LensResponsePayload {
+export function defaultFakeResponse(payload: LensPromptPayload): FakeLensResponse {
+  if (payload.task === 'disposition') {
+    // Safe default for the audit: promote nothing, flag nothing. Held-by-default
+    // stands until something affirmatively decides otherwise — silence, not exposure.
+    return { verdicts: [] };
+  }
   const priorFindings = payload.priorFindings ?? [];
   if (priorFindings.length > 0) {
     // An Aggregate+ call: anchor to the units behind the prior findings (deduped),
