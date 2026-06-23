@@ -377,6 +377,26 @@ invariants above). The whole project is the **case study**; its first built vers
   prior snapshot, independent (tested: `[[], []]`). Full set:
   `[listening, humanMeaning, tension, culturePattern, objective, discernment, opening]`.
   69/69 Vitest green; lints clean. No spec note.
+- **Read slice built — first full-stack path; frontend now live.** Seeded fixture
+  engagement → `GET /engagements/:id/brief` (runs the pipeline via the self-protecting
+  `BriefService`, returns the client-safe layer only) → `AxiosBriefApi` → `BriefStore`
+  (group by lens, nest subthemes) → `BriefPage` view-model/view. The fixture's promoting
+  fake makes the client see 2 findings while the engine holds 6 — **client-safe ⊊
+  internal visible on screen**, not just asserted. Authz lives in `BriefService` (route
+  only maps 200/403/404, never re-checks); `buildContainer()` stays pure (silent fake
+  default) — promoting fake + fixture seed live only in the dev bootstrap (`index.ts`).
+  New shared type `ClientSafeBrief`. Backend 75/75, frontend 8/8 Vitest green; tsc + vite
+  build + lints clean. Frontend code structure + read-path route contract recorded in
+  build_implementation.md. Temporary couplings: fixture engagement id hardcoded in the
+  frontend; stock `welcome` route still the default (retire when real screens land).
+- **Frontend folder-by-role reorg (behavior-preserving).** Files grouped by role:
+  `pages/` (Aurelia component pairs), `stores/`, `seams/` (`brief-api.ts` +
+  `brief-api.fake.ts`), `resources/`; `my-app` + `main.ts` stay at `src/` root. Naming
+  convention recorded in build_implementation.md → "Frontend code structure": folder =
+  role, filename = resource; outward seams carry a resource-kind suffix (`-api` = HTTP)
+  and ship with their fake beside them; **"Service" reserved for backend domain
+  operations** (the frontend's outward layer is a *seam*, never "Service"). All tests
+  green; no logic changed.
 - **Still open (stack):** only the **de-identification detector** — parked pending the
   Inclusity conversation (see queue + Open / deferred).
 
