@@ -70,3 +70,18 @@ export interface ClientSafeFinding {
   /** The finding this nests under, if any (so subthemes survive the projection). */
   readonly parent?: string;
 }
+
+/**
+ * The wire shape of a brief read — what `GET /engagements/:id/brief` returns and
+ * the frontend Service mirrors. It carries the CLIENT-SAFE layer ONLY: a brief's
+ * findings here are the promoted, projected subset, never the internal candid set.
+ * The engagement id rides along so a consumer can key/cache the brief without
+ * parsing it out of a finding.
+ *
+ * Only client-safe shapes belong on this envelope — `engagementId` is a primitive
+ * and `findings` are `ClientSafeFinding`s, so no internal-layer type can ride in.
+ */
+export interface ClientSafeBrief {
+  readonly engagementId: string;
+  readonly findings: readonly ClientSafeFinding[];
+}

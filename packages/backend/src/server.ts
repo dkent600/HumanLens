@@ -7,6 +7,7 @@ import type { AppContainer } from './composition-root.js';
 import { registerHealthRoute } from './routes/health.js';
 import { registerIntakeRoutes } from './routes/intake.js';
 import { registerDeidRoutes } from './routes/deid.js';
+import { registerBriefRoutes } from './routes/brief.js';
 
 // The thin front door. It serves the API, generates OpenAPI docs from the route
 // schemas, and resolves the actor once per request — then calls into the engine.
@@ -32,6 +33,7 @@ export async function buildServer(container: AwilixContainer<AppContainer>): Pro
   registerHealthRoute(app);
   registerIntakeRoutes(app, container);
   registerDeidRoutes(app, container);
+  registerBriefRoutes(app, container);
 
   return app;
 }

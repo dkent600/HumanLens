@@ -6,6 +6,7 @@ import { InMemoryUnitRepository, type UnitRepository } from './seams/repository.
 import { TrivialDeidDetector, type DeidDetector } from './seams/deid-detector.js';
 import { FakeLlmProvider, type LlmProvider } from './seams/llm-provider.js';
 import { IntakeService } from './engine/intake.js';
+import { BriefService } from './engine/brief-service.js';
 import { DeidGate } from './engine/deid-gate.js';
 import { ListeningLens } from './engine/lenses/listening-lens.js';
 import { HumanMeaningLens } from './engine/lenses/human-meaning-lens.js';
@@ -29,6 +30,7 @@ export interface AppContainer {
   deidDetector: DeidDetector;
   llmProvider: LlmProvider;
   intakeService: IntakeService;
+  briefService: BriefService;
   deidGate: DeidGate;
   listeningLens: ListeningLens;
   humanMeaningLens: HumanMeaningLens;
@@ -41,22 +43,39 @@ export interface AppContainer {
 }
 
 /**
+ * Optional overrides for `buildContainer`. The only override the build cycle needs
+ * is the LLM provider: the dev bootstrap injects a fixture/demo fake that promotes a
+ * subset of findings so there is a non-empty client-safe layer to render. It is an
+ * EXPLICIT caller-supplied override precisely so the promoting fake never lands in
+ * the default wiring — `buildContainer()` with no args stays the silent default, and
+ * the held-by-default proofs that rely on it keep passing.
+ */
+export interface BuildContainerOptions {
+  /** Defaults to the silent `FakeLlmProvider` (promotes nothing). */
+  readonly llmProvider?: LlmProvider;
+}
+
+/**
  * The composition root: the ONE place that wires the seams to concrete
  * implementations. Explicit registration — no decorators, no reflect-metadata.
  * This is where the platform layer would later swap real policy in behind the
  * identity and authorization seams.
  */
-export function buildContainer(): AwilixContainer<AppContainer> {
+export function buildContainer(options: BuildContainerOptions = {}): AwilixContainer<AppContainer> {
   const container = createContainer<AppContainer>();
   container.register({
     identity: asValue(new AssumedIdentity(ASSUMED_ACTOR)),
     authorization: asValue(new AllowAllAuthorization()),
     unitRepository: asValue(new InMemoryUnitRepository()),
     deidDetector: asValue(new TrivialDeidDetector()),
-    llmProvider: asValue(new FakeLlmProvider()),
+    llmProvider: asValue(options.llmProvider ?? new FakeLlmProvider()),
     intakeService: asFunction(
       ({ authorization, unitRepository }: AppContainer) =>
         new IntakeService(authorization, unitRepository),
+    ).singleton(),
+    briefService: asFunction(
+      ({ authorization, unitRepository, lensPipeline }: AppContainer) =>
+        new BriefService(authorization, unitRepository, lensPipeline),
     ).singleton(),
     deidGate: asFunction(
       ({ deidDetector, unitRepository }: AppContainer) =>

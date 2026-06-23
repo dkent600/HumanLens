@@ -13,7 +13,8 @@
   "dependencies": {
     "@humanlens/shared": "*",
     "aurelia": "2.0.0-rc.1",
-    "@aurelia/router": "2.0.0-rc.1"
+    "@aurelia/router": "2.0.0-rc.1",
+    "axios": "^1.7.9"
   },
   "devDependencies": {
     "@aurelia/testing": "2.0.0-rc.1",

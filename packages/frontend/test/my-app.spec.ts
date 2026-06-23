@@ -5,8 +5,9 @@ import { MyApp } from '../src/my-app';
 // Import them statically here so they evaluate while the jsdom environment is
 // alive — otherwise they resolve after teardown and throw "document is not
 // defined".
-import '../src/welcome-page';
-import '../src/about-page';
+import '../src/pages/welcome-page';
+import '../src/pages/brief-page';
+import '../src/pages/about-page';
 
 describe('my-app', () => {
   it('renders the navigation links', async () => {
@@ -20,6 +21,7 @@ describe('my-app', () => {
       (a) => a.textContent?.trim(),
     );
     expect(links).toContain('Welcome');
+    expect(links).toContain('Brief');
     expect(links).toContain('About');
   });
 });

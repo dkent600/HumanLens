@@ -12,6 +12,10 @@
   "scripts": {
     "build": "tsc -b packages/shared packages/backend",
     "clean": "tsc -b --clean packages/shared packages/backend",
+    "dev": "concurrently -k -n backend,frontend -c blue,green \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:backend": "npm run build --workspace @humanlens/backend && node packages/backend/dist/index.js",
+    "dev:frontend": "npm run dev --workspace @humanlens/frontend",
+    "stop": "powershell -NoProfile -Command \"Get-NetTCPConnection -LocalPort 3000,9000 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force }\"",
     "test": "npm run test --workspaces --if-present",
     "lint:js": "eslint \"packages/**/*.ts\"",
     "lint:css": "stylelint \"packages/*/src/**/*.css\"",
@@ -22,6 +26,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "concurrently": "^9.1.2",
     "eslint": "^9.17.0",
     "globals": "^15.14.0",
     "stylelint": "^16.12.0",

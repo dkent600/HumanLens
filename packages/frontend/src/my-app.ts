@@ -4,12 +4,17 @@ import { route } from '@aurelia/router';
   routes: [
     {
       path: ['', 'welcome'],
-      component: import('./welcome-page'),
+      component: import('./pages/welcome-page'),
       title: 'Welcome',
     },
     {
+      path: 'brief',
+      component: import('./pages/brief-page'),
+      title: 'Listening Brief',
+    },
+    {
       path: 'about',
-      component: import('./about-page'),
+      component: import('./pages/about-page'),
       title: 'About',
     },
   ],
