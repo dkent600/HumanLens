@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.19.21",
+    "@vitest/coverage-v8": "^2.1.9",
     "vitest": "^2.1.9"
   }
 }
