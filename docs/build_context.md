@@ -432,7 +432,41 @@ invariants above). The whole project is the **case study**; its first built vers
 - When the structural eval tier gets automated (depends on pipeline existing).
 - Lens orchestration detail (parallelism, finding-passing) — implementation.
 - Auth/authz IMPLEMENTATION (seam settled; real login/roles/grant-revoke deferred
-  to platform layer).
+  to platform layer). **Authorization model — design intent (deferred platform layer),
+  captured so it isn't re-derived:**
+  - **Capability-based, role-blind engine.** The engine/routes ask ONLY capability
+    questions — `authorize({ actor, engagementId, action })` → allow/deny. Nothing in
+    the engine, routes, or lenses ever asks "what ROLE is this actor?" or names
+    "facilitator." Role knowledge lives ONLY behind the authorization seam. (Already
+    true today: `BriefService` authorizes `brief.view`, `IntakeService`
+    `intake.contribute`; AllowAll in V1.) This is what lets "facilitator" be redefined
+    without touching engine code.
+  - **Roles vs rights are two layers.** A role (facilitator, voice-reviewer,
+    research-reviewer, admin) is a label; rights (read, write/contribute, promote,
+    export, grant) are capabilities; a role MAPS to a right-set (policy). "Facilitator"
+    has no inherent essence — it means its rights and nothing else. Maria/Mitchell are
+    distinct REVIEWER roles, NOT "global facilitators" (keep the three-actor review
+    roles distinct).
+  - **Assignment primitive = (actor, role, engagement)** — single-target (Option A,
+    chosen for SRP). An actor's reach over engagements is the UNION of their
+    assignments. "Multiple-but-not-all engagements" = several engagement-scoped
+    assignments (no stored set). An assignment may instead carry a broader scope
+    (org / global) for genuinely-broad roles (e.g. Maria global voice-reviewer).
+  - **Group senses:** the *derived* group (an actor's reachable engagements) is just
+    the union — free, always consistent, never materialized; a *named/managed* group
+    (e.g. "the Acme account" = N engagements, grant/revoke as a unit) is a stored
+    entity with its own lifecycle — DEFERRED convenience, and the same mechanism as
+    org-scope. Don't build it until managing sets one-by-one hurts.
+  - **Resolver stays one rule regardless of how reach is composed:** "does this actor
+    hold any assignment whose scope covers engagement X and whose role grants the
+    action?" Global-scope assignments are the high-blast-radius case (esp. global
+    `admin`/grant) — constrain who may hold/create them when built.
+  - **V1 read-gating (now ruled, recorded in build_approach.md → Engagement and actor
+    scoping):** isolation is engagement-level; `actor` scopes provenance + action
+    authorization, NOT a read partition within an engagement. Any actor authorized on
+    an engagement reads that engagement's brief (shared-workspace review: facilitator /
+    Mitchell / Maria share one brief). Repo correctly keys reads by engagement; no
+    per-actor read isolation within an engagement in V1.
 - Finding→finding provenance: interpretive findings anchor to UNITS (the trust
   guarantee) and the pipeline passes prior findings live via staging, so no stored
   "synthesized-from" field exists (only `parent` for subtheme nesting). Whether to
