@@ -397,6 +397,18 @@ invariants above). The whole project is the **case study**; its first built vers
   and ship with their fake beside them; **"Service" reserved for backend domain
   operations** (the frontend's outward layer is a *seam*, never "Service"). All tests
   green; no logic changed.
+- **Intake slice built — read/write loop closed.** Compose already-de-identified units →
+  submit each via `POST …/units` → run `POST …/deid/scan` → render the aggregate outcome
+  ("N cleared, M flagged — held back for review"). Cleared units now feed the brief
+  read-path automatically (a real flow no longer needs fixture pre-clearing). No backend
+  changes (the two existing routes sufficed); **no `deid_status` crosses; no de-id policy
+  invented.** New shared DTOs: `UnitSubmission`, `IntakeAck`, `DeidScanSummary` (all
+  "no internal type"). Reason set: submit seam → `validation | denied`; **gate-flagged is
+  NOT a reason** — it's `summary.flagged`, read as store state (`flaggedHeld`), a normal
+  gate verdict, not an error. New frontend: `seams/intake-api.ts` + fake,
+  `stores/intake-store.ts`, `pages/intake-page`. Frontend 16/16, backend 75/75 green.
+  Deferred: intake→brief nav (would touch `BriefPage`'s hardcoded fixture id). Three
+  questions parked — see Open/deferred.
 - **Still open (stack):** only the **de-identification detector** — parked pending the
   Inclusity conversation (see queue + Open / deferred).
 
@@ -437,6 +449,21 @@ invariants above). The whole project is the **case study**; its first built vers
   whether a prior finding was held/sensitive. If openings ever need to condition on that
   (e.g. an opening built on a sensitive finding inheriting caution), thread disposition
   into the lens↔model projection — additive, out of V1 scope.
+- **Staff-facing trust zone (PAIRED question)** — two needs share one shape: (a) a
+  facilitator-facing **internal-layer** view of the brief, and (b) **per-unit intake
+  status** (which unit the gate flagged, needing `deid_status` to cross). Both are
+  legitimate staff-only needs the *client-safe* `shared` contract cannot carry (internal
+  types / `deid_status` are forbidden from `shared` by design). They are the SAME
+  deferred decision: a staff/actor-facing contract or trust-zone distinct from the
+  client-safe one. Resolve once, for both — not two ad-hoc breaches.
+- Flagged-unit resolution policy (intake): what "resolve a flagged unit" should do is
+  unbuilt — both candidates edge into parked de-id policy (human override-clear via the
+  un-routed `recordHumanDecision`; correct-and-rescan, which the surface doesn't support:
+  no content-update op, `scanPending` only processes `pending`). Parked with the Inclusity
+  conversation.
+- Detector flag-reasons (intake): the gate discards `DeidDetector`'s `DeidFinding[]`, so
+  "why was this flagged" can't be surfaced; would need the gate to persist them. Parked
+  with the detector.
 
 ## Queued next steps (immediate)
 Stack decisions from this session now live under "## Locked stack & implementation
