@@ -498,6 +498,37 @@ invariants above). The whole project is the **case study**; its first built vers
 - Detector flag-reasons (intake): the gate discards `DeidDetector`'s `DeidFinding[]`, so
   "why was this flagged" can't be surfaced; would need the gate to persist them. Parked
   with the detector.
+- **Deferred test gaps (coverage audit, June 2026 — each with a trigger, so they ride a
+  natural increment rather than orphaning):**
+  - *Item 5 — sensitive-without-promote + disposition-lowering* (`discernment.ts:77`):
+    every sensitive test also promotes; "flag sensitive, don't promote" and revise-
+    downward (`promote:false`) unrun. → rides **caution-findings** or the **human-review
+    promoter** (both touch Discernment verdict-setting directly).
+  - *Item 8 — subtheme hierarchy through the backend* (`assemble.ts:54` parent
+    passthrough; frontend dangling-parent→root in `brief-store.ts`): `parent` tested only
+    in the frontend grouping; no backend finding carries one. → rides the **real-model /
+    prompts** work or the first lens that actually emits a subtheme.
+  - *Item 9 — multilingual* (every unit is `'en'`): "language is tagged" and "a Spanish/
+    mixed unit isn't silently dropped by the gate or a lens" are V1 Unit properties,
+    unguarded. Cheap (`'es'` fixture). → do when next touching units/gate, or with the
+    model work; it's an EN/ES-from-the-start constraint, so don't let it drift far.
+  - *Item 11 — single-vs-multiple per lens*: every fake emits one finding per lens, so
+    id-suffixing past `:0`, multi-finding accumulation, and ordering are unexercised. →
+    rides the **model work** (a multi-candidate fake is useful infra there anyway).
+  - *Minor / opportunistic:* de-id gate idempotency (`scanPending` skip-non-pending;
+    `recordHumanDecision('flagged')` re-flag) and `repository.setDeidStatus` not-found
+    branch — low blast radius; pick up when touching the gate/repo.
+  - **In the current test-adding increment (Option B):** Tier 1 (absence-through-
+    projection; Listening anchoring-drop; units-exist-none-cleared boundary) + Guardrail-
+    append + support-text singular + the two write-path HTTP route tests (item 4).
+    **DONE (June 2026): +20 tests, 91→111 green, no production change, no test failed
+    against production** (every guarded behavior matched production). Item 8 is now the
+    *last* structural-tier uncovered arm — `assemble.ts:54` (projecting a finding that
+    carries a `parent`) + the parent ternaries in `finding.ts` (160/184/219/230) — the
+    cleanest-isolated remaining structural gap, still deferred to its trigger (model work
+    / first lens that emits a subtheme). The append-branch test confirmed the real
+    `DiscernmentLens` cannot emit a fresh-id Guardrail finding (auditor's-privilege
+    scoping holds); it was driven by a test-construct `FreshIdGuardrailLens`.
 
 ## Queued next steps (immediate)
 Stack decisions from this session now live under "## Locked stack & implementation
