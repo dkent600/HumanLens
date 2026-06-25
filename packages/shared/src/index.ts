@@ -85,3 +85,45 @@ export interface ClientSafeBrief {
   readonly engagementId: string;
   readonly findings: readonly ClientSafeFinding[];
 }
+
+// ── Intake contract (the actor-facing write path) ────────────────────────────
+//
+// These cross the wire for intake: the actor's ALREADY-de-identified input
+// (frontend → backend) and the backend's acknowledgement + aggregate scan summary
+// (backend → frontend). They carry NO internal-layer type — no `Unit`, no per-unit
+// `deid_status`. The boundary's real rule is "no internal type crosses"; both the
+// client-safe brief shapes above and these actor-input shapes satisfy it.
+//
+// Note: per-unit de-id status is deliberately NOT here. Surfacing which unit was
+// flagged would require `deid_status` to cross, which is its own deferred
+// trust-zone decision (intake is actor-facing, a different zone than the
+// client-safe brief). V1 exposes only the AGGREGATE scan summary.
+
+/** What the actor submits at intake: one piece of already-de-identified material. */
+export interface UnitSubmission {
+  readonly content: string;
+  /** Detected/declared language of the content (e.g. 'en', 'es'). */
+  readonly language: string;
+  /** Which brought-in source this came from. */
+  readonly sourceRef: string;
+  /** Position of this unit within its source. */
+  readonly position: number;
+  /** Opaque, Inclusity-assigned source token — never self-identifying. */
+  readonly speakerToken: string;
+}
+
+/** Acknowledgement of a stored submission — just the handle. Per-unit status is not exposed. */
+export interface IntakeAck {
+  readonly unitId: string;
+}
+
+/**
+ * Aggregate outcome of running the de-identification gate over an engagement's
+ * pending units. `flagged > 0` means some units were held back for review — a
+ * normal gate verdict, not an error. Per-unit identification is deferred.
+ */
+export interface DeidScanSummary {
+  readonly scanned: number;
+  readonly cleared: number;
+  readonly flagged: number;
+}

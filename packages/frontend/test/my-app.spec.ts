@@ -6,6 +6,7 @@ import { MyApp } from '../src/my-app';
 // alive — otherwise they resolve after teardown and throw "document is not
 // defined".
 import '../src/pages/welcome-page';
+import '../src/pages/intake-page';
 import '../src/pages/brief-page';
 import '../src/pages/about-page';
 
@@ -21,6 +22,7 @@ describe('my-app', () => {
       (a) => a.textContent?.trim(),
     );
     expect(links).toContain('Welcome');
+    expect(links).toContain('Intake');
     expect(links).toContain('Brief');
     expect(links).toContain('About');
   });

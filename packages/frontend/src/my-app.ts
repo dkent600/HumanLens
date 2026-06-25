@@ -8,6 +8,11 @@ import { route } from '@aurelia/router';
       title: 'Welcome',
     },
     {
+      path: 'intake',
+      component: import('./pages/intake-page'),
+      title: 'Intake',
+    },
+    {
       path: 'brief',
       component: import('./pages/brief-page'),
       title: 'Listening Brief',

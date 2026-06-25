@@ -1,0 +1,86 @@
+<section class="space-y-6">
+  <header>
+    <h1 class="text-2xl font-semibold text-gray-900">Intake</h1>
+    <p class="text-sm text-gray-500">
+      Contribute already-de-identified material. The gate is a backstop — it does not de-identify for you.
+    </p>
+  </header>
+
+  <!-- Compose one unit -->
+  <form class="space-y-3 rounded-md border bg-white p-4" submit.trigger="add()">
+    <label class="block">
+      <span class="text-sm font-medium text-gray-700">Comment (de-identified)</span>
+      <textarea
+        value.bind="content"
+        rows="3"
+        class="mt-1 w-full rounded-md border p-2 text-sm"
+        placeholder="Paste one de-identified comment…"></textarea>
+    </label>
+
+    <div class="grid grid-cols-3 gap-3">
+      <label class="block">
+        <span class="text-sm font-medium text-gray-700">Source token</span>
+        <input value.bind="speakerToken" class="mt-1 w-full rounded-md border p-2 text-sm" placeholder="spk-a" />
+      </label>
+      <label class="block">
+        <span class="text-sm font-medium text-gray-700">Source</span>
+        <input value.bind="sourceRef" class="mt-1 w-full rounded-md border p-2 text-sm" placeholder="survey-1" />
+      </label>
+      <label class="block">
+        <span class="text-sm font-medium text-gray-700">Language</span>
+        <input value.bind="language" class="mt-1 w-full rounded-md border p-2 text-sm" />
+      </label>
+    </div>
+
+    <button
+      type="submit"
+      disabled.bind="!canAdd"
+      class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40">
+      Add unit
+    </button>
+  </form>
+
+  <!-- Pending drafts -->
+  <div if.bind="store.drafts.length" class="space-y-2">
+    <h2 class="text-sm font-medium text-gray-700">${store.drafts.length} unit(s) ready to submit</h2>
+    <ul class="space-y-1">
+      <li repeat.for="draft of store.drafts" class="flex items-start justify-between gap-3 rounded-md border bg-gray-50 p-2 text-sm">
+        <span class="text-gray-800">${draft.content}</span>
+        <button click.trigger="store.removeDraft($index)" class="shrink-0 text-xs text-gray-400 hover:text-red-600">remove</button>
+      </li>
+    </ul>
+    <button
+      click.trigger="submit()"
+      disabled.bind="store.status === 'submitting'"
+      class="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40">
+      Submit ${store.drafts.length} unit(s)
+    </button>
+  </div>
+
+  <!-- Error (validation / denied) -->
+  <div if.bind="store.status === 'error'" class="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+    <span if.bind="store.reason === 'denied'">You don’t have access to contribute to this engagement.</span>
+    <span else>Some material couldn’t be submitted (validation).</span>
+    <span if.bind="store.message"> — ${store.message}</span>
+  </div>
+
+  <!-- Submitted -> offer the scan -->
+  <div if.bind="store.status === 'submitted'" class="space-y-2">
+    <p class="text-sm text-gray-700">${store.submittedCount} unit(s) submitted — pending de-identification.</p>
+    <button click.trigger="scan()" class="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white">
+      Run de-identification scan
+    </button>
+  </div>
+
+  <!-- Scan outcome (aggregate only) -->
+  <div if.bind="store.status === 'scanned' && store.summary" class="rounded-md border bg-white p-4 text-sm">
+    <p class="text-gray-800">
+      <strong>${store.summary.cleared}</strong> cleared,
+      <strong>${store.summary.flagged}</strong> flagged
+      <span class="text-gray-500">(of ${store.summary.scanned} scanned)</span>
+    </p>
+    <p if.bind="store.flaggedHeld" class="mt-1 text-amber-700">
+      ${store.summary.flagged} unit(s) were flagged and held back for review — they will not enter synthesis.
+    </p>
+  </div>
+</section>
