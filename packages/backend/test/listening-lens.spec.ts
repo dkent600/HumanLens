@@ -1,8 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { ListeningLens } from '../src/engine/lenses/listening-lens.js';
-import { FakeLlmProvider, type LensResponsePayload } from '../src/seams/llm-provider.js';
+import {
+  FakeLlmProvider,
+  type LensResponsePayload,
+  type LlmProvider,
+} from '../src/seams/llm-provider.js';
 import { isEvidenceAnchored } from '../src/domain/finding.js';
 import type { Unit } from '../src/domain/types.js';
+
+/** A provider that returns whatever raw text we hand it — so we can exercise the
+ *  lens's tolerant parse against real-model-shaped output (fences, prose, bad fields)
+ *  that the JSON-stringifying FakeLlmProvider cannot produce. */
+function textProvider(text: string): LlmProvider {
+  return { complete: () => Promise.resolve({ text }) };
+}
 
 // The Listening Lens is the first Evidence-layer lens — the seed of the pipeline. It
 // reads the cleared units directly. For PARITY with every other lens (each of which has
@@ -63,5 +74,68 @@ describe('Listening lens — Evidence layer, reads units directly', () => {
     const a = await new ListeningLens().run(units, [], new FakeLlmProvider());
     const b = await new ListeningLens().run(units, [], new FakeLlmProvider());
     expect(a).toEqual(b);
+  });
+});
+
+describe('Listening lens — real-model output: tolerant parse + anchoring on the parsed text', () => {
+  it('parses bare JSON into an anchored, held-by-default finding', async () => {
+    const provider = textProvider('{"findings":[{"content":"a recurring theme","evidenceUnitIds":["u1"]}]}');
+    const out = await new ListeningLens().run(units, [], provider);
+
+    expect(out).toHaveLength(1);
+    expect(out[0].findingId).toBe('listening:0');
+    expect(out[0].content).toBe('a recurring theme');
+    expect([...out[0].evidenceLinks]).toEqual(['u1']);
+    expect(out[0].clearedToClientSafe).toBe(false);
+  });
+
+  it('tolerates a ```json fence around the JSON', async () => {
+    const provider = textProvider('```json\n{"findings":[{"content":"theme","evidenceUnitIds":["u1","u2"]}]}\n```');
+    const out = await new ListeningLens().run(units, [], provider);
+
+    expect(out).toHaveLength(1);
+    expect([...out[0].evidenceLinks].sort()).toEqual(['u1', 'u2']);
+    expect(out[0].supportSet).toEqual({ sourceCount: 2, unitCount: 2 });
+  });
+
+  it('returns no findings when the model answers in prose (silence, not a crash)', async () => {
+    const provider = textProvider('Sure! Here are the themes I noticed across the comments...');
+    const out = await new ListeningLens().run(units, [], provider);
+    expect(out).toHaveLength(0);
+  });
+
+  it('returns no findings for empty text or a payload with no findings array', async () => {
+    expect(await new ListeningLens().run(units, [], textProvider(''))).toHaveLength(0);
+    expect(await new ListeningLens().run(units, [], textProvider('{}'))).toHaveLength(0);
+  });
+
+  it('drops a malformed candidate but keeps the well-formed ones', async () => {
+    // First candidate has no `content`; second has a string (not array) evidenceUnitIds;
+    // only the third is well-formed.
+    const provider = textProvider(
+      '{"findings":[{"evidenceUnitIds":["u1"]},{"content":"x","evidenceUnitIds":"u1"},{"content":"ok","evidenceUnitIds":["u2"]}]}',
+    );
+    const out = await new ListeningLens().run(units, [], provider);
+
+    expect(out).toHaveLength(1);
+    expect(out[0].content).toBe('ok');
+    expect([...out[0].evidenceLinks]).toEqual(['u2']);
+  });
+
+  it('trims an out-of-scope (hallucinated) id while keeping the valid anchor', async () => {
+    // Schema-valid JSON can still carry an id the model invented; the anchoring guard
+    // drops it, keeping only the in-scope anchor — derived support reflects what is left.
+    const provider = textProvider('{"findings":[{"content":"grounded","evidenceUnitIds":["u1","nope"]}]}');
+    const out = await new ListeningLens().run(units, [], provider);
+
+    expect(out).toHaveLength(1);
+    expect([...out[0].evidenceLinks]).toEqual(['u1']);
+    expect(out[0].supportSet).toEqual({ sourceCount: 1, unitCount: 1 });
+  });
+
+  it('drops a candidate whose anchors are all out of scope', async () => {
+    const provider = textProvider('{"findings":[{"content":"ungrounded","evidenceUnitIds":["nope"]}]}');
+    const out = await new ListeningLens().run(units, [], provider);
+    expect(out).toHaveLength(0);
   });
 });

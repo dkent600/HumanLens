@@ -409,6 +409,20 @@ invariants above). The whole project is the **case study**; its first built vers
   `stores/intake-store.ts`, `pages/intake-page`. Frontend 16/16, backend 75/75 green.
   Deferred: intake→brief nav (would touch `BriefPage`'s hardcoded fixture id). Three
   questions parked — see Open/deferred.
+- **Real Listening behind the LLM provider seam (first real model; Listening only).**
+  `AnthropicLlmProvider` (`@anthropic-ai/sdk`, model `claude-opus-4-8` as a single named
+  constant, Messages API, adaptive thinking) added beside the fake. Listening gains a
+  versioned `system` contract + a tolerant defensive parse; the unchanged anchoring guard
+  is the hallucinated-id net on the real path. **Silence vs exception:** malformed output
+  / refusal → safe-empty; transport errors propagate (not disguised as silence).
+  **Selection = Option A:** `buildContainer()` and the running server stay on the fake;
+  the real provider is selected only by `selectLlmProvider()` (reads `ANTHROPIC_API_KEY`)
+  and exercised only by a dev **eval harness** (`npm run eval -- listening`, parameterized
+  for the next lens). No real call in any test. Structured outputs declined (would couple
+  the seam to a provider-specific capability; removes only the malformed-JSON failure mode,
+  not the parse/guard/refusal/transport handling). Backend 92→103 (+11) green; frontend 19
+  untouched; repo-wide 111→122; lint/build clean. Recorded in build_implementation.md →
+  "Lens↔model contract." The server goes real only once ALL lenses are defensive.
 - **Still open (stack):** only the **de-identification detector** — parked pending the
   Inclusity conversation (see queue + Open / deferred).
 
@@ -521,7 +535,8 @@ invariants above). The whole project is the **case study**; its first built vers
   - **In the current test-adding increment (Option B):** Tier 1 (absence-through-
     projection; Listening anchoring-drop; units-exist-none-cleared boundary) + Guardrail-
     append + support-text singular + the two write-path HTTP route tests (item 4).
-    **DONE (June 2026): +20 tests, 91→111 green, no production change, no test failed
+    **DONE (June 2026): +20 tests, 91→111 green (repo-wide: backend 75→92, frontend
+    16→19), no production change, no test failed
     against production** (every guarded behavior matched production). Item 8 is now the
     *last* structural-tier uncovered arm — `assemble.ts:54` (projecting a finding that
     carries a `parent`) + the parent ternaries in `finding.ts` (160/184/219/230) — the
