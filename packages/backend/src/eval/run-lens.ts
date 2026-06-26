@@ -66,7 +66,11 @@ async function main(): Promise<void> {
   const usingReal = hasAnthropicKey();
   console.log(`Lens:     ${lensName}`);
   console.log(`Provider: ${usingReal ? `real Anthropic model (${ANTHROPIC_MODEL})` : 'deterministic fake (no ANTHROPIC_API_KEY found)'}`);
-  console.log(`Units:    ${SAMPLE_UNITS.length}\n`);
+  console.log(`Units:    ${SAMPLE_UNITS.length}`);
+  for (const unit of SAMPLE_UNITS) {
+    console.log(`  [${unit.unitId}] (${unit.speakerToken}, ${unit.language}) ${unit.content}`);
+  }
+  console.log('');
 
   const findings = await runner(SAMPLE_UNITS, selectLlmProvider());
 
