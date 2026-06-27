@@ -34,12 +34,14 @@ function clearedUnit(position: number, speakerToken: string, content: string, la
   };
 }
 
-// The deliberate eval fixture: 17 de-identified units, all with distinct speaker tokens,
+// The deliberate eval fixture: 18 de-identified units, all with distinct speaker tokens,
 // built to exercise the Listening contract (build_approach.md §1) — bilingual + mixed
 // units (u5/u8/u13), recurrence across separate voices (workload: u0/u11; effort going
 // unnoticed: u3/u15), within-voice structure drawn softly (u3 dash, u9 narrative
-// sequence, u15 sequence), inference bait (u14 "since the reorg"), thin/empty units
-// (u4/u10), and intentionally messy punctuation/casing (u16 — verbatim, do not correct).
+// sequence, u15 sequence), inference bait (u14 "since the reorg"), thin/opaque units
+// (u4/u10), intentionally messy punctuation/casing (u16 — verbatim, do not correct), and
+// the one genuinely-contentless case (u17 "n/a" — the only kind Listening drops:
+// eval_set_draft.md L7b).
 const SAMPLE_UNITS: readonly Unit[] = [
   clearedUnit(0, 'spk-a', 'The workload has been heavy for months and it\'s hard to keep up.'),
   clearedUnit(1, 'spk-b', 'When I raise something with leadership, I genuinely feel heard and they act on it.'),
@@ -58,6 +60,7 @@ const SAMPLE_UNITS: readonly Unit[] = [
   clearedUnit(14, 'spk-o', 'Things haven\'t been the same since the reorg.'),
   clearedUnit(15, 'spk-p', 'I used to put in real effort. Two years of it going unnoticed. Now I just do the minimum.'),
   clearedUnit(16, 'spk-q', 'the training got rushed half of us are still just guessing'),
+  clearedUnit(17, 'spk-r', 'n/a'),
 ];
 
 type LensRunner = (units: readonly Unit[], provider: LlmProvider) => Promise<readonly Finding[]>;
@@ -93,7 +96,7 @@ async function main(): Promise<void> {
     console.log(`[${finding.findingId}] (${finding.lens})`);
     console.log(`  verbatim:   ${finding.verbatim ?? '(none — absence finding)'}`);
     if (finding.translation !== undefined) {
-      console.log(`  translation:${finding.translation} [from ${finding.sourceLanguage}]`);
+      console.log(`  translation:${finding.translation} (translated from ${finding.sourceLanguage})`);
     }
     console.log(`  anchors:    ${finding.evidenceLinks.join(', ') || '(none)'}`);
     console.log(`  support:    ${finding.supportSet.unitCount} units / ${finding.supportSet.sourceCount} sources`);
