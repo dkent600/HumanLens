@@ -544,6 +544,32 @@ invariants above). The whole project is the **case study**; its first built vers
     / first lens that emits a subtheme). The append-branch test confirmed the real
     `DiscernmentLens` cannot emit a fresh-id Guardrail finding (auditor's-privilege
     scoping holds); it was driven by a test-construct `FreshIdGuardrailLens`.
+- **Eval-set draft retirement (planned, after the next Listening re-run).** `eval_set_draft.md`
+  wears two hats: the *fixture units* (now wired into `run-lens.ts` — the harness is the
+  source of truth; do not maintain a second copy) and the *case rationale* (L1…L8, D1/D2 +
+  what-to-watch — the valuable part, not in the repo). Plan: once the prompt revision +
+  re-run settle (so we canonize against a stable prompt, not record-then-amend), **fold the
+  case rationale into `build_approach.md`'s evaluation section** as the recorded seeded-eval-set
+  definition — beside the §1 contract it tests, so the two move together — and **retire
+  `eval_set_draft.md`.** After that: units live in the harness, rationale lives in the contract
+  doc, each single-writer; the draft's `_draft` graduates by being folded in (it has proven
+  itself — this run used it as intended and surfaced two contract refinements).
+- **Questions worth asking — a candidate first-class output type (design thread; not to
+  build now).** A *question* (flags what is uncertain / unstated / worth probing; asks,
+  asserts nothing) may be a distinct artifact from a *finding* (asserts what is) — the
+  purest form of "AI surfaces, humans decide," and the *constructive* form of the
+  no-inference restraint (where the model is tempted to infer, the disciplined move can be
+  a question, not just silence). Already has scattered partial homes: Action Opening's
+  "follow-up inquiries / reflection prompts," Discernment's caution-findings, absence
+  findings — which suggests it wants to be one named thing. Subject to the *same*
+  boundaries as a finding (no inference smuggled under a question mark; must anchor; must
+  earn its place against question-spam). For Listening, only the narrow within-voice sliver
+  fits (a voice gestures at something it doesn't name); the broad "this material raises a
+  question" is downstream. **Most consequential open question: one lens vs. a cross-cutting
+  capability** (many layers can raise a question, so it may be a shared discipline like
+  anchoring, or it may consolidate into Action Opening) — answerable only against working
+  downstream lenses. → **Trigger: develop when Tension / Discernment / Action Opening go
+  real.** Full sketch in `questions_worth_asking_draft.md`.
 
 ## Queued next steps (immediate)
 Stack decisions from this session now live under "## Locked stack & implementation
