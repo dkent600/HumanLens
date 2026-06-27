@@ -34,16 +34,30 @@ function clearedUnit(position: number, speakerToken: string, content: string, la
   };
 }
 
-// A small set of de-identified comments to eyeball against. spk-a appears twice, so
-// honest support counting ("N units across M sources", M < N) is visible; one Spanish
-// comment lets the real model's bilingual handling be eyeballed too.
+// The deliberate eval fixture: 17 de-identified units, all with distinct speaker tokens,
+// built to exercise the Listening contract (build_approach.md §1) — bilingual + mixed
+// units (u5/u8/u13), recurrence across separate voices (workload: u0/u11; effort going
+// unnoticed: u3/u15), within-voice structure drawn softly (u3 dash, u9 narrative
+// sequence, u15 sequence), inference bait (u14 "since the reorg"), thin/empty units
+// (u4/u10), and intentionally messy punctuation/casing (u16 — verbatim, do not correct).
 const SAMPLE_UNITS: readonly Unit[] = [
-  clearedUnit(0, 'spk-a', 'The workload has been heavy for months and it is hard to keep up.'),
-  clearedUnit(1, 'spk-b', 'I do not feel safe raising concerns with my manager.'),
-  clearedUnit(2, 'spk-a', 'Leadership talks about inclusion but I do not see it in daily decisions.'),
-  clearedUnit(3, 'spk-c', 'My team genuinely supports each other, which makes a real difference.'),
-  clearedUnit(4, 'spk-d', 'There is little follow-through after the feedback sessions.'),
-  clearedUnit(5, 'spk-e', 'Nadie escucha de verdad cuando pedimos ayuda.', 'es'),
+  clearedUnit(0, 'spk-a', 'The workload has been heavy for months and it\'s hard to keep up.'),
+  clearedUnit(1, 'spk-b', 'When I raise something with leadership, I genuinely feel heard and they act on it.'),
+  clearedUnit(2, 'spk-c', 'I\'ve heard remarks about my accent in meetings, and it makes me wonder whether I belong.'),
+  clearedUnit(3, 'spk-d', 'I\'ve stopped putting in extra effort — it just goes unnoticed.'),
+  clearedUnit(4, 'spk-e', 'Things are fine, I guess.'),
+  clearedUnit(5, 'spk-f', 'No me siento seguro compartiendo lo que realmente pienso en las reuniones.', 'es'),
+  clearedUnit(6, 'spk-g', 'The new onboarding process is a real improvement, and the third-floor kitchen has been out of order for weeks.'),
+  clearedUnit(7, 'spk-h', 'Honestly, my own manager has been great about flexibility — that part works well for me.'),
+  clearedUnit(8, 'spk-i', 'Siempre vamos contrarreloj y nadie parece notar que estamos al límite.', 'es'),
+  clearedUnit(9, 'spk-j', 'After I disclosed a health condition, I noticed the interesting work quietly dried up.'),
+  clearedUnit(10, 'spk-k', 'No comment.'),
+  clearedUnit(11, 'spk-l', 'We\'re constantly running at capacity; I can\'t remember the last time things felt sustainable.'),
+  clearedUnit(12, 'spk-m', 'Leadership says the right things but nothing changes when you actually speak up.'),
+  clearedUnit(13, 'spk-n', 'They keep promising change pero al final todo sigue igual.', 'mixed'),
+  clearedUnit(14, 'spk-o', 'Things haven\'t been the same since the reorg.'),
+  clearedUnit(15, 'spk-p', 'I used to put in real effort. Two years of it going unnoticed. Now I just do the minimum.'),
+  clearedUnit(16, 'spk-q', 'the training got rushed half of us are still just guessing'),
 ];
 
 type LensRunner = (units: readonly Unit[], provider: LlmProvider) => Promise<readonly Finding[]>;
