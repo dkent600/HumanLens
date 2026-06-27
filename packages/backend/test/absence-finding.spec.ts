@@ -24,7 +24,6 @@ describe('Absence finding — through Assemble and projection', () => {
     const absence = makeAbsenceFinding({
       findingId: 'listening:abs',
       lens: 'listening',
-      content: 'no one mentioned psychological safety',
     });
     const brief = assembleBrief('eng:1', [absence]);
     expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:abs']);
@@ -35,7 +34,6 @@ describe('Absence finding — through Assemble and projection', () => {
     const promoted = makeAbsenceFinding({
       findingId: 'listening:abs',
       lens: 'listening',
-      content: 'leaders spoke of trust while front-line voices did not',
       clearedToClientSafe: true,
     });
     const projected = projectToClientSafe(promoted);
@@ -52,7 +50,6 @@ describe('Absence finding — through Assemble and projection', () => {
     const promoted = makeAbsenceFinding({
       findingId: 'listening:abs',
       lens: 'listening',
-      content: 'no one mentioned retention',
       clearedToClientSafe: true,
     });
     expect(isClientSafe(promoted)).toBe(true);
@@ -67,7 +64,6 @@ describe('Absence finding — through Assemble and projection', () => {
     const sensitivePromoted = makeAbsenceFinding({
       findingId: 'listening:abs',
       lens: 'listening',
-      content: 'a charged silence about leadership',
       clearedToClientSafe: true,
       sensitivity: 'sensitive',
     });
@@ -81,7 +77,6 @@ describe('Absence finding — reviseDisposition (the absence branch)', () => {
     const held = makeAbsenceFinding({
       findingId: 'listening:abs',
       lens: 'listening',
-      content: 'no one mentioned psychological safety',
     });
 
     const revised = reviseDisposition(held, { clearedToClientSafe: true }, []);
@@ -89,7 +84,7 @@ describe('Absence finding — reviseDisposition (the absence branch)', () => {
     expect(revised.findingKind).toBe('absence');
     expect(revised.findingId).toBe('listening:abs'); // identity preserved -> supersedes in place
     expect(revised.lens).toBe('listening');
-    expect(revised.content).toBe('no one mentioned psychological safety');
+    expect(revised.verbatim).toBeNull(); // absence has no source to quote
     expect(revised.evidenceLinks).toEqual([]); // still unanchored by nature
     expect(revised.supportSet).toEqual({ sourceCount: 0, unitCount: 0 }); // re-derived, empty
     expect(revised.clearedToClientSafe).toBe(true);
@@ -100,7 +95,6 @@ describe('Absence finding — reviseDisposition (the absence branch)', () => {
     const held = makeAbsenceFinding({
       findingId: 'listening:abs',
       lens: 'listening',
-      content: 'a silence worth noticing',
     });
 
     const revised = reviseDisposition(held, { sensitivity: 'sensitive' }, []);

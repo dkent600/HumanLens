@@ -36,7 +36,7 @@ const units: readonly Unit[] = [
 ];
 
 function finding(lens: 'listening' | 'tension', findingId: string, links: readonly string[]): Finding {
-  return makeOrdinaryFinding({ findingId, lens, content: `a ${lens} finding`, evidenceLinks: links, units });
+  return makeOrdinaryFinding({ findingId, lens, verbatim: `a ${lens} finding`, evidenceLinks: links, units });
 }
 
 describe('Inclusity Objective lens — Interpret layer, reads Aggregate output', () => {
@@ -84,7 +84,7 @@ describe('Inclusity Objective lens — Interpret layer, reads Aggregate output',
   it('enforces anchoring on interpretive output — drops an interpretation with no in-scope anchor', async () => {
     const rogue = new FakeLlmProvider(
       (): LensResponsePayload => ({
-        findings: [{ content: 'an ungrounded implication', evidenceUnitIds: ['not-in-scope'] }],
+        findings: [{ verbatim: 'an ungrounded implication', evidenceUnitIds: ['not-in-scope'] }],
       }),
     );
     const out = await new ObjectiveLens().run(units, [finding('tension', 'tension:0', ['u1'])], rogue);

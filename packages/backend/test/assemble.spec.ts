@@ -22,7 +22,7 @@ function finding(
   return makeOrdinaryFinding({
     findingId: id,
     lens: 'listening',
-    content: `finding ${id}`,
+    verbatim: `finding ${id}`,
     evidenceLinks: ['u1', 'u2'],
     units,
     clearedToClientSafe: overrides.clearedToClientSafe,

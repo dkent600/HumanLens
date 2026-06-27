@@ -8,7 +8,7 @@ import { FakeBriefApi } from '../src/seams/brief-api.fake';
 
 function finding(partial: Partial<ClientSafeFinding> & Pick<ClientSafeFinding, 'findingId' | 'lens'>): ClientSafeFinding {
   return {
-    content: 'content',
+    verbatim: 'a surfaced voice',
     evidenceLinks: ['u1'],
     support: { sourceCount: 1, unitCount: 1 },
     findingKind: 'ordinary',

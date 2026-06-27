@@ -48,7 +48,10 @@ export interface ClientSafeSupport {
  * client may see and NOTHING that governs the internal/client-safe split:
  *   - `clearedToClientSafe` and `sensitivity` are internal gating signals — a
  *     finding's disposition is decided inside the engine, never shipped outward.
- *   - `content` here is the (eventually voice-calibrated) client-facing phrasing.
+ *   - `verbatim` / `translation` / `sourceLanguage` carry the speaker's own words (and a
+ *     literal English translation when the source isn't English). They are surfaced
+ *     as-is — the projection never rewords; client-facing voicing is a separate, deferred
+ *     shaping stage, not this DTO.
  *   - `evidenceLinks` ARE preserved, so traceability survives into the client view.
  *
  * Because the internal layer is *every* finding and the client-safe layer is the
@@ -59,8 +62,12 @@ export interface ClientSafeFinding {
   readonly findingId: string;
   /** Which lens produced it. */
   readonly lens: string;
-  /** Client-facing phrasing of what was noticed. */
-  readonly content: string;
+  /** The speaker's words exactly as given; null for an absence finding (no source to quote). */
+  readonly verbatim: string | null;
+  /** A literal English translation of `verbatim` — present only when the source isn't English. Paired with `sourceLanguage`. */
+  readonly translation?: string;
+  /** The source language name (e.g. "Spanish") — present only when `translation` is. */
+  readonly sourceLanguage?: string;
   /** Unit ids supporting the finding — preserved so a quote can be traced back. */
   readonly evidenceLinks: readonly string[];
   /** Derived strength; safe to show because it falls out of the evidence. */

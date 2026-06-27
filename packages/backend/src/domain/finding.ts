@@ -66,8 +66,15 @@ export interface SupportSet {
 interface FindingCommon {
   readonly findingId: FindingId;
   readonly lens: LensId;
-  /** What was noticed (the candid internal phrasing). */
-  readonly content: string;
+  /**
+   * A literal English translation of `verbatim`, present ONLY when the source is not
+   * usable English. Literal, never a paraphrase — the speaker's own words rendered to
+   * English, first-person, same structure/register, nothing added or smoothed. Paired
+   * with `sourceLanguage`: both present or both absent (enforced by the factory).
+   */
+  readonly translation?: string;
+  /** The source language name (e.g. "Spanish"), present only when `translation` is. */
+  readonly sourceLanguage?: string;
   /** Derived, not asserted — see `deriveSupportSet`. */
   readonly supportSet: SupportSet;
   /** Whether this finding needs careful handling. Backstops promotion at Assemble. */
@@ -85,12 +92,27 @@ interface FindingCommon {
 /** An ordinary finding: MUST be anchored to at least one unit. */
 export interface OrdinaryFinding extends FindingCommon {
   readonly findingKind: 'ordinary';
+  /**
+   * The speaker's own words exactly as given — original language, punctuation, run-ons,
+   * fragments, casing, first-person — untouched. For a multi-finding split (one unit →
+   * two unrelated findings) this is the span surfaced, not necessarily the whole unit.
+   * NEVER a paraphrase or de-personalized re-rendering: surfacing carries the voice, and
+   * the only sanctioned transformation is the literal `translation` (when language forces it).
+   */
+  readonly verbatim: string;
   readonly evidenceLinks: NonEmpty<UnitId>;
 }
 
 /** The sanctioned exception: a finding about silence/absence, which by nature has no anchor. */
 export interface AbsenceFinding extends FindingCommon {
   readonly findingKind: 'absence';
+  /**
+   * Null: an absence finding has no source to quote (consistent with its anchoring
+   * exemption). How an absence finding carries its noticing text is a DEFERRED decision —
+   * settled when an absence-emitting lens lands; no V1 lens emits one (Listening drops a
+   * zero-anchor candidate rather than inventing an absence finding).
+   */
+  readonly verbatim: null;
   readonly evidenceLinks: readonly [];
 }
 
@@ -125,10 +147,31 @@ export class UnanchoredFindingError extends Error {
   }
 }
 
+/** Thrown when an ordinary finding is constructed with empty `verbatim` — the runtime mirror of the type. */
+export class MissingVerbatimError extends Error {
+  constructor(findingId: FindingId) {
+    super(`ordinary finding ${findingId} has no verbatim (the speaker's words are required for a surfaced finding)`);
+    this.name = 'MissingVerbatimError';
+  }
+}
+
+/** Thrown when `translation`/`sourceLanguage` are not both-present-or-both-absent — they are a pair. */
+export class UnpairedTranslationError extends Error {
+  constructor(findingId: FindingId) {
+    super(`finding ${findingId} has only one of translation/sourceLanguage (they must be present together)`);
+    this.name = 'UnpairedTranslationError';
+  }
+}
+
 interface MakeOrdinaryArgs {
   readonly findingId: FindingId;
   readonly lens: LensId;
-  readonly content: string;
+  /** The speaker's words exactly as given (see `OrdinaryFinding.verbatim`). Required, non-empty. */
+  readonly verbatim: string;
+  /** Literal English translation — present only when the source isn't usable English. Paired with `sourceLanguage`. */
+  readonly translation?: string;
+  /** Source language name — present only when `translation` is. */
+  readonly sourceLanguage?: string;
   readonly evidenceLinks: readonly UnitId[];
   readonly units: readonly SupportableUnit[];
   readonly sensitivity?: Sensitivity;
@@ -138,21 +181,34 @@ interface MakeOrdinaryArgs {
 
 /**
  * Build an ordinary (evidence-anchored) finding. Provider output arrives untyped,
- * so this is the single sanctioned construction path: it enforces anchoring at
- * runtime (the type already enforces it at compile time) and DERIVES the support
- * set from the evidence — a caller cannot assert a strength. Disposition defaults
- * to held and sensitivity to normal.
+ * so this is the single sanctioned construction path: it enforces anchoring AND a
+ * non-empty `verbatim` at runtime (the types already enforce them at compile time),
+ * keeps `translation`/`sourceLanguage` paired, and DERIVES the support set from the
+ * evidence — a caller cannot assert a strength. Disposition defaults to held and
+ * sensitivity to normal. The finding is built from the speaker's words verbatim; this
+ * factory never paraphrases or de-personalizes.
  */
 export function makeOrdinaryFinding(args: MakeOrdinaryArgs): OrdinaryFinding {
   if (args.evidenceLinks.length === 0) {
     throw new UnanchoredFindingError(args.findingId);
+  }
+  if (args.verbatim.trim() === '') {
+    throw new MissingVerbatimError(args.findingId);
+  }
+  const hasTranslation = args.translation !== undefined;
+  const hasSourceLanguage = args.sourceLanguage !== undefined;
+  if (hasTranslation !== hasSourceLanguage) {
+    throw new UnpairedTranslationError(args.findingId);
   }
   const [first, ...rest] = args.evidenceLinks;
   return {
     findingKind: 'ordinary',
     findingId: args.findingId,
     lens: args.lens,
-    content: args.content,
+    verbatim: args.verbatim,
+    ...(hasTranslation
+      ? { translation: args.translation, sourceLanguage: args.sourceLanguage }
+      : {}),
     evidenceLinks: [first, ...rest],
     supportSet: deriveSupportSet(args.evidenceLinks, args.units),
     sensitivity: args.sensitivity ?? 'normal',
@@ -164,19 +220,22 @@ export function makeOrdinaryFinding(args: MakeOrdinaryArgs): OrdinaryFinding {
 interface MakeAbsenceArgs {
   readonly findingId: FindingId;
   readonly lens: LensId;
-  readonly content: string;
   readonly sensitivity?: Sensitivity;
   readonly clearedToClientSafe?: boolean;
   readonly parent?: FindingId;
 }
 
-/** Build a sanctioned absence finding — exempt from anchoring; its support is empty by nature. */
+/**
+ * Build a sanctioned absence finding — exempt from anchoring; its support is empty by
+ * nature and its `verbatim` is null (no source to quote). How an absence finding carries
+ * its noticing text is a deferred decision (no V1 lens emits one).
+ */
 export function makeAbsenceFinding(args: MakeAbsenceArgs): AbsenceFinding {
   return {
     findingKind: 'absence',
     findingId: args.findingId,
     lens: args.lens,
-    content: args.content,
+    verbatim: null,
     evidenceLinks: [],
     supportSet: { sourceCount: 0, unitCount: 0 },
     sensitivity: args.sensitivity ?? 'normal',
@@ -198,9 +257,11 @@ export interface DispositionChange {
  * `promote()` helper: a NEW finding is constructed through the same factories, so
  * the support set is RE-DERIVED from the unchanged evidence (never hand-set) and the
  * anchoring invariant is re-enforced. Everything that identifies the finding —
- * `findingId`, `lens`, `content`, `evidenceLinks`, `parent` — is carried verbatim,
- * so the revision shares the original's id and the Guardrail stage can supersede the
- * original in place. Fields the change leaves unset keep the finding's current value.
+ * `findingId`, `lens`, `verbatim`, `translation`/`sourceLanguage`, `evidenceLinks`,
+ * `parent` — is carried through verbatim, so the revision shares the original's id and
+ * the Guardrail stage can supersede the original in place. Discernment never rewords:
+ * the surfaced words pass through untouched. Fields the change leaves unset keep the
+ * finding's current value.
  */
 export function reviseDisposition(
   finding: Finding,
@@ -213,7 +274,6 @@ export function reviseDisposition(
     return makeAbsenceFinding({
       findingId: finding.findingId,
       lens: finding.lens,
-      content: finding.content,
       sensitivity,
       clearedToClientSafe,
       ...(finding.parent !== undefined ? { parent: finding.parent } : {}),
@@ -222,7 +282,10 @@ export function reviseDisposition(
   return makeOrdinaryFinding({
     findingId: finding.findingId,
     lens: finding.lens,
-    content: finding.content,
+    verbatim: finding.verbatim,
+    ...(finding.translation !== undefined
+      ? { translation: finding.translation, sourceLanguage: finding.sourceLanguage }
+      : {}),
     evidenceLinks: finding.evidenceLinks,
     units,
     sensitivity,

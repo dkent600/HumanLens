@@ -79,7 +79,7 @@ export class OpeningLens implements Lens {
         makeOrdinaryFinding({
           findingId: `${this.id}:${index}`,
           lens: 'opening',
-          content: candidate.content,
+          verbatim: candidate.verbatim,
           evidenceLinks,
           units,
         }),

@@ -25,13 +25,21 @@
       <h2 class="text-lg font-medium text-gray-800 capitalize">${group.lens}</h2>
       <ul class="space-y-2">
         <li repeat.for="node of group.roots" class="rounded-md border bg-white p-3">
-          <p class="text-gray-900">${node.finding.content}</p>
+          <p class="text-gray-900">${node.finding.verbatim}</p>
+          <p if.bind="node.finding.translation" class="mt-1 italic text-gray-700">
+            ${node.finding.translation}
+            <span class="text-xs not-italic text-gray-400">· translated from ${node.finding.sourceLanguage}</span>
+          </p>
           <p class="mt-1 text-xs text-gray-500">${node.finding.support | supportText}</p>
 
           <!-- Subthemes (one documented level: themes carry subthemes). -->
           <ul if.bind="node.children.length" class="mt-2 ml-4 space-y-2 border-l pl-3">
             <li repeat.for="child of node.children" class="rounded-md border bg-gray-50 p-2">
-              <p class="text-gray-900">${child.finding.content}</p>
+              <p class="text-gray-900">${child.finding.verbatim}</p>
+              <p if.bind="child.finding.translation" class="mt-1 italic text-gray-700">
+                ${child.finding.translation}
+                <span class="text-xs not-italic text-gray-400">· translated from ${child.finding.sourceLanguage}</span>
+              </p>
               <p class="mt-1 text-xs text-gray-500">${child.finding.support | supportText}</p>
             </li>
           </ul>

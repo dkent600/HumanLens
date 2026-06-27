@@ -66,21 +66,27 @@ const SYSTEM = [
   'given; never upgrade an implied relation into an asserted causal claim. When in doubt, stay',
   'with the voice.',
   '',
-  'Carry the voice\'s surface form as given — its punctuation, run-ons, fragments, and casing.',
-  'Do not normalize, repair, or tidy the wording. Messy form can itself be signal, and repairing',
-  'it (for example, adding a connective the speaker didn\'t write) inserts structure the voice',
-  'didn\'t supply.',
-  '',
   'Carry only the context the speaker themselves supplied. Never add surrounding context, a',
   'likely cause, or what a statement "really means" given everything else — however reasonable',
   'the inference. A convincing guess reads exactly like evidence on the page, which is precisely',
   'why it is prohibited here; context that is declared rather than guessed enters later,',
   'downstream.',
   '',
-  'Some units may be in a language other than English. Do not silently translate. If a finding',
-  'rests on material you have translated, render the content in English but append a brief flag',
-  'in parentheses naming the source language, e.g. "(translated from Spanish)". This keeps the',
-  'language boundary visible rather than hidden.',
+  'Emit each finding as the speaker\'s own words, verbatim, in the "verbatim" field — the exact',
+  'span as given: original language, punctuation, run-ons, fragments, casing, and first person,',
+  'all untouched. Never paraphrase, normalize, repair, tidy, or de-personalize. Messy form can',
+  'itself be signal, and repairing it (e.g. adding a connective the speaker did not write)',
+  'inserts structure the voice did not supply. For a split (one unit, two unrelated things),',
+  '"verbatim" is the span you are surfacing, not necessarily the whole unit.',
+  '',
+  'When a unit is not in usable English, still carry the original words in "verbatim", and ALSO',
+  'provide "translation" — a literal first-person English rendering of those same words (same',
+  'structure and register; nothing added, smoothed, de-personalized, or interpreted) — and',
+  '"sourceLanguage", the name of the original language (e.g. "Spanish"). For a mixed-language',
+  'unit, "verbatim" is the mixed original as-is, "translation" renders the whole of it to',
+  'English, and "sourceLanguage" names the non-English language present. Omit "translation" and',
+  '"sourceLanguage" entirely for an English unit. The language boundary is shown by these',
+  'fields, not by any inline note in the text.',
   '',
   'You are given a JSON object with a list of de-identified units, each with a unitId and its',
   'content. Rules:',
@@ -94,8 +100,9 @@ const SYSTEM = [
   '  form-artifact with no statement behind it.',
   '',
   'Return ONLY a JSON object of exactly this shape, with no surrounding prose, explanation, or',
-  'markdown fences:',
-  '{"findings":[{"content":"<what was noticed>","evidenceUnitIds":["<unitId>"]}]}',
+  'markdown fences. For an English unit include only "verbatim" and "evidenceUnitIds"; for a',
+  'non-English unit also include "translation" and "sourceLanguage":',
+  '{"findings":[{"verbatim":"...","translation":"...","sourceLanguage":"...","evidenceUnitIds":["..."]}]}',
 ].join('\n');
 
 export class ListeningLens implements Lens {
@@ -140,7 +147,10 @@ export class ListeningLens implements Lens {
         makeOrdinaryFinding({
           findingId: `${this.id}:${index}`,
           lens: 'listening',
-          content: candidate.content,
+          verbatim: candidate.verbatim,
+          ...(candidate.translation !== undefined
+            ? { translation: candidate.translation, sourceLanguage: candidate.sourceLanguage }
+            : {}),
           evidenceLinks,
           units,
         }),
@@ -159,6 +169,12 @@ export class ListeningLens implements Lens {
  * `run` then enforces evidence on whatever survives. (Structural shape only — truth and
  * grounding are not its job: a schema-valid candidate can still cite a hallucinated id,
  * which the anchoring guard catches.)
+ *
+ * `verbatim` is required; `translation`/`sourceLanguage` are a PAIR — accepted only when
+ * both are non-empty strings, and a lone one is ignored (the finding keeps its verbatim).
+ * A non-English `verbatim` with no translation is kept, not dropped: a degraded-but-present
+ * voice beats a suppressed one, and a missing translation is a model-quality issue the
+ * seeded eval is meant to catch — not something to silently swallow a voice over.
  */
 function parseCandidates(text: string): readonly LensResponseCandidate[] {
   const body = stripFence(text.trim());
@@ -183,15 +199,26 @@ function parseCandidates(text: string): readonly LensResponseCandidate[] {
     if (typeof raw !== 'object' || raw === null) {
       continue;
     }
-    const content = (raw as { content?: unknown }).content;
+    const verbatim = (raw as { verbatim?: unknown }).verbatim;
+    const translation = (raw as { translation?: unknown }).translation;
+    const sourceLanguage = (raw as { sourceLanguage?: unknown }).sourceLanguage;
     const ids = (raw as { evidenceUnitIds?: unknown }).evidenceUnitIds;
-    if (typeof content !== 'string') {
+    if (typeof verbatim !== 'string' || verbatim.trim() === '') {
       continue;
     }
     if (!Array.isArray(ids) || !ids.every((id): id is string => typeof id === 'string')) {
       continue;
     }
-    candidates.push({ content, evidenceUnitIds: ids });
+    if (
+      typeof translation === 'string' &&
+      translation.trim() !== '' &&
+      typeof sourceLanguage === 'string' &&
+      sourceLanguage.trim() !== ''
+    ) {
+      candidates.push({ verbatim, translation, sourceLanguage, evidenceUnitIds: ids });
+    } else {
+      candidates.push({ verbatim, evidenceUnitIds: ids });
+    }
   }
   return candidates;
 }

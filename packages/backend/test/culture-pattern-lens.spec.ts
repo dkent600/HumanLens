@@ -38,7 +38,7 @@ function evidenceFinding(findingId: string, evidenceLinks: readonly string[]): F
   return makeOrdinaryFinding({
     findingId,
     lens: 'listening',
-    content: 'an evidence-layer theme',
+    verbatim: 'an evidence-layer theme',
     evidenceLinks,
     units,
   });
@@ -84,7 +84,7 @@ describe('Culture Pattern lens — Aggregate layer, reads prior findings', () =>
     // finding present, an unanchored interpretive finding is a defect, never asserted.
     const rogue = new FakeLlmProvider(
       (): LensResponsePayload => ({
-        findings: [{ content: 'an ungrounded pattern', evidenceUnitIds: ['not-in-scope'] }],
+        findings: [{ verbatim: 'an ungrounded pattern', evidenceUnitIds: ['not-in-scope'] }],
       }),
     );
     const prior = [evidenceFinding('listening:0', ['u1'])];

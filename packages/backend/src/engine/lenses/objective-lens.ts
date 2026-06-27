@@ -86,7 +86,7 @@ export class ObjectiveLens implements Lens {
         makeOrdinaryFinding({
           findingId: `${this.id}:${index}`,
           lens: 'objective',
-          content: candidate.content,
+          verbatim: candidate.verbatim,
           evidenceLinks,
           units,
         }),

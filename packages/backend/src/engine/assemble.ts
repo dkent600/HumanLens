@@ -44,7 +44,10 @@ export function projectToClientSafe(finding: Finding): ClientSafeFinding {
   return {
     findingId: finding.findingId,
     lens: finding.lens,
-    content: finding.content,
+    verbatim: finding.verbatim,
+    ...(finding.translation !== undefined
+      ? { translation: finding.translation, sourceLanguage: finding.sourceLanguage }
+      : {}),
     evidenceLinks: [...finding.evidenceLinks],
     support: {
       sourceCount: finding.supportSet.sourceCount,

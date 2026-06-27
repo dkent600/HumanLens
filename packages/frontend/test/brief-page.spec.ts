@@ -20,9 +20,19 @@ describe('brief-page', () => {
           {
             findingId: 'listening:0',
             lens: 'listening',
-            content: 'A recurring signal runs across the comments.',
+            verbatim: 'A recurring signal runs across the comments.',
             evidenceLinks: ['u1', 'u2'],
             support: { sourceCount: 2, unitCount: 2 },
+            findingKind: 'ordinary',
+          },
+          {
+            findingId: 'listening:1',
+            lens: 'listening',
+            verbatim: 'No me siento seguro',
+            translation: 'I do not feel safe',
+            sourceLanguage: 'Spanish',
+            evidenceLinks: ['u3'],
+            support: { sourceCount: 1, unitCount: 1 },
             findingKind: 'ordinary',
           },
         ],
@@ -48,6 +58,10 @@ describe('brief-page', () => {
 
     expect(appHost.textContent).toContain('A recurring signal runs across the comments.');
     expect(appHost.textContent).toContain('appears in 2 comments across 2 sources');
+    // The non-English finding shows the original verbatim, the translation, and the flag.
+    expect(appHost.textContent).toContain('No me siento seguro');
+    expect(appHost.textContent).toContain('I do not feel safe');
+    expect(appHost.textContent).toContain('translated from Spanish');
   });
 
   it('renders a not-found message when the brief is unavailable', async () => {

@@ -91,7 +91,10 @@ async function main(): Promise<void> {
   console.log(`${findings.length} finding(s):\n`);
   for (const finding of findings) {
     console.log(`[${finding.findingId}] (${finding.lens})`);
-    console.log(`  content:    ${finding.content}`);
+    console.log(`  verbatim:   ${finding.verbatim ?? '(none — absence finding)'}`);
+    if (finding.translation !== undefined) {
+      console.log(`  translation:${finding.translation} [from ${finding.sourceLanguage}]`);
+    }
     console.log(`  anchors:    ${finding.evidenceLinks.join(', ') || '(none)'}`);
     console.log(`  support:    ${finding.supportSet.unitCount} units / ${finding.supportSet.sourceCount} sources`);
     console.log(`  clientSafe: ${finding.clearedToClientSafe} (held by default)\n`);

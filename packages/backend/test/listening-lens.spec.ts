@@ -63,7 +63,7 @@ describe('Listening lens — Evidence layer, reads units directly', () => {
     // cannot exist without a valid anchor, so the hallucinated anchor is dropped.
     const rogue = new FakeLlmProvider(
       (): LensResponsePayload => ({
-        findings: [{ content: 'an ungrounded theme', evidenceUnitIds: ['not-in-scope'] }],
+        findings: [{ verbatim: 'an ungrounded theme', evidenceUnitIds: ['not-in-scope'] }],
       }),
     );
     const out = await new ListeningLens().run(units, [], rogue);
@@ -78,19 +78,56 @@ describe('Listening lens — Evidence layer, reads units directly', () => {
 });
 
 describe('Listening lens — real-model output: tolerant parse + anchoring on the parsed text', () => {
-  it('parses bare JSON into an anchored, held-by-default finding', async () => {
-    const provider = textProvider('{"findings":[{"content":"a recurring theme","evidenceUnitIds":["u1"]}]}');
+  it('parses bare JSON into an anchored, held-by-default finding (English: no translation)', async () => {
+    const provider = textProvider('{"findings":[{"verbatim":"the workload is heavy","evidenceUnitIds":["u1"]}]}');
     const out = await new ListeningLens().run(units, [], provider);
 
     expect(out).toHaveLength(1);
     expect(out[0].findingId).toBe('listening:0');
-    expect(out[0].content).toBe('a recurring theme');
+    expect(out[0].verbatim).toBe('the workload is heavy'); // the speaker's words, untouched
+    expect(out[0].translation).toBeUndefined();
+    expect(out[0].sourceLanguage).toBeUndefined();
     expect([...out[0].evidenceLinks]).toEqual(['u1']);
     expect(out[0].clearedToClientSafe).toBe(false);
   });
 
+  it('carries verbatim + translation + sourceLanguage for a non-English unit', async () => {
+    const provider = textProvider(
+      '{"findings":[{"verbatim":"No me siento seguro","translation":"I do not feel safe","sourceLanguage":"Spanish","evidenceUnitIds":["u1"]}]}',
+    );
+    const out = await new ListeningLens().run(units, [], provider);
+
+    expect(out).toHaveLength(1);
+    expect(out[0].verbatim).toBe('No me siento seguro'); // original kept verbatim
+    expect(out[0].translation).toBe('I do not feel safe');
+    expect(out[0].sourceLanguage).toBe('Spanish');
+  });
+
+  it('handles a mixed-language unit: verbatim as-is, whole-thing translation, source language named', async () => {
+    const provider = textProvider(
+      '{"findings":[{"verbatim":"They keep promising change pero todo sigue igual","translation":"They keep promising change but everything stays the same","sourceLanguage":"Spanish","evidenceUnitIds":["u2"]}]}',
+    );
+    const out = await new ListeningLens().run(units, [], provider);
+
+    expect(out).toHaveLength(1);
+    expect(out[0].verbatim).toBe('They keep promising change pero todo sigue igual');
+    expect(out[0].translation).toBe('They keep promising change but everything stays the same');
+    expect(out[0].sourceLanguage).toBe('Spanish');
+  });
+
+  it('keeps verbatim when only one of translation/sourceLanguage is present (degraded, not dropped)', async () => {
+    // A real model could emit a lone field; the pair is ignored but the voice is kept.
+    const provider = textProvider('{"findings":[{"verbatim":"workload is heavy","translation":"x","evidenceUnitIds":["u1"]}]}');
+    const out = await new ListeningLens().run(units, [], provider);
+
+    expect(out).toHaveLength(1);
+    expect(out[0].verbatim).toBe('workload is heavy');
+    expect(out[0].translation).toBeUndefined(); // lone field ignored
+    expect(out[0].sourceLanguage).toBeUndefined();
+  });
+
   it('tolerates a ```json fence around the JSON', async () => {
-    const provider = textProvider('```json\n{"findings":[{"content":"theme","evidenceUnitIds":["u1","u2"]}]}\n```');
+    const provider = textProvider('```json\n{"findings":[{"verbatim":"theme","evidenceUnitIds":["u1","u2"]}]}\n```');
     const out = await new ListeningLens().run(units, [], provider);
 
     expect(out).toHaveLength(1);
@@ -110,22 +147,28 @@ describe('Listening lens — real-model output: tolerant parse + anchoring on th
   });
 
   it('drops a malformed candidate but keeps the well-formed ones', async () => {
-    // First candidate has no `content`; second has a string (not array) evidenceUnitIds;
+    // First candidate has no `verbatim`; second has a string (not array) evidenceUnitIds;
     // only the third is well-formed.
     const provider = textProvider(
-      '{"findings":[{"evidenceUnitIds":["u1"]},{"content":"x","evidenceUnitIds":"u1"},{"content":"ok","evidenceUnitIds":["u2"]}]}',
+      '{"findings":[{"evidenceUnitIds":["u1"]},{"verbatim":"x","evidenceUnitIds":"u1"},{"verbatim":"ok","evidenceUnitIds":["u2"]}]}',
     );
     const out = await new ListeningLens().run(units, [], provider);
 
     expect(out).toHaveLength(1);
-    expect(out[0].content).toBe('ok');
+    expect(out[0].verbatim).toBe('ok');
     expect([...out[0].evidenceLinks]).toEqual(['u2']);
+  });
+
+  it('drops a candidate with empty verbatim (contentless)', async () => {
+    const provider = textProvider('{"findings":[{"verbatim":"   ","evidenceUnitIds":["u1"]}]}');
+    const out = await new ListeningLens().run(units, [], provider);
+    expect(out).toHaveLength(0);
   });
 
   it('trims an out-of-scope (hallucinated) id while keeping the valid anchor', async () => {
     // Schema-valid JSON can still carry an id the model invented; the anchoring guard
     // drops it, keeping only the in-scope anchor — derived support reflects what is left.
-    const provider = textProvider('{"findings":[{"content":"grounded","evidenceUnitIds":["u1","nope"]}]}');
+    const provider = textProvider('{"findings":[{"verbatim":"grounded","evidenceUnitIds":["u1","nope"]}]}');
     const out = await new ListeningLens().run(units, [], provider);
 
     expect(out).toHaveLength(1);
@@ -134,7 +177,7 @@ describe('Listening lens — real-model output: tolerant parse + anchoring on th
   });
 
   it('drops a candidate whose anchors are all out of scope', async () => {
-    const provider = textProvider('{"findings":[{"content":"ungrounded","evidenceUnitIds":["nope"]}]}');
+    const provider = textProvider('{"findings":[{"verbatim":"ungrounded","evidenceUnitIds":["nope"]}]}');
     const out = await new ListeningLens().run(units, [], provider);
     expect(out).toHaveLength(0);
   });

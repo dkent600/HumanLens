@@ -74,7 +74,7 @@ export class TensionLens implements Lens {
         makeOrdinaryFinding({
           findingId: `${this.id}:${index}`,
           lens: 'tension',
-          content: candidate.content,
+          verbatim: candidate.verbatim,
           evidenceLinks,
           units,
         }),

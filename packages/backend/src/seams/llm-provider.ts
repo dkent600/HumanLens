@@ -91,7 +91,12 @@ export interface LensPromptPayload {
 }
 
 export interface LensResponseCandidate {
-  readonly content: string;
+  /** The speaker's words exactly as given (surfacing lenses) / the lens's noticing text. */
+  readonly verbatim: string;
+  /** Literal English translation — present only when `verbatim` is not usable English. Paired with `sourceLanguage`. */
+  readonly translation?: string;
+  /** Source language name — present only when `translation` is. */
+  readonly sourceLanguage?: string;
   readonly evidenceUnitIds: readonly string[];
 }
 
@@ -169,7 +174,7 @@ export function defaultFakeResponse(payload: LensPromptPayload): FakeLensRespons
     return {
       findings: [
         {
-          content: 'A pattern runs across the surfaced findings.',
+          verbatim: 'A pattern runs across the surfaced findings.',
           evidenceUnitIds: unitIds,
         },
       ],
@@ -185,7 +190,7 @@ export function defaultFakeResponse(payload: LensPromptPayload): FakeLensRespons
   return {
     findings: [
       {
-        content: 'A recurring signal runs across the comments.',
+        verbatim: 'A recurring signal runs across the comments.',
         evidenceUnitIds: payload.units.map((u) => u.unitId),
       },
     ],

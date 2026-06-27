@@ -4,7 +4,9 @@ import {
   isEvidenceAnchored,
   makeAbsenceFinding,
   makeOrdinaryFinding,
+  MissingVerbatimError,
   UnanchoredFindingError,
+  UnpairedTranslationError,
 } from '../src/domain/finding.js';
 
 // Structural guards for the Finding's trust properties. These are regression
@@ -23,7 +25,7 @@ describe('Finding — evidence anchoring', () => {
       makeOrdinaryFinding({
         findingId: 'listening:0',
         lens: 'listening',
-        content: 'a pattern with no evidence',
+        verbatim: 'a pattern with no evidence',
         evidenceLinks: [],
         units,
       }),
@@ -34,22 +36,24 @@ describe('Finding — evidence anchoring', () => {
     const finding = makeOrdinaryFinding({
       findingId: 'listening:0',
       lens: 'listening',
-      content: 'people raise workload',
+      verbatim: 'people raise workload',
       evidenceLinks: ['u1'],
       units,
     });
     expect(isEvidenceAnchored(finding)).toBe(true);
     expect(finding.evidenceLinks).toEqual(['u1']);
+    expect(finding.verbatim).toBe('people raise workload');
+    expect(finding.translation).toBeUndefined(); // English: no translation/sourceLanguage
   });
 
   it('the absence finding is the sanctioned exception — unanchored, yet valid', () => {
     const finding = makeAbsenceFinding({
       findingId: 'listening:abs',
       lens: 'listening',
-      content: 'no one mentioned psychological safety',
     });
     expect(finding.evidenceLinks).toEqual([]);
     expect(isEvidenceAnchored(finding)).toBe(true);
+    expect(finding.verbatim).toBeNull(); // no source to quote
   });
 });
 
@@ -64,14 +68,14 @@ describe('Finding — strength is derived, not asserted', () => {
     const narrow = makeOrdinaryFinding({
       findingId: 'listening:0',
       lens: 'listening',
-      content: 'theme',
+      verbatim: 'theme',
       evidenceLinks: ['u1', 'u2'], // one source
       units,
     });
     const broad = makeOrdinaryFinding({
       findingId: 'listening:1',
       lens: 'listening',
-      content: 'theme',
+      verbatim: 'theme',
       evidenceLinks: ['u1', 'u2', 'u3'], // two sources
       units,
     });
@@ -83,7 +87,7 @@ describe('Finding — strength is derived, not asserted', () => {
     const finding = makeOrdinaryFinding({
       findingId: 'listening:0',
       lens: 'listening',
-      content: 'theme',
+      verbatim: 'theme',
       evidenceLinks: ['u3'],
       units,
     });
@@ -97,11 +101,50 @@ describe('Finding — disposition defaults to held', () => {
     const finding = makeOrdinaryFinding({
       findingId: 'listening:0',
       lens: 'listening',
-      content: 'theme',
+      verbatim: 'theme',
       evidenceLinks: ['u1'],
       units,
     });
     expect(finding.clearedToClientSafe).toBe(false);
     expect(finding.sensitivity).toBe('normal');
+  });
+});
+
+describe('Finding — verbatim and the translation pair', () => {
+  it('an ordinary finding cannot be built with empty verbatim (runtime mirror of the type)', () => {
+    expect(() =>
+      makeOrdinaryFinding({
+        findingId: 'listening:0',
+        lens: 'listening',
+        verbatim: '   ', // whitespace-only is contentless
+        evidenceLinks: ['u1'],
+        units,
+      }),
+    ).toThrow(MissingVerbatimError);
+  });
+
+  it('carries a paired translation + sourceLanguage for a non-English finding', () => {
+    const finding = makeOrdinaryFinding({
+      findingId: 'listening:0',
+      lens: 'listening',
+      verbatim: 'No me siento seguro',
+      translation: 'I do not feel safe',
+      sourceLanguage: 'Spanish',
+      evidenceLinks: ['u1'],
+      units,
+    });
+    expect(finding.verbatim).toBe('No me siento seguro'); // original kept, untouched
+    expect(finding.translation).toBe('I do not feel safe');
+    expect(finding.sourceLanguage).toBe('Spanish');
+  });
+
+  it('rejects a lone translation or a lone sourceLanguage (they are a pair)', () => {
+    const base = { findingId: 'listening:0', lens: 'listening' as const, evidenceLinks: ['u1'], units };
+    expect(() =>
+      makeOrdinaryFinding({ ...base, verbatim: 'x', translation: 'only translation' }),
+    ).toThrow(UnpairedTranslationError);
+    expect(() =>
+      makeOrdinaryFinding({ ...base, verbatim: 'x', sourceLanguage: 'Spanish' }),
+    ).toThrow(UnpairedTranslationError);
   });
 });

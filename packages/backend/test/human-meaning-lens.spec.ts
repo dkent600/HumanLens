@@ -47,7 +47,7 @@ describe('Human Meaning lens — Evidence layer, reads units directly', () => {
   it('drops a finding whose only anchor is out of scope', async () => {
     const rogue = new FakeLlmProvider(
       (): LensResponsePayload => ({
-        findings: [{ content: 'an ungrounded meaning', evidenceUnitIds: ['not-in-scope'] }],
+        findings: [{ verbatim: 'an ungrounded meaning', evidenceUnitIds: ['not-in-scope'] }],
       }),
     );
     const out = await new HumanMeaningLens().run(units, [], rogue);

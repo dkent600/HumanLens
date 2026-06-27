@@ -554,6 +554,28 @@ invariants above). The whole project is the **case study**; its first built vers
   `eval_set_draft.md`.** After that: units live in the harness, rationale lives in the contract
   doc, each single-writer; the draft's `_draft` graduates by being folded in (it has proven
   itself — this run used it as intended and surfaced two contract refinements).
+- **Two-field (three-field) Finding — `verbatim` / `translation` / `sourceLanguage` (in design → build).**
+  Replaces the single paraphrased `content`: Listening carries the speaker's words verbatim
+  (form intact, first-person) plus a literal English translation only when the original isn't
+  English (+ source language name). Removes paraphrase entirely — the model's one sanctioned
+  transformation is literal translation. Resolves the surface-form failure (the u16 "and" can't
+  happen to a verbatim field) and the downstream-English requirement (lenses read
+  `translation ?? verbatim`, resolved in one place in `prompt-projection`). Full spec in
+  `two_field_finding_draft.md`; plan approved. **Two deferrals it surfaced (don't rediscover):**
+  - *Absence findings have no text field.* `verbatim: null` for absence (decision 1a) means an
+    absence finding currently has nowhere to carry its descriptive noticing ("no one mentioned
+    X"). Harmless now — **no V1 lens emits absence findings** (Listening drops zero-anchor
+    candidates). → When an absence-emitting lens lands, decide how absence carries its noticing
+    text (likely a `noticing`/`observation` field used instead of `verbatim`).
+  - *`verbatim` is Listening-centric.* The six interpretive lenses produce *noticings* (the
+    model's interpretation), not a speaker's quote, so `verbatim` is a borrowed label while
+    they're fake placeholders. → When each interpretive lens goes real, decide whether it wants
+    `verbatim` or a distinct `noticing` field. (Same shape of question as absence; resolve
+    per-lens at realness.)
+  - *Edge confirmed:* a real model emitting non-English `verbatim` with no `translation` →
+    **keep** the finding (degraded-but-present voice beats a suppressed one), seeded eval catches
+    it as a model-quality issue. *§1 reconciled* to first-person + structural flag (was
+    "de-personalized frame" + inline "(translated from Spanish)").
 - **Questions worth asking — a candidate first-class output type (design thread; not to
   build now).** A *question* (flags what is uncertain / unstated / worth probing; asks,
   asserts nothing) may be a distinct artifact from a *finding* (asserts what is) — the

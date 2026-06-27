@@ -48,7 +48,7 @@ class FreshIdGuardrailLens implements Lens {
       makeOrdinaryFinding({
         findingId: 'guardrail-extra:0',
         lens: 'discernment',
-        content: 'a fresh guardrail finding under a new id',
+        verbatim: 'a fresh guardrail finding under a new id',
         evidenceLinks: ['u1'],
         units,
       }),

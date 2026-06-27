@@ -67,7 +67,7 @@ export class HumanMeaningLens implements Lens {
         makeOrdinaryFinding({
           findingId: `${this.id}:${index}`,
           lens: 'meaning',
-          content: candidate.content,
+          verbatim: candidate.verbatim,
           evidenceLinks,
           units,
         }),

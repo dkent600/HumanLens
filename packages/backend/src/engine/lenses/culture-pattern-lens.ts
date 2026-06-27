@@ -74,7 +74,7 @@ export class CulturePatternLens implements Lens {
         makeOrdinaryFinding({
           findingId: `${this.id}:${index}`,
           lens: 'culture',
-          content: candidate.content,
+          verbatim: candidate.verbatim,
           evidenceLinks,
           units,
         }),

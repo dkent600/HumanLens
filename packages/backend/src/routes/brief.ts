@@ -35,11 +35,15 @@ export function registerBriefRoutes(
                 type: 'array',
                 items: {
                   type: 'object',
-                  required: ['findingId', 'lens', 'content', 'evidenceLinks', 'support', 'findingKind'],
+                  required: ['findingId', 'lens', 'verbatim', 'evidenceLinks', 'support', 'findingKind'],
                   properties: {
                     findingId: { type: 'string' },
                     lens: { type: 'string' },
-                    content: { type: 'string' },
+                    // The speaker's words; null for an absence finding (no source to quote).
+                    verbatim: { type: 'string', nullable: true },
+                    // Literal English translation + source language — present only for a non-English finding.
+                    translation: { type: 'string' },
+                    sourceLanguage: { type: 'string' },
                     evidenceLinks: { type: 'array', items: { type: 'string' } },
                     support: {
                       type: 'object',

@@ -35,7 +35,7 @@ function priorFinding(findingId: string, evidenceLinks: readonly string[]): Find
   return makeOrdinaryFinding({
     findingId,
     lens: 'tension',
-    content: 'a prior finding',
+    verbatim: 'a prior finding',
     evidenceLinks,
     units,
   });
