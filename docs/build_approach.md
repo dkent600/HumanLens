@@ -395,7 +395,7 @@ For the developer, the AI task should be broken into lenses. Each lens becomes a
 **Prompt intention:** What are people actually saying?
 
 **Output:**
-- repeated themes
+- themes as voiced
 - direct concerns
 - hopes
 - frustrations
@@ -403,6 +403,22 @@ For the developer, the AI task should be broken into lenses. Each lens becomes a
 - representative anonymous quotes
 
 This is the basic "hear the voices" layer.
+
+**What this lens is for — the voice is the boundary.** Listening is *faithful surfacing* and nothing more: it renders each voice as an evidence-anchored finding and leaves every act of grouping, interpretation, and judgment to the lenses downstream. Its near-triviality is the discipline working, not a gap. The governing rule:
+
+> Listening may carry any structure or context that is *present in the voice*. It may never add structure or context that is *present only in the model's inference*.
+
+Everything Listening does is an application of that rule:
+
+- **Surface each voice faithfully**, anchored to its unit, in a de-personalized frame; **translate and flag** — a non-English unit is rendered in English with the language boundary made visible (e.g. "(translated from Spanish)"), never silently translated.
+- **Preserve the structure the voice gave.** A cause, contrast, condition, or contingency the speaker drew ("the workload's been brutal, *so* I've stopped speaking up") is part of what they said, and the finding keeps it. The splitting rule is structural, not grammatical: *do not split what the speaker bound together; do not bind what the speaker didn't.* One thing with internal structure → one structured finding; two genuinely unrelated things in one comment → two findings. Sentence count is not the test.
+- **Preserve only the context the voice gave.** A speaker's own context ("after the layoffs, I stopped trusting leadership") is carried; context the *model* would supply — the surrounding story, the likely cause, what this "really means" — is not, however convincing the guess. Inferred context is the most dangerous failure here, because a fluent guess is indistinguishable on the page from evidence; legitimate context enters the system *declared by humans* (the speaker's own, here; or Inclusity's, at the Inclusity Objective lens), never silently inferred at the surface.
+- **Surface every voice, including the quiet or buried ones** — position must not suppress a voice; completeness of surfacing is Listening's responsibility.
+- **Do not** group or count recurrence across voices (that is Culture Pattern), notice contradiction (Tension), judge significance or sensitivity (Discernment), or embellish a thin unit into subtext it doesn't carry — a unit that says nothing surface-able yields no finding; Listening does not manufacture signal.
+
+The within-voice / inferred boundary is real but not always crisp ("things changed after the reorg" names the reorg yet leans on context for its meaning). The rule for the edge is *stay with the voice when unsure*; the human review layer is the backstop, and the seeded eval set should include a unit on this line so the model's landing spot is observable and tunable.
+
+**Within-unit only.** A single unit is a single voice, so "within the voice" means *within the unit*. Listening never reaches across units — relations *between* units (recurrence, contradiction, shared meaning) are downstream lenses' work entirely (Culture Pattern, Tension, the Interpret layer). This is why the recurrence trio must surface as separate findings: merging them would be a between-unit relation, which Listening does not do.
 
 ---
 
