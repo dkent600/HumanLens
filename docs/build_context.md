@@ -576,6 +576,22 @@ invariants above). The whole project is the **case study**; its first built vers
     **keep** the finding (degraded-but-present voice beats a suppressed one), seeded eval catches
     it as a model-quality issue. *§1 reconciled* to first-person + structural flag (was
     "de-personalized frame" + inline "(translated from Spanish)").
+- **Does within-unit *splitting* survive in a verbatim world? (open question, surfaced by the
+  real run; parked).** L2 (u6, "The new onboarding process is a real improvement, and the
+  third-floor kitchen has been out of order for weeks") was designed to test that Listening
+  *splits* two genuinely-unrelated things the speaker joined with a bare "and" → two findings.
+  Against the real model under the verbatim regime it came back as **one** verbatim finding, not
+  two. This may be *correct*, not a miss: keeping the unit whole-and-verbatim adds nothing and
+  paraphrases nothing, whereas splitting requires the model to *judge* the two clauses unrelated
+  (a small interpretive act) and to emit a partial-span verbatim for each. The two-field decision
+  (verbatim, no paraphrase) may have **dissolved** the split case rather than failed it: "carry
+  the speaker's words exactly" pulls toward keeping the whole unit and letting downstream lenses
+  separate concerns. → **Decide deliberately:** does Listening still split multi-thought units
+  (and emit span-verbatim per finding), or does verbatim-fidelity mean one-finding-per-unit with
+  separation deferred downstream? Affects the L1/L1c "preserve within-voice structure" framing
+  too (structure-preservation and whole-unit-verbatim mostly agree; splitting is where they can
+  diverge). Revisit when convenient — not blocking; the current behavior (keep whole) is a
+  reasonable default.
 - **Questions worth asking — a candidate first-class output type (design thread; not to
   build now).** A *question* (flags what is uncertain / unstated / worth probing; asks,
   asserts nothing) may be a distinct artifact from a *finding* (asserts what is) — the
