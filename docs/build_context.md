@@ -47,23 +47,82 @@ partner and the writer of `build_approach.md`.
   (it is fine in the internal build doc).
 
 ## State of `build_approach.md` (as of last good edit)
-- ~926 lines. New section **"## Module 1 System Architecture"** inserted before
-  "## Version Roadmap", with 11 subsections: pipeline spine; engagement & actor
-  scoping; identity & authorization seams; de-identification gate; the Unit; lens
-  processing (staged pipeline); the Finding; the two-layer output; human review &
-  capture; evaluation; open questions & deferred decisions.
-- Three Mermaid diagrams now embedded as fenced ```mermaid blocks: (1) macro
-  pipeline spine — after the pipeline-spine prose; (2) lens processing, 5
-  dependency layers — end of the staged-pipeline subsection; (3) version
-  progression V0→V4 — top of "## Version Roadmap". Standalone `.mermaid` copies
-  also in `/mnt/user-data/outputs/` (module1_macro_spine, module1_lens_pipeline,
+- ~1042 lines. **Reorganized into three Parts** under the title (Option A
+  leveling): **Part 1 · The Case** (Why This Plan Fits SMI; Module Development
+  Plan; Lens Architecture Across Modules) · **Part 2 · The Build — Module 1** (The
+  Seven Lenses; System Architecture) · **Part 3 · The Roadmap — Module 1** (Version
+  Roadmap). Front matter is **"## How to Read This Document"** only (Terminology
+  eliminated, see below); the six content sections demoted to `###`, subsections to
+  `####`, with one `#####` (Client-facing shaping, under the two-layer output).
+- **"## How to Read This Document"** defines the recurring terms once, up front, in
+  dependency order (smallest unit → document structure): **Lens** (a distinct
+  prompt and response section in one AI pass — where the AI is used) → **Module** (a
+  self-contained analysis structured as a pipeline of functional stages, one of
+  which runs its lenses — Module 1 has seven) → **Pipeline** (how a module runs:
+  intake → normalize → de-identify gate → lens processing → assemble → human review
+  → capture; also defines **stage** = one step, **spine** = the ordered run of
+  stages) → **Gate** (a stage material must clear; the de-identification gate — de-id
+  proper is upstream at Inclusity, the gate verifies) → **Layer** (two senses:
+  *processing layer* = the dependency structure over a module's lenses,
+  Evidence→Aggregate→Interpret→Guardrail→Openings; *output layer* = internal vs
+  **client-safe**, client-safe ⊆ internal) → **Seam** (injection boundary; moved
+  here from the deleted Terminology) → **Engine** (the software that runs a module's
+  pipeline end to end; what V1–V4 build) → **Platform (layer)** (wraps the engine:
+  real auth + shared workspaces; deferred beyond V4) → **Authentication /
+  Authorization** (the two access checks the platform implements, present as seams
+  from V1) → **Version** (orthogonal maturity axis, V0–V4, all inside Module 1) →
+  **Parts** (the three parts and their **register**s). NOTE: **Layer** is flagged
+  for a revisit; **normalize** in the spine is the next item (in-engine, as the doc
+  has it, vs. upstream at Inclusity); "Pipeline" is also defined again in prose at
+  "The pipeline spine" (Part 2) — intentional overlap for now.
+- **Terminology section eliminated.** Its **seam** definition moved into How to Read
+  (now the single place seam is defined — the in-context re-definition under
+  "Identity and authorization seams" was removed). The **contract** /
+  *client-safe contract* definition was removed entirely; its one loose in-text use
+  (under Identity & authorization seams) reworded to "the interface is its
+  **signature**." `build_approach.md` no longer uses the word "contract" — see the
+  open cross-doc item below.
+- **Lens Architecture Across Modules lifted** to close Part 1 (was between the
+  lenses and System Architecture); lead-ins reframed forward ("the seven lenses,
+  defined below").
+- **Retitles** (scope inherited from the Part 2 banner): "Prompt Architecture:
+  Listening Brief (Module 1)" → **"The Seven Lenses"**; "Module 1 System
+  Architecture" → **"System Architecture."**
+- **Relocations:** **The Key Design Rule** → into the Seven Lenses framing (before
+  lens 1); **Success Criteria** → into System Architecture, right after Evaluation
+  (whose "eight success criteria below" now resolves locally). Roadmap ends cleanly
+  on V4 · Pilot-Ready.
+- **Part 3 strips:** V3/V4 titles lose "Module 1" → "Limited Inclusity Context" /
+  "Pilot-Ready"; the four per-version "Still … Module 1" refrains removed, replaced
+  by one discipline line under the Part 3 banner.
+- **Consistency reconciliation (this session, both files):** the superseded
+  "rephrased / voice-calibrated subset" framing of the client-safe projection was
+  retired for the settled **pure-filter** framing — in `build_approach.md` at the
+  two-layer prose and the pipeline-diagram label (`filtered subset · shaping
+  deferred`), and in this file's locked two-layer entry below. (Also fixed in this
+  file's locked entries: Finding `content` → `verbatim`/`translation`/
+  `source_language`; `sourceLanguage`→`source_language` prose casing.) A follow-up
+  `voice`/`assemble` sweep then re-pointed three residual "voice applied at Assemble"
+  claims to the dedicated, deferred client-facing shaping stage: the Voice-calibration
+  open-question bullet and the Assemble node in the pipeline-spine diagram (now
+  "mechanical join · no rewording") in `build_approach.md`, and the voice-config
+  design constraint in this file. Assemble/projection/lenses are now clean
+  everywhere; voice/shaping is located only at the deferred shaping stage.
+- System Architecture (Part 2) subsections, in order: pipeline spine; engagement &
+  actor scoping; identity & authorization seams; de-identification gate; the Unit;
+  lens processing (staged pipeline); the Finding; the two-layer output; human
+  review & capture; evaluation; **Success Criteria** (relocated in); open questions
+  & deferred decisions.
+- Three Mermaid diagrams embedded as fenced ```mermaid blocks: (1) macro pipeline
+  spine — after the pipeline-spine prose; (2) lens processing, 5 dependency layers
+  — end of the staged-pipeline subsection; (3) version progression V0→V4 — top of
+  "### Version Roadmap" (Part 3). Standalone `.mermaid` copies also in
+  `/mnt/user-data/outputs/` (module1_macro_spine, module1_lens_pipeline,
   module1_version_progression). Source carries no theme directive — renders per
   viewer theme; force `neutral`/white at export time if printing.
-- Version Roadmap re-derived (V0–V4 revised; V1 retitled "The Trustworthy
-  Engine", V2 "Reliability and Refinement").
-- Auth/authz seam captured in the V1 text AND now fully designed in its own
-  subsection (see locked decision below); deferred register's auth entry updated
-  to point at it (only policy behind the seams remains deferred).
+- Auth/authz seam captured in the V1 text AND fully designed in its own subsection
+  (see locked decision below); deferred register's auth entry points at it (only
+  policy behind the seams remains deferred).
 - DONE: owner banner stamped as line 1 (`> Edited only in the chat where this
   file is the working copy. All other chats: read-only reference.`).
 - NOTE: `/mnt/user-data/uploads` is READ-ONLY this container. Working copies of
@@ -134,9 +193,9 @@ partner and the writer of `build_approach.md`.
   prompt. Discernment runs late so it can audit prior findings; its flags drive
   the two-layer split. Independent lenses within a layer may run in parallel.
   (Rejected: single composite call; seven independent passes.)
-- Common **Finding** interface (finding_id, lens, content, evidence_links →
-  unit_ids, support_set, cleared_to_client_safe, sensitivity, finding_kind,
-  parent). Rules:
+- Common **Finding** interface (finding_id, lens, verbatim/translation/
+  source_language, evidence_links → unit_ids, support_set, cleared_to_client_safe,
+  sensitivity, finding_kind, parent). Rules:
   interpretive findings MUST be anchored (validation, not a prompt ask;
   unanchored = defect surfaced by Discernment); a sanctioned `absence`
   finding_kind is exempt (findings about silence); strength is DERIVED from the
@@ -147,9 +206,11 @@ partner and the writer of `build_approach.md`.
   + unit count; the segment dimension is deferred with the unit type-specific
   extensions.
 - Two-layer output = two PROJECTIONS of one finding set. Internal = full candid
-  set. Client-safe = filtered (cleared_to_client_safe + sensitivity), rephrased, voice-
-  calibrated subset, with evidence_links preserved. Integrity guarantee:
-  client-safe ⊆ internal. Voice applies at Assemble, on the client-safe layer.
+  set. Client-safe = a PURE FILTER over the same findings (cleared_to_client_safe
+  + sensitivity), evidence_links preserved — removes findings, never rewords them.
+  Integrity guarantee: client-safe ⊆ internal. Voice/shaping is a SEPARATE,
+  DEFERRED stage applied over already-filtered findings — NOT part of the
+  projection and NOT folded into Assemble (which stays a mechanical join).
   DEFAULT DISPOSITION = HELD: a finding is internal-only unless affirmatively
   promoted (Discernment + human review) to the client-safe layer — safe failure
   mode is silence, not exposure. (Surfaced by the V1 slice plan; model the
@@ -218,8 +279,9 @@ partner and the writer of `build_approach.md`.
   placement — DONE: reconciled in the seam subsection (a "Where each seam is
   invoked" paragraph now states identity-at-web / authz-at-engine, self-protecting).
 - Voice calibration design constraint (from A2): a single, swappable voice-
-  configuration source applied at Assemble, so self-serve voice editing later is
-  a UI over an existing seam — not a rebuild.
+  configuration source applied at the dedicated, deferred client-facing shaping
+  stage (not Assemble), so self-serve voice editing later is a UI over an existing
+  seam — not a rebuild.
 
 Terminology agreed: a *stub* supplies fake data/state; a *mock* stands in for a
 collaborator's interface and carries behavioral expectations. You can only mock
@@ -554,7 +616,7 @@ invariants above). The whole project is the **case study**; its first built vers
   `eval_set_draft.md`.** After that: units live in the harness, rationale lives in the contract
   doc, each single-writer; the draft's `_draft` graduates by being folded in (it has proven
   itself — this run used it as intended and surfaced two contract refinements).
-- **Two-field (three-field) Finding — `verbatim` / `translation` / `sourceLanguage` (in design → build).**
+- **Two-field (three-field) Finding — `verbatim` / `translation` / `source_language` (in design → build).**
   Replaces the single paraphrased `content`: Listening carries the speaker's words verbatim
   (form intact, first-person) plus a literal English translation only when the original isn't
   English (+ source language name). Removes paraphrase entirely — the model's one sanctioned
@@ -639,6 +701,19 @@ decisions" above. Genuinely-open work remaining:
    stages) — moves from "deferred" toward design when V1 build begins.
 6. Whether `build_approach.md` needs its own output (PDF/docx) setup, or stays
    markdown-only as an internal doc.
+7. Revisit **Layer** in How to Read (Doug flagged it for a second pass). Settle
+   alongside it the parallel question: "Pipeline" is now defined in How to Read but
+   also re-defined in prose at "The pipeline spine" (Part 2) — same defined-up-top-
+   then-elaborated pattern as Layer. Decide how much Part 2 should re-state vs.
+   reference for both. Also in scope: the "reviewed two-layer brief" phrasing in the
+   Pipeline entry (Doug flagged it to be settled as part of the layers review).
+8. Cross-doc **"contract"** vocabulary decision. `build_approach.md` no longer uses
+   the term (the definition and its sole in-text use were removed this session),
+   but `build_context.md`, `build_implementation.md`, and the code still use
+   *client-safe contract* / "the published client-safe shapes." Decide: retire
+   "contract" everywhere (a coordinated vocabulary change across docs + code) vs.
+   accept that `build_approach.md` simply does not use it while the implementation
+   layer keeps it.
 
 ## Environment
 VSCode on Windows. (Pandoc + MiKTeX / LuaLaTeX / EB Garamond is the *proposal's*
