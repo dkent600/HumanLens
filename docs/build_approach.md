@@ -24,11 +24,20 @@ Action Opening Lens; the **pipeline** that runs them is defined below.
 
 **Pipeline** — *how a module runs.* A module is a pipeline: material enters, passes
 through a fixed sequence of **stages** comprising the spine of the pipeline, and
-leaves as a reviewed two-layer brief plus captured learning. A **stage** is one step
+leaves as a reviewed **brief** (defined below) plus captured learning. A **stage** is one step
 in that sequence — a single operation performed as the material passes through. The
 ordered run of stages comprises the pipeline's **spine**: intake → normalize →
 de-identify gate → lens processing → assemble → human review → capture. The lenses do
-their work in the lens-processing stage. (Part 2 details the spine.)
+their work in the lens-processing stage, organized into **lens waves** (below). (Part 2 details the spine.)
+
+**Lens wave** — the lens-processing stage runs the module's lenses grouped into an
+ordered sequence of five waves: Evidence → Aggregate → Interpret → Guardrail →
+Openings. Each wave is comprised of a set of lenses sharing a particular role
+(suggested by the name of the wave). Lenses in a wave are independent of one
+another, run in parallel, and read the findings of earlier waves' lenses (all
+findings accumulate in one shared pool, tagged by the lens that produced them).
+Waves comprise the internal structure of the lens-processing stage. They are not
+themselves stages.
 
 **Gate** — a stage that material must clear before it may continue. Module 1 has
 one: the **de-identification gate**. De-identification proper is done by a person at
@@ -37,29 +46,18 @@ de-identified; the gate is a verifying backstop — it scans for any identifying
 language a human missed and holds it for review, and nothing reaches the lenses
 until it is cleared.
 
-**Layer — two distinct senses, always disambiguated.** The word names two
-different things, and the text marks which one whenever both could be meant:
+**Brief** — a module's deliverable to Inclusity, produced from one set of findings
+in two **types**:
 
-- A **processing layer** is a *stage of analysis* — the dependency structure over a
-  module's lenses. In lens processing the seven lenses run in five layers —
-  Evidence → Aggregate → Interpret → Guardrail → Openings — each reading the units
-  and findings of the layers above it.
-- An **output layer** is a *view of the finished brief for an audience,*
-  distinguished by who may see it:
-    - The **internal layer** is the full candid finding set — every finding,
-      including uncertain inferences, unresolved tensions, and cautions — written
-      for the Inclusity people who can hold that candor (the facilitator and
-      Dr. Campbell).
-    - The **client-safe layer** is the subset that may be shown to **the client —
-      the organization Inclusity is serving in the engagement.** A finding reaches
-      it only by being affirmatively cleared; the layer is a pure filtered subset
-      of the internal one (**client-safe ⊆ internal**), never a reworded version.
-      So *client-safe* is a property of a finding — *cleared to cross out to the
-      client* — and, by extension, of the layer built from such findings. Clients
-      receive exported deliverables; they are never users of the system.
+- **internal brief** — the module's complete set of candid findings. For the
+  Inclusity people who can hold that candor — the facilitator and Dr. Campbell.
+- **client-safe brief** — the subset of the module's findings that may be shown to
+  the client. A finding reaches it only by being affirmatively cleared and not held
+  back by sensitivity; it is a pure **projection** of the internal (**client-safe ⊆
+  internal**), never a rewrite. It is the exported deliverable the client receives.
 
-A processing layer is a step in *how the analysis is built*; an output layer is
-*who the finished result is for.* They never refer to the same thing.
+**Client** — the organization Inclusity is serving in an engagement. A client is
+never a user of the system.
 
 **Seam** — an interface boundary where the concrete implementation is injected and
 can be replaced without touching the call sites: callers depend only on the
@@ -70,14 +68,19 @@ the LLM provider, the de-identification detector, and export; each exists so the
 engine can depend on an abstraction now and acquire its real implementation later
 without rework.
 
-**Engine** — the software that runs a module's pipeline end to end: the spine and
-its stages, the lenses, the findings, the two-layer output, and review and capture.
-It is what Versions 1–4 build, engagement- and actor-aware throughout. The engine
-runs on its own; the **platform** (below) wraps it without changing it.
+**Engine** — the software that runs a module's pipeline end to end (intake through
+capture): its stages, the lenses it invokes, the findings they produce, and the
+brief it assembles. It is what Versions 1–4 build, engagement- and actor-aware
+throughout. The engine needs no platform to run; the **platform** (defined below)
+wraps it without changing it.
 
-**Platform (layer)** — the layer that wraps the engine to supply what the engine
-deliberately leaves out: real **authentication** and **authorization** (login,
-roles, per-engagement grant and revoke) and shared workspaces. It is deferred
+**Platform** — the wrapper around the engine, supplying what the engine
+deliberately defers: real **authentication** and **authorization** (login,
+roles, per-engagement grant and revoke) and **shared workspaces** — the
+per-engagement collaborative model in which everyone authorized on an engagement
+works on its one brief, each action attributed. The engine enforces that sharing at
+the data level from Version 1; the platform later adds the real accounts and
+workspace around it. It is deferred
 beyond Version 4; until then those access checks live in the engine as **seams**
 that resolve trivially (identity assumed, access granted), so the platform can later
 slot in behind them without touching the engine.
@@ -192,7 +195,7 @@ So the skill transfers directly back into Sasha's business.
 
 The technical side can make the AI produce structured output. But human judgment is what determines whether the output is emotionally accurate, too generic, too corporate, too confident, missing nuance, ethically awkward, useful to a facilitator, or respectful of human complexity.
 
-That makes this a genuine partnership task — the human/facilitation intelligence becomes part of the system design, not a layer added at the end.
+That makes this a genuine partnership task — the human/facilitation intelligence becomes part of the system design, not something added at the end.
 
 **The deeper reason**
 
@@ -248,7 +251,7 @@ So the build path remains:
 - Impact Report Generator
 
 **Spans all domains**
-- Inclusity Knowledge Assistant — a knowledge layer that supports every domain rather than living in one
+- Inclusity Knowledge Assistant — a knowledge capability that supports every domain rather than living in one
 
 ---
 
@@ -392,7 +395,7 @@ This could become highly valuable in many human-centered consulting contexts.
 
 #### Sasha: Providing the Human Sensibility
 
-Sasha's contribution should not be "learn to code." It should be the human intelligence layer that makes the AI work valuable.
+Sasha's contribution should not be "learn to code." It should be the human intelligence that makes the AI work valuable.
 
 She could contribute:
 
@@ -483,7 +486,7 @@ Two further stakeholders are introduced elsewhere in this document, each tied to
 
 The lens approach is the general method for every module in Human Lens: each module's AI task is broken into a set of lenses, where each lens is a distinct prompt section and output section. The Listening Brief's seven lenses, defined below, are its first concrete instance. What changes from module to module is *which* lenses apply, because the input and purpose differ — voice synthesis, facilitator preparation, policy analysis, and impact reporting are not the same task.
 
-The important design principle is that this is not eight independent lens sets built from scratch. There is a small shared core that runs through the whole system, and each module layers its own specific lenses on top.
+The important design principle is that this is not eight independent lens sets built from scratch. There is a small shared core that runs through the whole system, and each module adds its own specific lenses.
 
 #### The shared core
 
@@ -547,7 +550,7 @@ That distinction matters enormously for DEI/culture/facilitation work.
 - emotional tones
 - representative anonymous quotes
 
-This is the basic "hear the voices" layer.
+This is the basic "hear the voices" pass.
 
 **What this lens is for — the voice is the boundary.** Listening is *faithful surfacing* and nothing more: it renders each voice as an evidence-anchored finding and leaves every act of grouping, interpretation, and judgment to the lenses downstream. Its near-triviality is the discipline working, not a gap. The governing rule:
 
@@ -565,9 +568,9 @@ Everything Listening does is an application of that rule:
 
 **Surface form is part of the voice.** Listening carries the voice's surface form — punctuation, run-ons, fragments, casing — *as given*. It does not normalize, repair, or tidy. Cleanup is both lossy (the messiness can itself be signal — fragmentation, a run-on, all-caps can carry urgency or emotional state) and a form of adding-what-wasn't-said (repairing "the training got rushed half of us are still just guessing" into "…rushed **and** half of us…" inserts a connective the speaker didn't type). The same boundary as everything else, one level down: do not add structure — even punctuation-level structure — that the voice didn't supply.
 
-The within-voice / inferred boundary is real but not always crisp ("things changed after the reorg" names the reorg yet leans on context for its meaning). The rule for the edge is *stay with the voice when unsure*; the human review layer is the backstop, and the seeded eval set should include a unit on this line so the model's landing spot is observable and tunable.
+The within-voice / inferred boundary is real but not always crisp ("things changed after the reorg" names the reorg yet leans on context for its meaning). The rule for the edge is *stay with the voice when unsure*; human review is the backstop, and the seeded eval set should include a unit on this line so the model's landing spot is observable and tunable.
 
-**Within-unit only.** A single unit is a single voice, so "within the voice" means *within the unit*. Listening never reaches across units — relations *between* units (recurrence, contradiction, shared meaning) are downstream lenses' work entirely (Culture Pattern, Tension, the Interpret layer). This is why the recurrence trio must surface as separate findings: merging them would be a between-unit relation, which Listening does not do.
+**Within-unit only.** A single unit is a single voice, so "within the voice" means *within the unit*. Listening never reaches across units — relations *between* units (recurrence, contradiction, shared meaning) are downstream lenses' work entirely (Culture Pattern, Tension, the Interpret wave). This is why the recurrence trio must surface as separate findings: merging them would be a between-unit relation, which Listening does not do.
 
 ---
 
@@ -600,7 +603,7 @@ This is where Human Lens becomes more than a summary tool.
 - repeated leadership/culture signals
 - places where experience differs across groups
 
-This is the organizational sensemaking layer.
+This is organizational sensemaking.
 
 ---
 
@@ -690,7 +693,7 @@ This keeps the AI humble.
 
 Not final recommendations. More like intelligent openings.
 
-Because the Openings layer runs last — after the Guardrail layer — the Facilitator Discernment Lens never audits action openings; they are produced after it has run. Their promoter is therefore the *other* affirmative promoter the disposition model names: human review, not Discernment. The facilitator weighs the openings and decides which of them — including any "possible client-safe next steps" — to carry to the client, and that decision is the human-review promotion. Until human review is built, action openings are held internal-only, which is the model's safe failure mode (silence, not exposure). This is intended: an opening is prepared for a person to weigh, not auto-promoted to a client.
+Because the Openings wave runs last — after the Guardrail wave — the Facilitator Discernment Lens never audits action openings; they are produced after it has run. Their promoter is therefore the *other* affirmative promoter the disposition model names: human review, not Discernment. The facilitator weighs the openings and decides which of them — including any "possible client-safe next steps" — to carry to the client, and that decision is the human-review promotion. Until human review is built, action openings are held internal-only, which is the model's safe failure mode (silence, not exposure). This is intended: an opening is prepared for a person to weigh, not auto-promoted to a client.
 
 ---
 
@@ -700,7 +703,7 @@ The lens sections above describe *what* the Listening Brief notices. This sectio
 
 #### The pipeline spine
 
-Module 1 is a pipeline. Material enters, passes through a fixed sequence of stages, and leaves as a reviewed two-layer brief plus captured learning. The stages are:
+Module 1 is a pipeline. Material enters, passes through a fixed sequence of stages, and leaves as a reviewed brief plus captured learning. The stages are:
 
 > **Intake → Normalize → De-identify (gate) → Lens processing → Assemble → Human review → Capture**
 
@@ -717,8 +720,8 @@ flowchart TD
     R --> C
     C -->|"cleared"| D["Lens processing<br/>staged pipeline →"]
     D --> E["Assemble<br/>mechanical join · no rewording"]
-    E --> INT["Internal layer<br/>full candid finding set"]
-    E --> CS["Client-safe layer<br/>filtered subset · shaping deferred"]
+    E --> INT["Internal brief<br/>full candid finding set"]
+    E --> CS["Client-safe brief<br/>filtered subset · shaping deferred"]
     INT -. "projection<br/>client-safe ⊆ internal" .-> CS
     INT --> HR
     CS --> HR
@@ -731,18 +734,18 @@ flowchart TD
     HR --> CAP["🔒 Capture<br/>edits + rating signals<br/>useful / generic / overreaching /<br/>missing-nuance / unsafe"]
     CAP -. "human-mediated learning<br/>(prompt edits, not automatic)" .-> D
 
-    LEG["🔒 = identity + authorization seam call site<br/>layer view/export is the key one — Maria sees client-safe only"]
+    LEG["🔒 = identity + authorization seam call site<br/>brief view/export is the key one — Maria sees client-safe only"]
 ```
 
 #### Engagement and actor scoping
 
-Every record the pipeline produces — every unit, every finding, every layer of the brief, every edit and rating — carries the engagement it belongs to and the actor who created or reviewed it. This is true from the first version onward, even though the early versions have a single team and no sign-in.
+Every record the pipeline produces — every unit, every finding, every part of the brief, every edit and rating — carries the engagement it belongs to and the actor who created or reviewed it. This is true from the first version onward, even though the early versions have a single team and no sign-in.
 
-The reason to build this in from the start is that Module 1 already has multiple distinct roles touching one brief even in a single pilot: the facilitator drafts and reviews, Mitchell checks the internal layer against the evidence, and Maria reads the client-safe layer for voice. "Whose rating is this? Who edited this section? Who signed off on the voice?" only have answers if the system knows who did what.
+The reason to build this in from the start is that Module 1 already has multiple distinct roles touching one brief even in a single pilot: the facilitator drafts and reviews, Mitchell checks the internal brief against the evidence, and Maria reads the client-safe brief for voice. "Whose rating is this? Who edited this section? Who signed off on the voice?" only have answers if the system knows who did what.
 
 The invariant to hold — and to test — is **isolation**: material from one engagement can never surface in another engagement's brief, and every review is attributed to the actor who made it. Testing should mock multiple engagements and multiple users and assert that isolation holds *without any authentication system existing yet*. Authentication, the grant-and-revoke-access interface, and shared workspaces are deliberately deferred to a later platform layer that wraps this engine. Building the engine engagement- and actor-aware now means that platform becomes a shell added on top of a correct data shape, rather than a later re-modeling of one that was not.
 
-A clarification on what the actor dimension scopes, since "engagement + actor scope" can be misread as per-actor read partitioning. **Isolation is at the engagement level; the actor dimension is provenance and action-authorization, not a read partition within an engagement.** An actor stamps the records it creates or reviews (provenance — "whose rating is this?") and must be authorized to *act* (contribute, promote, review, export). But *reads* are shared among the actors authorized on an engagement: the facilitator, Mitchell, and Maria all read the same engagement's brief — that is the shared-workspace review model, not a leak. So the repository correctly keys reads by engagement (gated by "is this actor authorized on this engagement?"), and there is deliberately no per-actor read isolation *within* an engagement in V1. (Whether some future engagement might restrict the internal layer to certain staff is a platform-layer question, deferred — see the authorization-model note in the build context, and the staff trust-zone item.)
+A clarification on what the actor dimension scopes, since "engagement + actor scope" can be misread as per-actor read partitioning. **Isolation is at the engagement level; the actor dimension is provenance and action-authorization, not a read partition within an engagement.** An actor stamps the records it creates or reviews (provenance — "whose rating is this?") and must be authorized to *act* (contribute, promote, review, export). But *reads* are shared among the actors authorized on an engagement: the facilitator, Mitchell, and Maria all read the same engagement's brief — that is the shared-workspace review model, not a leak. So the repository correctly keys reads by engagement (gated by "is this actor authorized on this engagement?"), and there is deliberately no per-actor read isolation *within* an engagement in V1. (Whether some future engagement might restrict the internal brief to certain staff is a platform-layer question, deferred — see the authorization-model note in the build context, and the staff trust-zone item.)
 
 #### Identity and authorization seams
 
@@ -758,9 +761,9 @@ Identity is settled first because it produces the actor that authorization consu
 Two further commitments make the seams safe to build against before any policy exists:
 
 - **A deny is a first-class return value, not an exception.** The authorization seam returns a small decision object — an allow-or-deny outcome with a slot for the reason — rather than a bare boolean (which discards the *why* the moment real policy starts denying) or an exception (which would wrongly treat "not allowed," a normal expected outcome, as a breakage). Every call site branches on the decision and has a real deny path, even though this cycle always returns allow. The test for it is exactly that: mock the seam to *return deny* and assert the call site refuses to proceed. The deny branch is built and proven before any policy exists.
-- **The `action` input is a structured identifier, not a free string, but its set is not enumerated now.** The most consequential authorization in the whole system is layer-scoped read — Maria may see the client-safe layer, the facilitator and Mitchell the internal one — so `action` must be expressive enough to name "view internal layer" versus "view client-safe layer." We commit that it can carry that distinction; we do not pre-model the full action set, which would be the over-designing the interface guards against.
+- **The `action` input is a structured identifier, not a free string, but its set is not enumerated now.** The most consequential authorization in the whole system is brief-scoped read — Maria may see the client-safe brief, the facilitator and Mitchell the internal one — so `action` must be expressive enough to name "view internal brief" versus "view client-safe brief." We commit that it can carry that distinction; we do not pre-model the full action set, which would be the over-designing the interface guards against.
 
-The seams are called at **actor-initiated boundaries** — where an actor performs an action on engagement-scoped data — not at every internal step. In Module 1 that is three places: at **Intake**, when an actor contributes material to an engagement; at **layer view and export**, the output screen's choice of which layer to read or export, where authorization carries its real future weight; and at **human review and capture**, where edits, ratings, and sign-off are read and written by actor. The machine steps in between — Normalize, the de-identification gate, lens processing, Assemble — run inside an already-authorized request: they stamp every record with engagement and actor (the scoping invariant, which is a separate mechanism from the seam calls) but do not re-call the seams. Identity resolves once per actor-initiated request and is threaded through.
+The seams are called at **actor-initiated boundaries** — where an actor performs an action on engagement-scoped data — not at every internal step. In Module 1 that is three places: at **Intake**, when an actor contributes material to an engagement; at **brief view and export**, the output screen's choice of which brief to read or export, where authorization carries its real future weight; and at **human review and capture**, where edits, ratings, and sign-off are read and written by actor. The machine steps in between — Normalize, the de-identification gate, lens processing, Assemble — run inside an already-authorized request: they stamp every record with engagement and actor (the scoping invariant, which is a separate mechanism from the seam calls) but do not re-call the seams. Identity resolves once per actor-initiated request and is threaded through.
 
 Where each seam is invoked follows from this. Identity is resolved at the request boundary — the web layer turns a session into an actor once per request and threads it inward; the engine never parses sessions. Authorization, by contrast, is enforced by the engine itself: each of the three operations above asks the authorization seam, at its own boundary, whether the actor may proceed. The effect is that the engine is **self-protecting** — the authorization decision holds whatever calls the engine, rather than relying on the web layer to have filtered first — which is the more faithful reading of dependency inversion here, since the engine depends on the authorization abstraction with policy still deferred behind it. Folding the check into the engine's own operations is the deliberate choice over a front-door-only check, which any other caller could bypass, and over a separate enforcement layer, which would only move the "trusts its caller" problem up a level.
 
@@ -799,9 +802,9 @@ The `speaker_token` is what keeps later counting honest. When the brief reports 
 
 #### Lens processing: a staged pipeline
 
-The seven lenses are defined above, but defining them does not say how they run. The temptation is to treat them as seven independent passes over the units, or to fold all seven into a single prompt. Both are wrong, for the same reason: **the lenses are not peers — they form five dependency layers**, and some lenses cannot do their work until earlier ones have produced something to work from.
+The seven lenses are defined above, but defining them does not say how they run. The temptation is to treat them as seven independent passes over the units, or to fold all seven into a single prompt. Both are wrong, for the same reason: **the lenses are not peers — they form five lens waves**, and some lenses cannot do their work until earlier ones have produced something to work from.
 
-Read in that light, the seven lenses sort into layers:
+Read in that light, the seven lenses sort into waves:
 
 - **Evidence** — the Listening Lens and the Human Meaning Lens, which read the units directly.
 - **Aggregate** — the Culture Pattern Lens and the Tension Lens, which work across the whole set of units rather than one at a time.
@@ -813,12 +816,12 @@ Each stage reads the units and the findings of the stages above it. This is what
 
 The staged pipeline keeps each lens a separate, individually versioned prompt — which matters for both evaluation and the later learning loop, since a single lens can be revised without disturbing the others — while letting later lenses build on earlier ones. Two further properties follow:
 
-- The **Discernment Lens runs late**, so it can actually audit the accumulated findings. Its flags are not advisory notes; they drive what happens at Assemble, deciding which findings may appear in the client-safe layer and which are held to the internal one. It does this by *revising* the findings it audits rather than emitting a separate side channel: Discernment sets a finding's `cleared_to_client_safe` and `sensitivity` by re-emitting that finding under its original `finding_id`, rebuilt through the same sanctioned factory the lenses use — so support stays derived and anchoring re-enforced, disposition is never hand-set, and it lives on the finding itself (one source of truth, leaving Assemble unchanged). The orchestrator lets only this late Guardrail stage supersede a finding by id; every other layer appends, so revising another lens's finding is the auditor's privilege alone, and a stray id collision in any other layer stays a visible append rather than a silent drop on the path that gates client exposure.
-- Within a layer, lenses that do not depend on each other can run in parallel. This matters because a staged pipeline is inherently slower than a single call, and the Listening and Human Meaning lenses, or the Culture Pattern and Tension lenses, need not wait on each other.
+- The **Discernment Lens runs late**, so it can actually audit the accumulated findings. Its flags are not advisory notes; they drive what happens at Assemble, deciding which findings may appear in the client-safe brief and which are held to the internal one. It does this by *revising* the findings it audits rather than emitting a separate side channel: Discernment sets a finding's `cleared_to_client_safe` and `sensitivity` by re-emitting that finding under its original `finding_id`, rebuilt through the same sanctioned factory the lenses use — so support stays derived and anchoring re-enforced, disposition is never hand-set, and it lives on the finding itself (one source of truth, leaving Assemble unchanged). The orchestrator lets only this late Guardrail stage supersede a finding by id; every other wave appends, so revising another lens's finding is the auditor's privilege alone, and a stray id collision in any other wave stays a visible append rather than a silent drop on the path that gates client exposure.
+- Within a wave, lenses that do not depend on each other can run in parallel. This matters because a staged pipeline is inherently slower than a single call, and the Listening and Human Meaning lenses, or the Culture Pattern and Tension lenses, need not wait on each other.
 
 ```mermaid
 ---
-title: "Module 1 — Lens processing: seven lenses, five dependency layers"
+title: "Module 1 — Lens processing: seven lenses, five lens waves"
 ---
 flowchart TD
     U["Cleared units<br/>(de-identified)"]
@@ -840,15 +843,15 @@ flowchart TD
     L5["Openings — Action Opening Lens<br/>points toward possible next steps"]
 
     U --> L1 --> L2 --> L3 --> L4 --> L5
-    L4 -->|"sensitivity + cleared-to-client-safe<br/>drive the two-layer split"| OUT["→ Assemble"]
+    L4 -->|"sensitivity + cleared-to-client-safe<br/>drive the internal/client-safe split"| OUT["→ Assemble"]
     L5 --> OUT
 
-    NOTE["Each layer reads the units AND every finding above it.<br/>Lenses within a layer are independent — may run in parallel.<br/>Every finding shares one interface; interpretive findings must be<br/>evidence-anchored (validation rule). Absence findings are exempt."]
+    NOTE["Each wave reads the units AND every finding from earlier waves.<br/>Lenses within a wave are independent — may run in parallel.<br/>Every finding shares one interface; interpretive findings must be<br/>evidence-anchored (validation rule). Absence findings are exempt."]
 ```
 
 #### The Finding
 
-A **finding** is the counterpart to a unit: if a unit is something a person said, a finding is something a lens noticed. Every lens, in every layer, emits findings of one **common interface**, so that findings can flow down the pipeline and later lenses can read earlier ones. A finding carries:
+A **finding** is the counterpart to a unit: if a unit is something a person said, a finding is something a lens noticed. Every lens, in every wave, emits findings of one **common interface**, so that findings can flow down the pipeline and later lenses can read earlier ones. A finding carries:
 
 - `finding_id` — a stable handle, so a finding can be referenced (by `parent`, and by the client-safe projection's correspondence back to its internal finding); analogous to a unit's `unit_id`
 - `lens` — which lens produced it
@@ -857,40 +860,40 @@ A **finding** is the counterpart to a unit: if a unit is something a person said
 - `source_language` — the original language name (e.g. "Spanish"), present whenever `translation` is. `translation`/`source_language` are a **pair** (both or neither). For a mixed-language unit: `verbatim` is the mixed original as-is, `translation` renders the whole to English, `source_language` names the non-English language present.
 - `evidence_links` — the `unit_id`s that support it
 - `support_set` — the distinct sources behind those units (and, once unit type-specific extensions land, segments), from which strength and spread are derived. V1 derives distinct sources (by `speaker_token`) and unit count; the segment dimension arrives with the type-specific extensions.
-- `cleared_to_client_safe` — whether it has been affirmatively promoted to the client-safe layer; **defaults to held** (internal-only) until the Discernment Lens or human review clears it. Every finding is in the internal layer regardless, so client-safe ⊆ internal holds by construction.
+- `cleared_to_client_safe` — whether it has been affirmatively promoted to the client-safe brief; **defaults to held** (internal-only) until the Discernment Lens or human review clears it. Every finding is in the internal brief regardless, so client-safe ⊆ internal holds by construction.
 - `sensitivity` — whether it needs careful handling (see below)
 - `finding_kind` — an ordinary finding, or a sanctioned *absence* finding
 - `parent` — the finding it nests under, so themes can carry subthemes
 
-The most important rule on this interface is what makes the evidence-versus-interpretation distinction real rather than hoped-for. **Any finding from an interpretive layer must be anchored to the units that support it.** An inferred pattern or tension with no `evidence_links` is treated as a defect the pipeline catches and the Discernment Lens surfaces — not as something we trust the prompt to have done well. This is the difference between asking a prompt to separate evidence from interpretation and making the separation a property the output must satisfy. It also pulls a capability the roadmap had placed later into the core, where it belongs, because it is the heart of what Mitchell's evidence standards demand.
+The most important rule on this interface is what makes the evidence-versus-interpretation distinction real rather than hoped-for. **Any finding from an interpretive wave must be anchored to the units that support it.** An inferred pattern or tension with no `evidence_links` is treated as a defect the pipeline catches and the Discernment Lens surfaces — not as something we trust the prompt to have done well. This is the difference between asking a prompt to separate evidence from interpretation and making the separation a property the output must satisfy. It also pulls a capability the roadmap had placed later into the core, where it belongs, because it is the heart of what Mitchell's evidence standards demand.
 
 Two clarifications keep the rule honest. First, some of the most valuable findings are **about silence** — "no one mentioned psychological safety," or "leaders spoke of trust while front-line voices did not." These have no supporting quote by their nature, so the `absence` finding kind is exempt from the anchoring rule: the architecture must be able to notice the dog that did not bark. Second, **strength is derived, not asserted.** Because a finding's support is the `support_set` behind its `evidence_links`, "how much evidence" is something the system can show and a reviewer can check — counted across distinct sources and segments, never as a bare confidence label and never inflated into a count of people.
 
-The `sensitivity` flag is deliberately separate from de-identification. De-identification asks whether material could expose who said it, and is handled upstream at the gate. Sensitivity asks whether a finding, even when fully anonymous and true, is charged enough that surfacing it bluntly — or surfacing it to the client at all — could do harm. That is a property of a finding, judged late by the Discernment Lens, and it is the signal the two-layer assembly relies on.
+The `sensitivity` flag is deliberately separate from de-identification. De-identification asks whether material could expose who said it, and is handled upstream at the gate. Sensitivity asks whether a finding, even when fully anonymous and true, is charged enough that surfacing it bluntly — or surfacing it to the client at all — could do harm. That is a property of a finding, judged late by the Discernment Lens, and it is the signal the brief's assembly relies on.
 
-#### The two-layer output
+#### The brief
 
-Assemble produces the deliverable: a brief with two layers, an internal facilitator-only layer and a client-safe layer. The defining decision here is that these are **not two separate generations of text — they are two views of one set of findings.** The client-safe layer is a filtered projection of the internal one — a subset of the same findings, not a separate rewrite of them.
+Assemble produces the deliverable: a brief in two types, an internal (facilitator-only) brief and a client-safe brief. The defining decision here is that these are **not two separate generations of text — they are two views of one set of findings.** The client-safe brief is a filtered projection of the internal one — a subset of the same findings, not a separate rewrite of them.
 
-The internal layer is the full candid set: every finding, including low-confidence inferences, unresolved tensions, findings about silence, and the Discernment Lens's cautions about what is uncertain or should not be overstated. It is written for the people who can hold that candor — the facilitator and Mitchell.
+The internal brief is the full candid set: every finding, including low-confidence inferences, unresolved tensions, findings about silence, and the Discernment Lens's cautions about what is uncertain or should not be overstated. It is written for the people who can hold that candor — the facilitator and Mitchell.
 
-The client-safe layer is built from the same findings by **filtering only**. A finding appears in it only if it has been cleared to the client-safe layer (`cleared_to_client_safe`) and its `sensitivity` flag does not hold it back. The default disposition is to **hold**: `cleared_to_client_safe` stays false — internal-only — unless something affirmatively promotes it — the Discernment Lens, and human review, clearing it for the client-safe layer. The safe failure mode is therefore silence, not exposure: if discernment has not run, or is uncertain, the finding simply does not reach the client layer. A finding's `evidence_links` (and its verbatim source) are preserved as it moves into the client-safe layer, so traceability survives into the version a client might see.
+The client-safe brief is built from the same findings by **filtering only**. A finding appears in it only if it has been cleared to the client-safe brief (`cleared_to_client_safe`) and its `sensitivity` flag does not hold it back. The default disposition is to **hold**: `cleared_to_client_safe` stays false — internal-only — unless something affirmatively promotes it — the Discernment Lens, and human review, clearing it for the client-safe brief. The safe failure mode is therefore silence, not exposure: if discernment has not run, or is uncertain, the finding simply does not reach the client-safe brief. A finding's `evidence_links` (and its verbatim source) are preserved as it moves into the client-safe brief, so traceability survives into the version a client might see.
 
-**The projection is a pure filter — it only ever removes findings, never rewords them.** This keeps the integrity guarantee in its strongest form (see below) and keeps findings verbatim end-to-end. The *shaping* the client layer needs — softening phrasing, applying Inclusity's voice — is deliberately **not** done here; it is a separate, dedicated stage (see "Client-facing shaping" below), so that the filter stays a provable subset operation and rephrasing never contaminates the findings or the ⊆ guarantee.
+**The projection is a pure filter — it only ever removes findings, never rewords them.** This keeps the integrity guarantee in its strongest form (see below) and keeps findings verbatim end-to-end. The *shaping* the client-safe brief needs — softening phrasing, applying Inclusity's voice — is deliberately **not** done here; it is a separate, dedicated stage (see "Client-facing shaping" below), so that the filter stays a provable subset operation and rephrasing never contaminates the findings or the ⊆ guarantee.
 
-**The pipeline's working text is always English.** A downstream lens reads `translation` when present, else `verbatim` (already English) — resolved at a *single point* (the prompt-projection helper), so no lens keys off the wrong field. `verbatim` always travels alongside, so the original words are never lost from the pipeline and are available at the human-facing layers and for audit. The translation flag is **structural** — the presence of `translation`/`source_language` *is* the signal — not an inline prose note. *(A possible future structural guard — "`verbatim` must be a substring of a cited unit" — was considered and deliberately not added: translation, mixed-language, and legitimate span-trimming all break exact-substring matching.)*
+**The pipeline's working text is always English.** A downstream lens reads `translation` when present, else `verbatim` (already English) — resolved at a *single point* (the prompt-projection helper), so no lens keys off the wrong field. `verbatim` always travels alongside, so the original words are never lost from the pipeline and are available in the human-facing briefs and for audit. The translation flag is **structural** — the presence of `translation`/`source_language` *is* the signal — not an inline prose note. *(A possible future structural guard — "`verbatim` must be a substring of a cited unit" — was considered and deliberately not added: translation, mixed-language, and legitimate span-trimming all break exact-substring matching.)*
 
-This projection relationship buys an integrity guarantee that matters for Mitchell's standards: because the client-safe layer is provably a subset of the candid internal analysis, nothing can appear in front of a client that is not grounded in what the facilitator saw. Findings the Discernment Lens held back for sensitivity are simply absent from the client-safe layer — never quietly reworded so they can slip through. The split is a property of how the brief is assembled, not a manual cleanup step performed afterward.
+This projection relationship buys an integrity guarantee that matters for Mitchell's standards: because the client-safe brief is provably a subset of the candid internal analysis, nothing can appear in front of a client that is not grounded in what the facilitator saw. Findings the Discernment Lens held back for sensitivity are simply absent from the client-safe brief — never quietly reworded so they can slip through. The split is a property of how the brief is assembled, not a manual cleanup step performed afterward.
 
 ##### Client-facing shaping (a dedicated stage, deferred)
 
-Producing the client-facing rendering — softening phrasing and applying Inclusity's voice — is its own concern, given its own devoted stage rather than folded into the projection or any earlier lens. This separation is deliberate: the surfacing lenses keep findings *verbatim* (the speaker's own words; see "The Finding"), the filter that builds the client-safe layer only *removes* findings, and **the dedicated shaping stage is the single, late, explicit, auditable place where finding wording is transformed at all** — applied as a skin over already-verbatim, already-filtered findings, where it cannot contaminate the evidence or weaken the ⊆ guarantee. Each transformation thus has exactly one owner: lenses surface, Discernment judges clearance/sensitivity, the filter subsets, the shaping stage voices.
+Producing the client-facing rendering — softening phrasing and applying Inclusity's voice — is its own concern, given its own devoted stage rather than folded into the projection or any earlier lens. This separation is deliberate: the surfacing lenses keep findings *verbatim* (the speaker's own words; see "The Finding"), the filter that builds the client-safe brief only *removes* findings, and **the dedicated shaping stage is the single, late, explicit, auditable place where finding wording is transformed at all** — applied as a skin over already-verbatim, already-filtered findings, where it cannot contaminate the evidence or weaken the ⊆ guarantee. Each transformation thus has exactly one owner: lenses surface, Discernment judges clearance/sensitivity, the filter subsets, the shaping stage voices.
 
 How that voice calibration is expressed and adjusted is left open (it is Inclusity-dependent and tied to the unresolved voice-calibration promise to Maria), so the **stage itself is deferred** for V1 — but the architecture names it as its own thing now rather than leaving rephrasing tangled inside Assemble. Assemble remains a mechanical join; it makes no judgments and does no rewording.
 
 #### Human review and capture
 
-The brief that Assemble produces is a draft. Review is not a final formality bolted onto the system — it is the stage where the system's entire posture, "AI surfaces, humans decide," becomes literal. Three actors meet one artifact, each with a distinct role: the facilitator weighs, corrects, and adds; Mitchell checks the internal layer against the evidence; Maria reads the client-safe layer for voice. Because every record is actor-scoped, each of these acts is attributed to the person who made it.
+The brief that Assemble produces is a draft. Review is not a final formality bolted onto the system — it is the stage where the system's entire posture, "AI surfaces, humans decide," becomes literal. Three actors meet one artifact, each with a distinct role: the facilitator weighs, corrects, and adds; Mitchell checks the internal brief against the evidence; Maria reads the client-safe brief for voice. Because every record is actor-scoped, each of these acts is attributed to the person who made it.
 
 Review is where the reviewer's judgment re-enters the material. Sections are editable, and reviewers mark findings with a small set of signals — useful, generic, overreaching, missing nuance, unsafe — which name the ways a finding can fall short of what the work needs.
 
@@ -905,12 +908,12 @@ The eight success criteria below are the bar Module 1 must clear, but they are n
 The **structural tier** checks invariants the architecture has already made checkable, and runs on every pipeline execution:
 
 - interpretive findings are anchored to evidence, or are sanctioned absence findings
-- the client-safe layer is a subset of the internal one, with evidence links preserved and sensitivity-held findings absent
+- the client-safe brief is a subset of the internal one, with evidence links preserved and sensitivity-held findings absent
 - the `sensitivity` field is populated, and the de-identification gate was enforced
 - language is tagged and no Spanish units were silently dropped
 - themes carry their subtheme hierarchy, and the tool accepts the expected volume of comments
 
-The value of these checks compounds over time. Once lenses are revised by hand under the learning approach, the structural tier is what catches a prompt edit the moment it breaks evidence anchoring or layer integrity — it is the regression guard that lets the prompts change safely.
+The value of these checks compounds over time. Once lenses are revised by hand under the learning approach, the structural tier is what catches a prompt edit the moment it breaks evidence anchoring or brief integrity — it is the regression guard that lets the prompts change safely.
 
 The **qualitative tier** is rooted in a rubric and expressed through the review signals already described. Whether the themes are the right ones, whether an interpretation is sound rather than merely anchored, whether nuance was preserved or flattened, whether the facilitator questions are worth bringing into a room, whether meaning survived translation — these are judgments, and the useful / generic / overreaching / missing-nuance / unsafe signals are how they are recorded. Evaluation and capture are therefore the same data seen twice: the signals a reviewer gives in the course of normal review are the evaluation, and aggregated per lens across many briefs they show whether a lens is working.
 
@@ -939,8 +942,8 @@ Several decisions were deliberately set aside while this architecture was settle
 - **Authentication and authorization.** The approach is settled: identity and authorization exist as seams from Version 1, exercised on every access path but resolving trivially in this cycle — identity assumed, access always granted — with callers depending only on the abstractions. What is deferred to the platform layer is the implementation behind them: real login, the role and permission model, and per-engagement grant and revoke, none of which changes the seam's inputs (actor, engagement, action). The seam interfaces themselves are now designed — see *Identity and authorization seams* above; what remains deferred is only the policy that sits behind them.
 - **Voice calibration.** Inclusity's voice is applied at the dedicated, deferred client-facing shaping stage (not at Assemble, which is a mechanical join) — but how that calibration is expressed, and in particular how directly a non-engineer can adjust it, is undecided. This bears directly on what has been described to Inclusity about configuring the system's voice, and should be reconciled with it.
 - **When the structural evaluation tier is automated.** Version 0 has no pipeline, so its checks are manual. The point at which the structural checks become automated regression guards depends on when the pipeline itself exists, and should be settled as part of the build sequence.
-- **Lens orchestration detail.** The staged-pipeline structure is fixed, but the orchestration within it — how independent lenses in a layer are run in parallel, how findings are passed between stages — is build-out detail left for implementation.
-- **Re-deriving the build sequence (done).** The Version Roadmap below was originally sketched before this architecture was worked out. It has now been re-derived from the architecture and reconciled against the original — most notably by moving the trust-critical properties out of Version 2 and into Version 1, correcting the two-layer output to a single projected finding set, and parking the platform layer beyond the first build cycle.
+- **Lens orchestration detail.** The staged-pipeline structure is fixed, but the orchestration within it — how independent lenses in a wave are run in parallel, how findings are passed between stages — is build-out detail left for implementation.
+- **Re-deriving the build sequence (done).** The Version Roadmap below was originally sketched before this architecture was worked out. It has now been re-derived from the architecture and reconciled against the original — most notably by moving the trust-critical properties out of Version 2 and into Version 1, correcting the brief to a single projected finding set, and parking the platform layer beyond the first build cycle.
 
 ---
 
@@ -950,7 +953,7 @@ The entire roadmap stays inside Module 1: V0–V4 mature one module to pilot-rea
 
 ### Version Roadmap
 
-This roadmap is derived from the architecture above: each version brings a defined set of those commitments online, sequenced to prove the riskiest assumption as early and as cheaply as possible. The trust-critical properties — the de-identification gate, the separation of evidence from interpretation, the two-layer output, sensitivity flagging — are not deferred improvements. They are foundational, and they appear as soon as there is software to hold them.
+This roadmap is derived from the architecture above: each version brings a defined set of those commitments online, sequenced to prove the riskiest assumption as early and as cheaply as possible. The trust-critical properties — the de-identification gate, the separation of evidence from interpretation, the internal/client-safe brief split, sensitivity flagging — are not deferred improvements. They are foundational, and they appear as soon as there is software to hold them.
 
 ```mermaid
 ---
@@ -959,11 +962,11 @@ title: "Version progression — one structure: V1 brings it online, V2–V4 refi
 flowchart TD
     V0["V0 · Manual Prompt Lab<br/>no pipeline — prove the thinking,<br/>and define the rubric WITH Mitchell (V0's real deliverable)"]
 
-    V1["V1 · THE TRUSTWORTHY ENGINE — full spine online<br/>• scoping (engagement + actor) on every record<br/>• de-identify gate (basic scan + human checkpoint)<br/>• staged lens pipeline — 7 lenses, 5 layers<br/>• Finding with enforced evidence anchoring<br/>• two-layer output as ONE projection (client-safe ⊆ internal)<br/>• human review + capture<br/>• structural evaluation tier<br/>• auth/authz SEAMS present (resolve trivially: identity assumed, access granted)"]
+    V1["V1 · THE TRUSTWORTHY ENGINE — full spine online<br/>• scoping (engagement + actor) on every record<br/>• de-identify gate (basic scan + human checkpoint)<br/>• staged lens pipeline — 7 lenses, 5 waves<br/>• Finding with enforced evidence anchoring<br/>• brief as ONE projection (client-safe ⊆ internal)<br/>• human review + capture<br/>• structural evaluation tier<br/>• auth/authz SEAMS present (resolve trivially: identity assumed, access granted)"]
 
     V2["V2 · Reliability & Refinement — same spine, components stronger<br/>• cross-language de-identification detector<br/>• multilingual fidelity (meaning preserved, not just detected)<br/>• evaluation harness + seeded set with Mitchell → recall test on sensitive flags<br/>• output comparison + per-lens prompt versioning"]
 
-    V3["V3 · Limited Inclusity Context — same spine + one new input<br/>• small context store (framing docs, tone guide, preferred/avoided terms, rubric, sample brief)<br/>• calibrates the Objective lens + gives the client-safe layer Inclusity's actual voice"]
+    V3["V3 · Limited Inclusity Context — same spine + one new input<br/>• small context store (framing docs, tone guide, preferred/avoided terms, rubric, sample brief)<br/>• calibrates the Objective lens + gives the client-safe brief Inclusity's actual voice"]
 
     V4["V4 · Pilot-Ready — same spine, declared shippable as a narrow prototype<br/>(platform layer — real auth, per-engagement access control, shared workspaces —<br/>sits BEYOND this cycle, wrapping the engine rather than changing it)"]
 
@@ -1008,7 +1011,7 @@ What comes online here is the architecture's spine, with the trust-critical prop
 **Input screen:**
 - paste/upload qualitative comments
 - choose context: survey, workshop notes, interview notes, discovery notes
-- choose which layer to view or export: the internal facilitator brief or its client-safe projection
+- choose which brief to view or export: the internal facilitator brief or its client-safe projection
 - optional notes about client/audience
 
 **AI output screen:**
@@ -1050,7 +1053,7 @@ For example, you might add:
 - a synthesis rubric
 - a sample "excellent" facilitator brief
 
-This is not yet a general searchable knowledge base. It is just enough context to make the Module 1 synthesis less generic. Concretely, this is what *calibrates* the Inclusity Objective lens — which has been running since Version 1, but against generic framing — and what gives the client-safe layer Inclusity's actual voice. The lens exists early; its calibration arrives here.
+This is not yet a general searchable knowledge base. It is just enough context to make the Module 1 synthesis less generic. Concretely, this is what *calibrates* the Inclusity Objective lens — which has been running since Version 1, but against generic framing — and what gives the client-safe brief Inclusity's actual voice. The lens exists early; its calibration arrives here.
 
 ---
 

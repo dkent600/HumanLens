@@ -53,27 +53,33 @@ partner and the writer of `build_approach.md`.
   Seven Lenses; System Architecture) · **Part 3 · The Roadmap — Module 1** (Version
   Roadmap). Front matter is **"## How to Read This Document"** only (Terminology
   eliminated, see below); the six content sections demoted to `###`, subsections to
-  `####`, with one `#####` (Client-facing shaping, under the two-layer output).
+  `####`, with one `#####` (Client-facing shaping, under the brief §).
 - **"## How to Read This Document"** defines the recurring terms once, up front, in
   dependency order (smallest unit → document structure): **Lens** (a distinct
   prompt and response section in one AI pass — where the AI is used) → **Module** (a
   self-contained analysis structured as a pipeline of functional stages, one of
   which runs its lenses — Module 1 has seven) → **Pipeline** (how a module runs:
   intake → normalize → de-identify gate → lens processing → assemble → human review
-  → capture; also defines **stage** = one step, **spine** = the ordered run of
-  stages) → **Gate** (a stage material must clear; the de-identification gate — de-id
-  proper is upstream at Inclusity, the gate verifies) → **Layer** (two senses:
-  *processing layer* = the dependency structure over a module's lenses,
-  Evidence→Aggregate→Interpret→Guardrail→Openings; *output layer* = internal vs
-  **client-safe**, client-safe ⊆ internal) → **Seam** (injection boundary; moved
-  here from the deleted Terminology) → **Engine** (the software that runs a module's
-  pipeline end to end; what V1–V4 build) → **Platform (layer)** (wraps the engine:
-  real auth + shared workspaces; deferred beyond V4) → **Authentication /
-  Authorization** (the two access checks the platform implements, present as seams
-  from V1) → **Version** (orthogonal maturity axis, V0–V4, all inside Module 1) →
-  **Parts** (the three parts and their **register**s). NOTE: **Layer** is flagged
-  for a revisit; **normalize** in the spine is the next item (in-engine, as the doc
-  has it, vs. upstream at Inclusity); "Pipeline" is also defined again in prose at
+  → capture; emits a **Brief**; also defines **stage** = one step, **spine** = the
+  ordered run of stages) → **Lens wave** (the lens-processing stage's internal
+  structure: five ordered waves Evidence→Aggregate→Interpret→Guardrail→Openings;
+  lenses in a wave run in parallel and read earlier waves' findings from one shared
+  pool; waves are NOT stages) → **Gate** (a stage material must clear; the
+  de-identification gate — de-id proper is upstream at Inclusity, the gate verifies)
+  → **Brief** (a module's deliverable to Inclusity in two **types**: **internal
+  brief** = the complete candid finding set, for facilitator + Dr. Campbell;
+  **client-safe brief** = the cleared subset shown to the client, a pure projection
+  client-safe ⊆ internal, never a rewrite, the exported deliverable) → **Client**
+  (the organization Inclusity serves in an engagement; never a user of the system) →
+  **Seam** (injection boundary; moved here from the deleted Terminology) → **Engine**
+  (the software that runs a module's pipeline end to end; what V1–V4 build) →
+  **Platform** (wraps the engine: real auth + shared workspaces; deferred beyond V4)
+  → **Authentication / Authorization** (the two access checks the platform
+  implements, present as seams from V1) → **Version** (orthogonal maturity axis,
+  V0–V4, all inside Module 1) → **Parts** (the three parts and their **register**s).
+  NOTE: the **Layer** term is retired — output sense → **Brief** (internal/client-safe
+  types), processing sense → **Lens wave**; directionality is horizontal
+  (earlier/later, never above/below); "Pipeline" is also defined again in prose at
   "The pipeline spine" (Part 2) — intentional overlap for now.
 - **Terminology section eliminated.** Its **seam** definition moved into How to Read
   (now the single place seam is defined — the in-context re-definition under
@@ -98,8 +104,8 @@ partner and the writer of `build_approach.md`.
 - **Consistency reconciliation (this session, both files):** the superseded
   "rephrased / voice-calibrated subset" framing of the client-safe projection was
   retired for the settled **pure-filter** framing — in `build_approach.md` at the
-  two-layer prose and the pipeline-diagram label (`filtered subset · shaping
-  deferred`), and in this file's locked two-layer entry below. (Also fixed in this
+  brief prose and the pipeline-diagram label (`filtered subset · shaping
+  deferred`), and in this file's locked brief entry below. (Also fixed in this
   file's locked entries: Finding `content` → `verbatim`/`translation`/
   `source_language`; `sourceLanguage`→`source_language` prose casing.) A follow-up
   `voice`/`assemble` sweep then re-pointed three residual "voice applied at Assemble"
@@ -110,11 +116,11 @@ partner and the writer of `build_approach.md`.
   everywhere; voice/shaping is located only at the deferred shaping stage.
 - System Architecture (Part 2) subsections, in order: pipeline spine; engagement &
   actor scoping; identity & authorization seams; de-identification gate; the Unit;
-  lens processing (staged pipeline); the Finding; the two-layer output; human
+  lens processing (staged pipeline); the Finding; the brief; human
   review & capture; evaluation; **Success Criteria** (relocated in); open questions
   & deferred decisions.
 - Three Mermaid diagrams embedded as fenced ```mermaid blocks: (1) macro pipeline
-  spine — after the pipeline-spine prose; (2) lens processing, 5 dependency layers
+  spine — after the pipeline-spine prose; (2) lens processing, 5 lens waves
   — end of the staged-pipeline subsection; (3) version progression V0→V4 — top of
   "### Version Roadmap" (Part 3). Standalone `.mermaid` copies also in
   `/mnt/user-data/outputs/` (module1_macro_spine, module1_lens_pipeline,
@@ -186,12 +192,12 @@ partner and the writer of `build_approach.md`.
   omit rather than fabricate; no-op + "insufficient material" when too few).
   `speaker_token` keeps support honest: count "N units across M sources/segments",
   never "N people".
-- Lens processing = STAGED PIPELINE. The 7 Module-1 lenses form 5 dependency
-  layers: Evidence (Listening, Human Meaning) → Aggregate (Culture Pattern,
+- Lens processing = STAGED PIPELINE. The 7 Module-1 lenses form 5 lens waves:
+  Evidence (Listening, Human Meaning) → Aggregate (Culture Pattern,
   Tension) → Interpret (Inclusity Objective) → Guardrail (Facilitator
   Discernment) → Openings (Action Opening). Each lens is a separate, versioned
   prompt. Discernment runs late so it can audit prior findings; its flags drive
-  the two-layer split. Independent lenses within a layer may run in parallel.
+  the internal/client-safe split. Independent lenses within a wave may run in parallel.
   (Rejected: single composite call; seven independent passes.)
 - Common **Finding** interface (finding_id, lens, verbatim/translation/
   source_language, evidence_links → unit_ids, support_set, cleared_to_client_safe,
@@ -205,18 +211,18 @@ partner and the writer of `build_approach.md`.
   projection correspondence. `support_set` V1 = distinct sources (by speaker_token)
   + unit count; the segment dimension is deferred with the unit type-specific
   extensions.
-- Two-layer output = two PROJECTIONS of one finding set. Internal = full candid
+- Brief = two PROJECTIONS of one finding set. Internal = full candid
   set. Client-safe = a PURE FILTER over the same findings (cleared_to_client_safe
   + sensitivity), evidence_links preserved — removes findings, never rewords them.
   Integrity guarantee: client-safe ⊆ internal. Voice/shaping is a SEPARATE,
   DEFERRED stage applied over already-filtered findings — NOT part of the
   projection and NOT folded into Assemble (which stays a mechanical join).
   DEFAULT DISPOSITION = HELD: a finding is internal-only unless affirmatively
-  promoted (Discernment + human review) to the client-safe layer — safe failure
+  promoted (Discernment + human review) to the client-safe brief — safe failure
   mode is silence, not exposure. (Surfaced by the V1 slice plan; model the
   disposition so "held by default" and client-safe-outside-internal-is-impossible
   are both obvious in the type — e.g. a binary held / cleared, not a 3-value enum.)
-- Human review by 3 actors (facilitator; Mitchell — internal layer vs evidence;
+- Human review by 3 actors (facilitator; Mitchell — internal brief vs evidence;
   Maria — client-safe voice). Rating signals: useful / generic / overreaching /
   missing nuance / unsafe. Capture keys edits+signals to finding+lens+unit,
   engagement/actor-scoped; keeps learning (patterns), not raw voices.
@@ -257,10 +263,10 @@ partner and the writer of `build_approach.md`.
   this cycle always allows; test by MOCKING the seam to return deny and asserting
   the call site refuses to proceed.
   (4) `action` = structured identifier (not free string), expressive enough for
-  LAYER-SCOPED READ (Maria→client-safe; facilitator/Mitchell→internal), the most
+  BRIEF-SCOPED READ (Maria→client-safe; facilitator/Mitchell→internal), the most
   consequential authz in the system; action set NOT enumerated now (over-design
   trap).
-  Call sites at ACTOR-INITIATED boundaries only — Intake; layer view/export;
+  Call sites at ACTOR-INITIATED boundaries only — Intake; brief view/export;
   human review & capture. Machine steps (Normalize, de-id gate, lens processing,
   Assemble) run inside an already-authorized request, stamp engagement+actor
   (scoping invariant — separate mechanism), do NOT re-call the seams. Identity
@@ -542,7 +548,10 @@ invariants above). The whole project is the **case study**; its first built vers
     authorization, NOT a read partition within an engagement. Any actor authorized on
     an engagement reads that engagement's brief (shared-workspace review: facilitator /
     Mitchell / Maria share one brief). Repo correctly keys reads by engagement; no
-    per-actor read isolation within an engagement in V1.
+    per-actor read isolation within an engagement in V1. This data-level sharing is
+    the V1 half of the platform's deferred **shared workspaces** — the engine enforces
+    who-shares-what now; real accounts + workspace machinery come with the platform
+    (beyond V4).
 - Finding→finding provenance: interpretive findings anchor to UNITS (the trust
   guarantee) and the pipeline passes prior findings live via staging, so no stored
   "synthesized-from" field exists (only `parent` for subtheme nesting). Whether to
@@ -560,7 +569,7 @@ invariants above). The whole project is the **case study**; its first built vers
   (e.g. an opening built on a sensitive finding inheriting caution), thread disposition
   into the lens↔model projection — additive, out of V1 scope.
 - **Staff-facing trust zone (PAIRED question)** — two needs share one shape: (a) a
-  facilitator-facing **internal-layer** view of the brief, and (b) **per-unit intake
+  facilitator-facing **internal-brief** view of the brief, and (b) **per-unit intake
   status** (which unit the gate flagged, needing `deid_status` to cross). Both are
   legitimate staff-only needs the *client-safe* `shared` contract cannot carry (internal
   types / `deid_status` are forbidden from `shared` by design). They are the SAME
@@ -697,16 +706,27 @@ decisions" above. Genuinely-open work remaining:
    prompt for precise confidentiality language.
 4. Seam IMPLEMENTATION shape against the settled signatures: exact decision-object
    fields; where identity is resolved/threaded; the deny-path test scaffolding.
-5. Lens orchestration detail (parallelism within a layer, finding-passing between
+5. Lens orchestration detail (parallelism within a wave, finding-passing between
    stages) — moves from "deferred" toward design when V1 build begins.
 6. Whether `build_approach.md` needs its own output (PDF/docx) setup, or stays
    markdown-only as an internal doc.
-7. Revisit **Layer** in How to Read (Doug flagged it for a second pass). Settle
-   alongside it the parallel question: "Pipeline" is now defined in How to Read but
-   also re-defined in prose at "The pipeline spine" (Part 2) — same defined-up-top-
-   then-elaborated pattern as Layer. Decide how much Part 2 should re-state vs.
-   reference for both. Also in scope: the "reviewed two-layer brief" phrasing in the
-   Pipeline entry (Doug flagged it to be settled as part of the layers review).
+7. **Layer revisit — DONE in `build_approach.md`.** "Layer" retired in both senses:
+   output → **Brief** (internal/client-safe **types**; client-safe is the exported
+   deliverable), processing → **Lens wave** (5 ordered waves inside the lens-
+   processing stage). Also: **Client** added as a How-to-Read term; **Platform**
+   de-parenthesized (the wrapper around the engine); directionality made horizontal
+   (earlier/later, never above/below); body sweep complete (residual "layer" = only
+   the quoted Inclusity principle + software jargon: platform/web/enforcement layer);
+   the How-to-Read term list above is re-synced. RESIDUAL: (a) this file's
+   *design-describing* locked entries still carry old vocab — the lens-group
+   "layers," "two-layer split/output," "client-safe/internal layer" (~L188–219,
+   L113/117) — to be swept to lens-wave / Brief vocab (NOT the implementation
+   build-log, which accurately records the code). (b) Cross-doc **code** question
+   (parallel to #8): `build_approach.md` now says "lens wave," but the code,
+   `build_implementation.md`, and this file's build-log use `Layer`/`LAYER_ORDER`
+   and a `layer` field. Decide: rename code Layer→Wave (coordinated change) vs.
+   accept design=wave / code=Layer split. The "Pipeline" defined-up-top-then-
+   elaborated-in-Part-2 overlap (former sub-question) is accepted as intentional.
 8. Cross-doc **"contract"** vocabulary decision. `build_approach.md` no longer uses
    the term (the definition and its sole in-text use were removed this session),
    but `build_context.md`, `build_implementation.md`, and the code still use
