@@ -7,18 +7,18 @@ import type {
   LlmProvider,
   ObjectiveFrame,
 } from '../../seams/llm-provider.js';
-import type { Layer, Lens } from './lens.js';
+import type { Wave, Lens } from './lens.js';
 import { toPromptFinding } from './prompt-projection.js';
 
-// The Inclusity Objective Lens — the first lens in the Interpret layer: "why does
-// this matter for Inclusity's work?" It maps what earlier layers found onto
+// The Inclusity Objective Lens — the first lens in the Interpret wave: "why does
+// this matter for Inclusity's work?" It maps what earlier waves found onto
 // Inclusity's objectives (the climate-survey domains and the PROSCI/ADKAR change
 // vocabulary). It is one half of the cross-module shared core (Objective +
 // Discernment) that keeps the whole system Inclusity-specific rather than generic.
 //
-// Its real dependency is the AGGREGATE layer: it interprets the patterns and
+// Its real dependency is the AGGREGATE wave: it interprets the patterns and
 // tensions those lenses surfaced. Structurally its prior-findings snapshot is
-// Evidence + Aggregate (every layer above it), and its output is a function of what
+// Evidence + Aggregate (every wave above it), and its output is a function of what
 // is in that snapshot — add an Aggregate finding and the interpretation reaches the
 // units behind it. Anchoring is unchanged: follow the prior findings' evidence_links
 // back to units, validate against in-scope cleared units, drop out-of-scope ids,
@@ -26,7 +26,7 @@ import { toPromptFinding } from './prompt-projection.js';
 //
 // The objective context it calibrates against is a PLACEHOLDER in V1 — the real
 // Inclusity objectives (survey domains + ADKAR values) arrive with the V3 context
-// work. The frame's shape is wired through the prompt now so the Interpret layer is
+// work. The frame's shape is wired through the prompt now so the Interpret wave is
 // proven structurally; its values are filled later. Disposition stays HELD —
 // promotion is Discernment's job. Finding ids are deterministic (`objective:0`, ...).
 
@@ -34,7 +34,7 @@ const INSTRUCTION =
   'Interpret the prior findings — especially the patterns and tensions — against the Inclusity objective frame. Anchor each interpretation to the unit ids behind the findings it draws on.';
 
 // Empty stub: objectives are not wired until V3. Carried through the prompt so the
-// Interpret layer threads the objective context structurally even while empty.
+// Interpret wave threads the objective context structurally even while empty.
 const PLACEHOLDER_OBJECTIVE_FRAME: ObjectiveFrame = {
   surveyDomains: [],
   adkarDimensions: [],
@@ -42,7 +42,7 @@ const PLACEHOLDER_OBJECTIVE_FRAME: ObjectiveFrame = {
 
 export class ObjectiveLens implements Lens {
   readonly id = 'objective';
-  readonly layer: Layer = 'interpret';
+  readonly wave: Wave = 'interpret';
 
   async run(
     units: readonly Unit[],

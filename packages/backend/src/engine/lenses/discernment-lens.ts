@@ -6,10 +6,10 @@ import type {
   LensPromptPayload,
   LlmProvider,
 } from '../../seams/llm-provider.js';
-import type { Layer, Lens } from './lens.js';
+import type { Wave, Lens } from './lens.js';
 import { toPromptFinding } from './prompt-projection.js';
 
-// The Facilitator Discernment Lens — the Guardrail-layer lens. It runs LATE, after
+// The Facilitator Discernment Lens — the Guardrail-wave lens. It runs LATE, after
 // Evidence and Aggregate, so it can audit the findings they accumulated, and it is
 // the thing that AFFIRMATIVELY promotes findings to the client-safe layer and flags
 // findings as sensitive. After this, disposition comes from Discernment, not from a
@@ -20,7 +20,7 @@ import { toPromptFinding } from './prompt-projection.js';
 // through the domain factory (`reviseDisposition`), which re-derives the support set
 // from the unchanged evidence and re-enforces anchoring — disposition is never
 // hand-set. The staged orchestrator supersedes by finding_id ONLY for this stage;
-// every other layer is pure-append, so revising another lens's finding stays the
+// every other wave is pure-append, so revising another lens's finding stays the
 // auditor's privilege rather than a general pipeline capability.
 //
 // Held-by-default is preserved as the ABSENCE of a verdict: a finding Discernment
@@ -35,7 +35,7 @@ const INSTRUCTION =
 
 export class DiscernmentLens implements Lens {
   readonly id = 'discernment';
-  readonly layer: Layer = 'guardrail';
+  readonly wave: Wave = 'guardrail';
 
   async run(
     units: readonly Unit[],

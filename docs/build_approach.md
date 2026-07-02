@@ -9,8 +9,10 @@
 ## How to Read This Document
 
 This document uses a handful of terms precisely and repeatedly. They are easy to
-conflate, so they are defined here once, up front — building up from the smallest
-unit to the document's own structure.
+conflate, so they are defined here once, up front.
+
+**Client** — the organization Inclusity is serving in an engagement. A client is
+never a user of the system.
 
 **Lens** — *an analytical pass where the AI is used.* A lens is a distinct prompt
 and response section in one AI pass.
@@ -56,8 +58,12 @@ in two **types**:
   back by sensitivity; it is a pure **projection** of the internal (**client-safe ⊆
   internal**), never a rewrite. It is the exported deliverable the client receives.
 
-**Client** — the organization Inclusity is serving in an engagement. A client is
-never a user of the system.
+**Promotion** — the act of clearing a finding into the client-safe brief. Every
+finding is **held** — internal-only — by default; a finding reaches the client-safe
+brief only by being affirmatively *promoted* (`cleared_to_client_safe` set true) and
+not held back by its `sensitivity` flag. Because held is the default, the safe
+failure mode is silence: anything un-promoted or uncertain stays internal-only,
+never exposed to the client.
 
 **Seam** — an interface boundary where the concrete implementation is injected and
 can be replaced without touching the call sites: callers depend only on the
@@ -812,12 +818,14 @@ Read in that light, the seven lenses sort into waves:
 - **Guardrail** — the Facilitator Discernment Lens, which reviews everything found so far for overreach, thin evidence, and what should be handled with care.
 - **Openings** — the Action Opening Lens, which points toward possible next steps.
 
-Each stage reads the units and the findings of the stages above it. This is what makes a **staged pipeline** the right structure rather than the two alternatives. A single composite prompt would collapse all seven lenses into one, so no lens could be revised or evaluated on its own, evidence and interpretation would blur together in a single pass, and the Discernment Lens could not do its job — it is meant to scrutinize the other findings, which it cannot do if they do not yet exist. Seven fully independent passes would avoid that but waste the structure: the Tension Lens would re-derive what the Culture Pattern Lens already found, and the Objective and Discernment lenses would be working from raw material instead of from the findings they are supposed to interpret and check.
+Each wave reads the units and the findings of earlier waves. This is what makes a **staged pipeline** the right structure rather than the two alternatives. A single composite prompt would collapse all seven lenses into one, so no lens could be revised or evaluated on its own, evidence and interpretation would blur together in a single pass, and the Discernment Lens could not do its job — it is meant to scrutinize the other findings, which it cannot do if they do not yet exist. Seven fully independent passes would avoid that but waste the structure: the Tension Lens would re-derive what the Culture Pattern Lens already found, and the Objective and Discernment lenses would be working from raw material instead of from the findings they are supposed to interpret and check.
 
 The staged pipeline keeps each lens a separate, individually versioned prompt — which matters for both evaluation and the later learning loop, since a single lens can be revised without disturbing the others — while letting later lenses build on earlier ones. Two further properties follow:
 
 - The **Discernment Lens runs late**, so it can actually audit the accumulated findings. Its flags are not advisory notes; they drive what happens at Assemble, deciding which findings may appear in the client-safe brief and which are held to the internal one. It does this by *revising* the findings it audits rather than emitting a separate side channel: Discernment sets a finding's `cleared_to_client_safe` and `sensitivity` by re-emitting that finding under its original `finding_id`, rebuilt through the same sanctioned factory the lenses use — so support stays derived and anchoring re-enforced, disposition is never hand-set, and it lives on the finding itself (one source of truth, leaving Assemble unchanged). The orchestrator lets only this late Guardrail stage supersede a finding by id; every other wave appends, so revising another lens's finding is the auditor's privilege alone, and a stray id collision in any other wave stays a visible append rather than a silent drop on the path that gates client exposure.
 - Within a wave, lenses that do not depend on each other can run in parallel. This matters because a staged pipeline is inherently slower than a single call, and the Listening and Human Meaning lenses, or the Culture Pattern and Tension lenses, need not wait on each other.
+
+One more property holds at the lens↔model edge itself, and it is a trust boundary. When the model returns something a lens cannot use — malformed output, off-format, or a refusal — the lens **fails safe to silence**: it emits no findings, never a fabricated one, and never crashes the run. When the *infrastructure* fails instead — the call cannot complete — that failure **propagates** as an error rather than being disguised as silence. The distinction is load-bearing: an empty result must always mean the model genuinely surfaced nothing, never that something broke on the way — so *nothing to surface* and *the call failed* can never be confused. (The wiring — parse tolerance, refusal handling, transport retries — lives in `build_implementation.md`.)
 
 ```mermaid
 ---

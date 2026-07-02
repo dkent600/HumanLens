@@ -8,7 +8,7 @@ import {
 import { isEvidenceAnchored, makeOrdinaryFinding, type Finding } from '../src/domain/finding.js';
 import type { Unit } from '../src/domain/types.js';
 
-// Discernment is the Guardrail-layer auditor: the real, affirmative promoter of
+// Discernment is the Guardrail-wave auditor: the real, affirmative promoter of
 // findings to the client-safe layer and the setter of sensitivity. It does not
 // mutate prior findings — it returns revisions rebuilt through the factory that
 // reuse the prior finding_id (so the Guardrail stage supersedes them in place),

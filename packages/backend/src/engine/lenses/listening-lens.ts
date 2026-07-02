@@ -6,9 +6,9 @@ import type {
   LensResponseCandidate,
   LlmProvider,
 } from '../../seams/llm-provider.js';
-import type { Layer, Lens } from './lens.js';
+import type { Wave, Lens } from './lens.js';
 
-// The Listening Lens — the first Evidence-layer lens: "what are people actually
+// The Listening Lens — the first Evidence-wave lens: "what are people actually
 // saying?" (repeated themes, direct concerns, representative quotes). It reads
 // the cleared units directly, and is the FIRST lens with a real model behind it.
 //
@@ -28,7 +28,7 @@ import type { Layer, Lens } from './lens.js';
 // before: an id the model invented but that is not in this run's cleared set is dropped
 // — the net against a hallucinated anchor, on the real path as on the fake.
 //
-// Disposition is left at its default (HELD): an Evidence-layer lens does not
+// Disposition is left at its default (HELD): an Evidence-wave lens does not
 // promote findings to the client-safe layer. That is an affirmative act for the
 // Discernment lens / human review (both deferred). Finding ids are deterministic
 // (`listening:0`, ...) to keep the slice reproducible.
@@ -107,9 +107,9 @@ const SYSTEM = [
 
 export class ListeningLens implements Lens {
   readonly id = 'listening';
-  readonly layer: Layer = 'evidence';
+  readonly wave: Wave = 'evidence';
 
-  // Evidence layer: reads the cleared units directly, so it ignores `priorFindings`
+  // Evidence wave: reads the cleared units directly, so it ignores `priorFindings`
   // (there are none above it anyway). The uniform signature lets the staged
   // orchestrator treat every lens the same.
   async run(

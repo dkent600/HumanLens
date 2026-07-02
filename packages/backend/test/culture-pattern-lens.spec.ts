@@ -8,7 +8,7 @@ import {
 import { isEvidenceAnchored, makeOrdinaryFinding, type Finding } from '../src/domain/finding.js';
 import type { Unit } from '../src/domain/types.js';
 
-// The Culture Pattern lens is the Aggregate-layer sibling of the Tension lens, so it
+// The Culture Pattern lens is the Aggregate-wave sibling of the Tension lens, so it
 // proves the same properties: it reads PRIOR (Evidence) findings, and anchors its
 // pattern to the units BEHIND them — interpretive output stays evidence-anchored.
 
@@ -33,18 +33,18 @@ const units: readonly Unit[] = [
   clearedUnit('u3', 'spk-c'),
 ];
 
-/** An Evidence-layer finding to feed the Culture Pattern lens as prior input. */
+/** An Evidence-wave finding to feed the Culture Pattern lens as prior input. */
 function evidenceFinding(findingId: string, evidenceLinks: readonly string[]): Finding {
   return makeOrdinaryFinding({
     findingId,
     lens: 'listening',
-    verbatim: 'an evidence-layer theme',
+    verbatim: 'an evidence-wave theme',
     evidenceLinks,
     units,
   });
 }
 
-describe('Culture Pattern lens — Aggregate layer, reads prior findings', () => {
+describe('Culture Pattern lens — Aggregate wave, reads prior findings', () => {
   it('stays silent when there are no prior findings to synthesize from', async () => {
     const out = await new CulturePatternLens().run(units, [], new FakeLlmProvider());
     expect(out).toHaveLength(0);

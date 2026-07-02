@@ -6,17 +6,17 @@ import type {
   LensResponsePayload,
   LlmProvider,
 } from '../../seams/llm-provider.js';
-import type { Layer, Lens } from './lens.js';
+import type { Wave, Lens } from './lens.js';
 
-// The Human Meaning Lens — the Evidence-layer sibling of the Listening Lens: "what
+// The Human Meaning Lens — the Evidence-wave sibling of the Listening Lens: "what
 // might these comments mean at the human level?" (unmet needs, fears, hopes, identity
 // and belonging signals, dignity concerns). Like Listening, it reads the cleared
 // units DIRECTLY — not prior findings — so it ignores `priorFindings` (there are none
-// above the Evidence layer anyway).
+// above the Evidence wave anyway).
 //
 // As an Evidence sibling it runs against the SAME input (the cleared units) as
 // Listening and never sees Listening's output — the orchestrator runs the Evidence
-// layer against an empty prior-findings snapshot, so the two stay independent and
+// wave against an empty prior-findings snapshot, so the two stay independent and
 // parallelizable (the analog of the Aggregate pair's independence).
 //
 // Same rules as Listening: it emits findings anchored to the units it read, built
@@ -29,9 +29,9 @@ const INSTRUCTION =
 
 export class HumanMeaningLens implements Lens {
   readonly id = 'meaning';
-  readonly layer: Layer = 'evidence';
+  readonly wave: Wave = 'evidence';
 
-  // Evidence layer: reads the cleared units directly, so it ignores `priorFindings`.
+  // Evidence wave: reads the cleared units directly, so it ignores `priorFindings`.
   async run(
     units: readonly Unit[],
     _priorFindings: readonly Finding[],

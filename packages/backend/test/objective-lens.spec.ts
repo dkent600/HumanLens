@@ -8,9 +8,9 @@ import {
 import { isEvidenceAnchored, makeOrdinaryFinding, type Finding } from '../src/domain/finding.js';
 import type { Unit } from '../src/domain/types.js';
 
-// The Inclusity Objective Lens is the first lens in the Interpret layer. Beyond the
+// The Inclusity Objective Lens is the first lens in the Interpret wave. Beyond the
 // established "reads prior findings, anchors to units" pattern, it proves the deeper
-// dependency: its real input is the AGGREGATE layer's output, so its findings depend
+// dependency: its real input is the AGGREGATE wave's output, so its findings depend
 // on an Aggregate (tension/culture) finding being present and anchor to the units
 // behind it — the analog of the test that proved Discernment saw Aggregate output.
 
@@ -39,7 +39,7 @@ function finding(lens: 'listening' | 'tension', findingId: string, links: readon
   return makeOrdinaryFinding({ findingId, lens, verbatim: `a ${lens} finding`, evidenceLinks: links, units });
 }
 
-describe('Inclusity Objective lens — Interpret layer, reads Aggregate output', () => {
+describe('Inclusity Objective lens — Interpret wave, reads Aggregate output', () => {
   it('stays silent when there is nothing to interpret', async () => {
     const out = await new ObjectiveLens().run(units, [], new FakeLlmProvider());
     expect(out).toHaveLength(0);
@@ -75,7 +75,7 @@ describe('Inclusity Objective lens — Interpret layer, reads Aggregate output',
     });
     await new ObjectiveLens().run(units, [finding('tension', 'tension:0', ['u1'])], spy);
 
-    // The Interpret layer carries the (placeholder) objective frame structurally...
+    // The Interpret wave carries the (placeholder) objective frame structurally...
     expect(seen?.objectiveFrame).toEqual({ surveyDomains: [], adkarDimensions: [] });
     // ...and the prior findings it interprets.
     expect(seen?.priorFindings?.map((f) => f.findingId)).toEqual(['tension:0']);

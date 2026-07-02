@@ -15,7 +15,7 @@ function textProvider(text: string): LlmProvider {
   return { complete: () => Promise.resolve({ text }) };
 }
 
-// The Listening Lens is the first Evidence-layer lens — the seed of the pipeline. It
+// The Listening Lens is the first Evidence-wave lens — the seed of the pipeline. It
 // reads the cleared units directly. For PARITY with every other lens (each of which has
 // its own rogue/drop test), this proves anchoring is ENFORCED on Listening too: a
 // candidate citing an out-of-scope unit id is dropped, never asserted. Listening had no
@@ -39,7 +39,7 @@ function clearedUnit(unitId: string, speakerToken: string): Unit {
 
 const units: readonly Unit[] = [clearedUnit('u1', 'spk-a'), clearedUnit('u2', 'spk-b')];
 
-describe('Listening lens — Evidence layer, reads units directly', () => {
+describe('Listening lens — Evidence wave, reads units directly', () => {
   it('is silent when there are no units', async () => {
     const out = await new ListeningLens().run([], [], new FakeLlmProvider());
     expect(out).toHaveLength(0);

@@ -18,7 +18,7 @@ const neverPipeline = {
   },
 } as unknown as LensPipeline;
 
-describe('BriefService — layer-view read (self-protecting)', () => {
+describe('BriefService — brief-view read (self-protecting)', () => {
   it('authorizes, synthesizes, and returns ONLY the promoted client-safe subset', async () => {
     // Full wiring with the fixture's promoting fake, exercising the real pipeline.
     const container = buildContainer({ llmProvider: fixtureLlmProvider() });

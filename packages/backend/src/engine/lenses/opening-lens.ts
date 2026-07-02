@@ -6,15 +6,15 @@ import type {
   LensResponsePayload,
   LlmProvider,
 } from '../../seams/llm-provider.js';
-import type { Layer, Lens } from './lens.js';
+import type { Wave, Lens } from './lens.js';
 import { toPromptFinding } from './prompt-projection.js';
 
-// The Action Opening Lens — the single lens of the terminal Openings layer: "what
+// The Action Opening Lens — the single lens of the terminal Openings wave: "what
 // openings for next steps appear?" (possible workshop focus areas, leadership
 // conversations, reflection prompts, follow-up inquiries). Not final recommendations
 // — intelligent openings, prepared for the facilitator to weigh.
 //
-// It runs LAST, after the Guardrail layer, so it reads the AUDITED picture: its
+// It runs LAST, after the Guardrail wave, so it reads the AUDITED picture: its
 // prior-findings snapshot is the full accumulated set as the Discernment Lens left
 // it (dispositions already set). Forward-looking openings should be grounded in what
 // survived the guardrail. Anchoring is unchanged: follow the prior findings'
@@ -22,7 +22,7 @@ import { toPromptFinding } from './prompt-projection.js';
 // out-of-scope ids, build through the factory (support derived, anchoring enforced).
 //
 // DISPOSITION (the deliberate consequence of running last). Because Discernment runs
-// at the Guardrail layer — before this one — it never audits these openings, so
+// at the Guardrail wave — before this one — it never audits these openings, so
 // nothing auto-promotes them: an Action Opening finding is HELD internal-only in V1.
 // That is intended, not a gap. The disposition model names two affirmative promoters
 // — the Discernment Lens OR human review — and openings' promoter is HUMAN REVIEW
@@ -36,7 +36,7 @@ const INSTRUCTION =
 
 export class OpeningLens implements Lens {
   readonly id = 'opening';
-  readonly layer: Layer = 'openings';
+  readonly wave: Wave = 'openings';
 
   async run(
     units: readonly Unit[],

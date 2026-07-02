@@ -34,18 +34,18 @@ const units: readonly Unit[] = [
   clearedUnit('u3', 'spk-c'),
 ];
 
-/** An Evidence-layer finding to feed the Tension lens as prior input. */
+/** An Evidence-wave finding to feed the Tension lens as prior input. */
 function evidenceFinding(findingId: string, evidenceLinks: readonly string[]): Finding {
   return makeOrdinaryFinding({
     findingId,
     lens: 'listening',
-    verbatim: 'an evidence-layer theme',
+    verbatim: 'an evidence-wave theme',
     evidenceLinks,
     units,
   });
 }
 
-describe('Tension lens — Aggregate layer, reads prior findings', () => {
+describe('Tension lens — Aggregate wave, reads prior findings', () => {
   it('stays silent when there are no prior findings to synthesize from', async () => {
     const out = await new TensionLens().run(units, [], new FakeLlmProvider());
     expect(out).toHaveLength(0);

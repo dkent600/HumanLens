@@ -6,13 +6,13 @@ import type {
   LensResponsePayload,
   LlmProvider,
 } from '../../seams/llm-provider.js';
-import type { Layer, Lens } from './lens.js';
+import type { Wave, Lens } from './lens.js';
 import { toPromptFinding } from './prompt-projection.js';
 
-// The Culture Pattern Lens — the Aggregate-layer sibling of the Tension Lens:
+// The Culture Pattern Lens — the Aggregate-wave sibling of the Tension Lens:
 // "what patterns appear across the group or organization?" (recurring dynamics,
 // contradictions, gaps between stated values and lived experience). Like Tension,
-// it reads the PRIOR (Evidence-layer) findings and works across them.
+// it reads the PRIOR (Evidence-wave) findings and works across them.
 //
 // Same shape, same rules as Tension: it still anchors to UNITS, not to findings —
 // it follows each prior finding back to the units behind it and links its pattern
@@ -21,7 +21,7 @@ import { toPromptFinding } from './prompt-projection.js';
 // factory, so support is derived and anchoring enforced.
 //
 // As an Aggregate sibling it runs against the SAME Evidence snapshot as Tension and
-// never sees Tension's output (the orchestrator's snapshot-per-layer semantics) —
+// never sees Tension's output (the orchestrator's snapshot-per-wave semantics) —
 // the two stay independent and parallelizable. Disposition stays HELD: promotion is
 // Discernment's job. Finding ids are deterministic (`culture:0`, ...).
 
@@ -30,7 +30,7 @@ const INSTRUCTION =
 
 export class CulturePatternLens implements Lens {
   readonly id = 'culture';
-  readonly layer: Layer = 'aggregate';
+  readonly wave: Wave = 'aggregate';
 
   async run(
     units: readonly Unit[],

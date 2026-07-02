@@ -6,12 +6,12 @@ import type {
   LensResponsePayload,
   LlmProvider,
 } from '../../seams/llm-provider.js';
-import type { Layer, Lens } from './lens.js';
+import type { Wave, Lens } from './lens.js';
 import { toPromptFinding } from './prompt-projection.js';
 
-// The Tension Lens — an Aggregate-layer lens: "what tensions should a facilitator
+// The Tension Lens — an Aggregate-wave lens: "what tensions should a facilitator
 // notice?" It is the first lens that reads PRIOR findings rather than units alone:
-// it works from the findings the Evidence layer produced and surfaces a tension
+// it works from the findings the Evidence wave produced and surfaces a tension
 // between them.
 //
 // Crucially it still anchors to UNITS, not to findings. It follows each prior
@@ -30,7 +30,7 @@ const INSTRUCTION =
 
 export class TensionLens implements Lens {
   readonly id = 'tension';
-  readonly layer: Layer = 'aggregate';
+  readonly wave: Wave = 'aggregate';
 
   async run(
     units: readonly Unit[],

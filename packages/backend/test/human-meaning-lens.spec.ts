@@ -4,7 +4,7 @@ import { FakeLlmProvider, type LensResponsePayload } from '../src/seams/llm-prov
 import { isEvidenceAnchored } from '../src/domain/finding.js';
 import type { Unit } from '../src/domain/types.js';
 
-// The Human Meaning lens is the Evidence-layer sibling of Listening: it reads the
+// The Human Meaning lens is the Evidence-wave sibling of Listening: it reads the
 // cleared units directly and emits findings anchored to them. (Its independence from
 // Listening — same units, neither sees the other — is proven in lens-pipeline.spec.)
 
@@ -25,7 +25,7 @@ function clearedUnit(unitId: string, speakerToken: string): Unit {
 
 const units: readonly Unit[] = [clearedUnit('u1', 'spk-a'), clearedUnit('u2', 'spk-b')];
 
-describe('Human Meaning lens — Evidence layer, reads units directly', () => {
+describe('Human Meaning lens — Evidence wave, reads units directly', () => {
   it('is silent when there are no units', async () => {
     const out = await new HumanMeaningLens().run([], [], new FakeLlmProvider());
     expect(out).toHaveLength(0);

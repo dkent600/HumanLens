@@ -33,7 +33,7 @@ function finding(
 // The fields that govern the internal/client-safe split and must NEVER cross out.
 const INTERNAL_ONLY_KEYS = ['clearedToClientSafe', 'sensitivity', 'supportSet'] as const;
 
-describe('Assemble — the two-layer split', () => {
+describe('Assemble — the internal/client-safe split', () => {
   it('holds findings by default: an unpromoted finding is internal-only', () => {
     const held = finding('listening:0'); // default held
     const brief = assembleBrief('eng:1', [held]);

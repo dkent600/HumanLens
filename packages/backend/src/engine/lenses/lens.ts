@@ -11,14 +11,14 @@ import type { LlmProvider } from '../../seams/llm-provider.js';
 // with the unit type-specific extensions, so for now a lens runs over all the
 // cleared units handed to it.
 
-// The seven Module-1 lenses are not peers — they form five dependency layers
+// The seven Module-1 lenses are not peers — they form five dependency waves
 // (build_approach.md, "Lens processing: a staged pipeline"). A lens declares which
-// layer it belongs to; the orchestrator runs the layers in this canonical order,
-// and each layer reads the units plus the findings of the layers ABOVE it.
-export type Layer = 'evidence' | 'aggregate' | 'interpret' | 'guardrail' | 'openings';
+// wave it belongs to; the orchestrator runs the waves in this canonical order,
+// and each wave reads the units plus the findings of the waves ABOVE it.
+export type Wave = 'evidence' | 'aggregate' | 'interpret' | 'guardrail' | 'openings';
 
-/** The dependency order the staged orchestrator iterates. Earlier layers feed later ones. */
-export const LAYER_ORDER: readonly Layer[] = [
+/** The dependency order the staged orchestrator iterates. Earlier waves feed later ones. */
+export const WAVE_ORDER: readonly Wave[] = [
   'evidence', // Listening, Human Meaning — read units directly
   'aggregate', // Culture Pattern, Tension — work across the whole set / prior findings
   'interpret', // Inclusity Objective — maps findings to survey domains + ADKAR
@@ -28,13 +28,13 @@ export const LAYER_ORDER: readonly Layer[] = [
 
 export interface Lens {
   readonly id: string;
-  /** Which dependency layer this lens belongs to — fixes when it runs relative to the others. */
-  readonly layer: Layer;
+  /** Which dependency wave this lens belongs to — fixes when it runs relative to the others. */
+  readonly wave: Wave;
   /**
-   * Read the cleared units and the findings of PRIOR layers, then emit findings.
+   * Read the cleared units and the findings of PRIOR waves, then emit findings.
    *
-   * `priorFindings` carries only the findings of layers above this one — never the
-   * findings of other lenses in the same layer. That keeps within-layer lenses
+   * `priorFindings` carries only the findings of waves above this one — never the
+   * findings of other lenses in the same wave. That keeps within-wave lenses
    * independent (and therefore parallelizable later); the load-bearing property of
    * the staged pipeline is this finding-passing between stages, not concurrency.
    */

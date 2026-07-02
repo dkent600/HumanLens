@@ -36,9 +36,9 @@ export class BriefService {
     const decision = await this.authorization.authorize({
       actor,
       engagementId,
-      // Layer-scoped read — expressive enough to name WHICH layer, the distinction
-      // authorization carries its real weight on. V1 always allows.
-      action: { type: 'brief.view', layer: 'client-safe' },
+      // Brief-layer-scoped read — expressive enough to name WHICH brief layer, the
+      // distinction authorization carries its real weight on. V1 always allows.
+      action: { type: 'brief.view', briefType: 'client-safe' },
     });
     if (!decision.allowed) {
       // Deny path: refuse to proceed; nothing is synthesized. The reason is preserved.

@@ -6,7 +6,7 @@ import { InMemoryUnitRepository, type Scope } from '../src/seams/repository.js';
 import { TrivialDeidDetector } from '../src/seams/deid-detector.js';
 import { FakeLlmProvider, type LlmProvider } from '../src/seams/llm-provider.js';
 import { makeOrdinaryFinding, type Finding } from '../src/domain/finding.js';
-import type { Layer, Lens } from '../src/engine/lenses/lens.js';
+import type { Wave, Lens } from '../src/engine/lenses/lens.js';
 import type { Actor, Unit } from '../src/domain/types.js';
 
 // The orchestrator folds the Guardrail stage by supersede-on-finding_id: a produced
@@ -18,7 +18,7 @@ import type { Actor, Unit } from '../src/domain/types.js';
 //
 // The real DiscernmentLens only ever emits revisions of prior finding ids, so a
 // fresh-id Guardrail finding cannot come from it — it is driven here by a minimal
-// Guardrail-layer lens that emits a brand-new finding.
+// Guardrail-wave lens that emits a brand-new finding.
 
 const actor: Actor = { id: 'actor:test' };
 const scope: Scope = { engagementId: 'eng:1', actor };
@@ -38,10 +38,10 @@ function pendingUnit(unitId: string, speakerToken: string): Unit {
   };
 }
 
-/** A Guardrail-layer lens that emits a brand-new finding under a fresh id (never a prior id). */
+/** A Guardrail-wave lens that emits a brand-new finding under a fresh id (never a prior id). */
 class FreshIdGuardrailLens implements Lens {
   readonly id = 'extra-guardrail';
-  readonly layer: Layer = 'guardrail';
+  readonly wave: Wave = 'guardrail';
 
   run(units: readonly Unit[], _priorFindings: readonly Finding[], _provider: LlmProvider): Promise<readonly Finding[]> {
     return Promise.resolve([

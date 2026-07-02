@@ -8,7 +8,7 @@ import {
 import { isEvidenceAnchored, makeOrdinaryFinding, type Finding } from '../src/domain/finding.js';
 import type { Unit } from '../src/domain/types.js';
 
-// The Action Opening lens is the single lens of the terminal Openings layer. It
+// The Action Opening lens is the single lens of the terminal Openings wave. It
 // follows the established "reads prior findings, anchors to units" pattern. Its
 // distinguishing property — that it runs after Discernment and is therefore never
 // auto-promoted (held internal-only) — is proven end-to-end in lens-pipeline.spec.
@@ -34,7 +34,7 @@ const units: readonly Unit[] = [
   clearedUnit('u3', 'spk-c'),
 ];
 
-/** A prior finding to feed the Opening lens (its layer is irrelevant to this lens). */
+/** A prior finding to feed the Opening lens (its wave is irrelevant to this lens). */
 function priorFinding(findingId: string, evidenceLinks: readonly string[]): Finding {
   return makeOrdinaryFinding({
     findingId,
@@ -45,7 +45,7 @@ function priorFinding(findingId: string, evidenceLinks: readonly string[]): Find
   });
 }
 
-describe('Action Opening lens — Openings layer, reads the audited picture', () => {
+describe('Action Opening lens — Openings wave, reads the audited picture', () => {
   it('stays silent when there are no prior findings to build on', async () => {
     const out = await new OpeningLens().run(units, [], new FakeLlmProvider());
     expect(out).toHaveLength(0);

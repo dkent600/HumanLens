@@ -89,10 +89,10 @@ export function buildContainer(options: BuildContainerOptions = {}): AwilixConta
     discernmentLens: asFunction(() => new DiscernmentLens()).singleton(),
     openingLens: asFunction(() => new OpeningLens()).singleton(),
     lensPipeline: asFunction(
-      // Registered in layer order for readability; the pipeline groups by each
-      // lens's declared layer and runs the layers in LAYER_ORDER regardless. The full
+      // Registered in wave order for readability; the pipeline groups by each
+      // lens's declared wave and runs the waves in WAVE_ORDER regardless. The full
       // seven-lens set: Listening + Human Meaning are both Evidence — independent
-      // siblings in one layer; Tension and Culture Pattern are both Aggregate;
+      // siblings in one wave; Tension and Culture Pattern are both Aggregate;
       // Objective (Interpret) runs after them and before Discernment (Guardrail), so
       // Discernment audits its findings. Opening (Openings) runs LAST — after
       // Discernment — so its findings are never audited and stay held internal-only

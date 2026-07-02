@@ -12,7 +12,7 @@ export interface Actor {
 }
 
 /** The two output layers. The client-safe layer is a subset of the internal one. */
-export type BriefLayer = 'internal' | 'client-safe';
+export type BriefType = 'internal' | 'client-safe';
 
 /**
  * A structured action identifier — deliberately NOT a free string. The set is
@@ -21,7 +21,8 @@ export type BriefLayer = 'internal' | 'client-safe';
  */
 export interface Action {
   readonly type: string;
-  readonly layer?: BriefLayer;
+  /** Which brief layer this action concerns (the internal vs client-safe read distinction). */
+  readonly briefType?: BriefType;
 }
 
 /** The de-identification gate's enforcement handle. A unit cannot reach the lenses unless `cleared`. */

@@ -55,7 +55,9 @@ partner and the writer of `build_approach.md`.
   eliminated, see below); the six content sections demoted to `###`, subsections to
   `####`, with one `#####` (Client-facing shaping, under the brief §).
 - **"## How to Read This Document"** defines the recurring terms once, up front, in
-  dependency order (smallest unit → document structure): **Lens** (a distinct
+  in order: **Client** (the
+  organization Inclusity serves in an engagement; never a user of the system) →
+  **Lens** (a distinct
   prompt and response section in one AI pass — where the AI is used) → **Module** (a
   self-contained analysis structured as a pipeline of functional stages, one of
   which runs its lenses — Module 1 has seven) → **Pipeline** (how a module runs:
@@ -69,9 +71,9 @@ partner and the writer of `build_approach.md`.
   → **Brief** (a module's deliverable to Inclusity in two **types**: **internal
   brief** = the complete candid finding set, for facilitator + Dr. Campbell;
   **client-safe brief** = the cleared subset shown to the client, a pure projection
-  client-safe ⊆ internal, never a rewrite, the exported deliverable) → **Client**
-  (the organization Inclusity serves in an engagement; never a user of the system) →
-  **Seam** (injection boundary; moved here from the deleted Terminology) → **Engine**
+  client-safe ⊆ internal, never a rewrite, the exported deliverable) → **Promotion** (clearing a finding into the client-safe brief — held by default;
+  cleared only by being affirmatively promoted and not held back by sensitivity;
+  safe failure = silence) → **Seam** (injection boundary; moved here from the deleted Terminology) → **Engine**
   (the software that runs a module's pipeline end to end; what V1–V4 build) →
   **Platform** (wraps the engine: real auth + shared workspaces; deferred beyond V4)
   → **Authentication / Authorization** (the two access checks the platform
@@ -114,6 +116,17 @@ partner and the writer of `build_approach.md`.
   "mechanical join · no rewording") in `build_approach.md`, and the voice-config
   design constraint in this file. Assemble/projection/lenses are now clean
   everywhere; voice/shaping is located only at the deferred shaping stage.
+- **Cross-doc placement (silence-vs-exception & structured-outputs):** the tell is
+  *does it survive a stack swap?* **Silence-vs-exception** (unusable model output →
+  silence/safe-empty, never fabricate; infrastructure failure → propagate, never
+  disguised as silence) survives → **principle** lifted to `build_approach.md` (end
+  of "Lens processing: a staged pipeline"), **wiring** (parse tolerance,
+  refusal→`{text:''}`, transport retries) left in `build_implementation.md`.
+  **Structured-outputs-declined** does *not* survive — it's a seam-signature choice
+  (keep `complete()` prompt-in/text-out) — so it stays entirely in
+  `build_implementation.md`. Born together, split because they answer the stack-swap
+  test oppositely. (Also fixed a residual wave/horizontal miss in `build_approach.md`
+  L821: "each stage … the stages above it" → "each wave … earlier waves.")
 - System Architecture (Part 2) subsections, in order: pipeline spine; engagement &
   actor scoping; identity & authorization seams; de-identification gate; the Unit;
   lens processing (staged pipeline); the Finding; the brief; human
@@ -367,18 +380,18 @@ invariants above). The whole project is the **case study**; its first built vers
   adjustments landed (held-by-default; disposition unrepresentable-when-violated).
   Tests green: held-by-default end-to-end, promote-one-finding, projection ⊆ internal,
   anchoring, honest-counting support.
-- **Staged pipeline built (minimal orchestrator → real staged structure).** Layers
-  first-class (`Layer` + `LAYER_ORDER`: evidence→aggregate→interpret→guardrail→
-  openings); each lens declares its `layer`; `run(units, priorFindings, provider)`.
-  Orchestrator groups lenses by layer, iterates LAYER_ORDER, runs each layer against a
-  snapshot of **prior-layer findings only** (same-layer lenses never see each other →
-  within-layer parallelizability preserved; concurrency deferred, sequential for now),
-  accumulates into Assemble. Second lens added: **Tension** (Aggregate layer) — reads
+- **Staged pipeline built (minimal orchestrator → real staged structure).** Waves
+  first-class (`Wave` + `WAVE_ORDER`: evidence→aggregate→interpret→guardrail→
+  openings); each lens declares its `wave`; `run(units, priorFindings, provider)`.
+  Orchestrator groups lenses by wave, iterates WAVE_ORDER, runs each wave against a
+  snapshot of **prior-wave findings only** (same-wave lenses never see each other →
+  within-wave parallelizability preserved; concurrency deferred, sequential for now),
+  accumulates into Assemble. Second lens added: **Tension** (Aggregate wave) — reads
   Evidence findings but anchors back to the units behind them; out-of-scope ids dropped
   (anchoring enforced on interpretive output); held by default; silent without priors.
   One deterministic fake drives both lenses. `shared` boundary untouched. 36/36 Vitest
   green; tsc/eslint/stylelint clean. No `docs/` edits by Claude Code; no spec note.
-- **Discernment built — two-layer split now real (Guardrail layer).** The Facilitator
+- **Discernment built — internal/client-safe split now real (Guardrail wave).** The Facilitator
   Discernment Lens runs late, audits accumulated findings, and is the real affirmative
   promoter (sets `cleared_to_client_safe`) and sensitivity-setter — the test's faked
   `promote()` is gone. **Mechanism = B2:** Discernment sets disposition by re-emitting a
@@ -386,8 +399,8 @@ invariants above). The whole project is the **case study**; its first built vers
   (`reviseDisposition` → support re-derived, anchoring re-enforced, never hand-set), so
   disposition lives on the finding (one source of truth) and Assemble is untouched
   (client-safe ⊆ internal, held-by-default, sensitivity backstop all hold by
-  construction). The orchestrator folds **only the Guardrail stage by supersede-on-
-  `finding_id`** (replace in place, preserving position); every other layer stays pure-
+  construction). The orchestrator folds **only the Guardrail wave by supersede-on-
+  `finding_id`** (replace in place, preserving position); every other wave stays pure-
   append — revision is the auditor's privilege, and a stray id collision elsewhere is a
   visible append, not a silent drop. Seam stayed domain-agnostic (`complete()→{text}`;
   task/verdict types in the lens↔model convention). Default fake = empty verdicts
@@ -401,7 +414,7 @@ invariants above). The whole project is the **case study**; its first built vers
   run against the same Evidence-only snapshot and never see each other (tested). Pipeline
   now `[listening, tension, culturePattern, discernment]`. 52/52 Vitest green; lints
   clean. No docs/spec changes.
-- **Inclusity Objective lens built (Interpret) — first lens in a new layer.** Reads the
+- **Inclusity Objective lens built (Interpret) — first lens in a new wave.** Reads the
   Evidence+Aggregate snapshot, interprets it against the objective frame, anchors back to
   units, held by default, silent without priors (`objective:0…`); `'objective'` added to
   `LensId`. Pipeline now `[listening, tension, culturePattern, objective, discernment]`;
@@ -436,7 +449,7 @@ invariants above). The whole project is the **case study**; its first built vers
   sole AUTOMATED promoter; held-by-default, client-safe ⊆ internal, sensitivity backstop
   all intact. Recorded in build_approach.md → "The Action Opening Lens."
 - **Human Meaning lens built (Evidence) — Module-1 lens set COMPLETE (7 of 7).**
-  Evidence-layer sibling of Listening: reads cleared units directly (ignores prior
+  Evidence-wave sibling of Listening: reads cleared units directly (ignores prior
   findings), anchors to units, held by default, silent without units (`meaning:0…`).
   Cleanup: a dangling unused `'human-meaning'` placeholder in `LensId` replaced with
   single-token `'meaning'`, matching the id===lens===namespace convention of every other
@@ -447,7 +460,7 @@ invariants above). The whole project is the **case study**; its first built vers
   69/69 Vitest green; lints clean. No spec note.
 - **Read slice built — first full-stack path; frontend now live.** Seeded fixture
   engagement → `GET /engagements/:id/brief` (runs the pipeline via the self-protecting
-  `BriefService`, returns the client-safe layer only) → `AxiosBriefApi` → `BriefStore`
+  `BriefService`, returns the client-safe brief only) → `AxiosBriefApi` → `BriefStore`
   (group by lens, nest subthemes) → `BriefPage` view-model/view. The fixture's promoting
   fake makes the client see 2 findings while the engine holds 6 — **client-safe ⊊
   internal visible on screen**, not just asserted. Authz lives in `BriefService` (route
@@ -710,30 +723,44 @@ decisions" above. Genuinely-open work remaining:
    stages) — moves from "deferred" toward design when V1 build begins.
 6. Whether `build_approach.md` needs its own output (PDF/docx) setup, or stays
    markdown-only as an internal doc.
-7. **Layer revisit — DONE in `build_approach.md`.** "Layer" retired in both senses:
+7. **Layer revisit — COMPLETE (design docs + code).** "Layer" retired in both senses:
    output → **Brief** (internal/client-safe **types**; client-safe is the exported
    deliverable), processing → **Lens wave** (5 ordered waves inside the lens-
    processing stage). Also: **Client** added as a How-to-Read term; **Platform**
    de-parenthesized (the wrapper around the engine); directionality made horizontal
    (earlier/later, never above/below); body sweep complete (residual "layer" = only
    the quoted Inclusity principle + software jargon: platform/web/enforcement layer);
-   the How-to-Read term list above is re-synced. RESIDUAL: (a) this file's
-   *design-describing* locked entries still carry old vocab — the lens-group
-   "layers," "two-layer split/output," "client-safe/internal layer" (~L188–219,
-   L113/117) — to be swept to lens-wave / Brief vocab (NOT the implementation
-   build-log, which accurately records the code). (b) Cross-doc **code** question
-   (parallel to #8): `build_approach.md` now says "lens wave," but the code,
-   `build_implementation.md`, and this file's build-log use `Layer`/`LAYER_ORDER`
-   and a `layer` field. Decide: rename code Layer→Wave (coordinated change) vs.
-   accept design=wave / code=Layer split. The "Pipeline" defined-up-top-then-
-   elaborated-in-Part-2 overlap (former sub-question) is accepted as intentional.
-8. Cross-doc **"contract"** vocabulary decision. `build_approach.md` no longer uses
-   the term (the definition and its sole in-text use were removed this session),
-   but `build_context.md`, `build_implementation.md`, and the code still use
-   *client-safe contract* / "the published client-safe shapes." Decide: retire
-   "contract" everywhere (a coordinated vocabulary change across docs + code) vs.
-   accept that `build_approach.md` simply does not use it while the implementation
-   layer keeps it.
+   the How-to-Read term list above is re-synced. RESIDUAL: (a) design-describing
+   locked entries — SWEPT to lens-wave / Brief vocab. (b) Cross-doc code vocabulary —
+   **Option 1 COMPLETE.** Code relay executed (naming-only, no behavior change):
+   `Layer`→`Wave`, `LAYER_ORDER`→`WAVE_ORDER` (order unchanged), `Lens.layer`→
+   `Lens.wave` (7 lenses), orchestrator internals (`groupByWave`, `byWave`, snapshot
+   of prior-wave findings, same-wave independence, Guardrail wave supersedes, others
+   append); the authorization action field `layer`→`briefType` (call site
+   `{ type: 'brief.view', briefType: 'client-safe' }` — note the discriminant is
+   `type`, not `action`); the Listening lens emission verified already `verbatim`
+   (not `content`) with the `translation`/`sourceLanguage` pair for non-English (no
+   change). 129 tests green (backend 110, frontend 19); lint/build clean. Docs
+   (`build_implementation.md` + this build-log) on `Wave` vocabulary throughout.
+   OUTPUT-SIDE RESIDUALS — CLEARED (naming-only, 129 tests green): `BriefLayer`→
+   `BriefType` (definition + its one annotation; union values `'internal' |
+   'client-safe'` unchanged; was local to `types.ts`, zero other refs;
+   `ClientSafeFinding`/`ClientSafeBrief`/`.clientSafe`/`.internal` untouched); and
+   the two test-prose strings retired (`assemble.spec` "internal/client-safe split",
+   `brief-service.spec` "brief-view read"). Output-side "layer" is now fully retired
+   in code. The "Pipeline" defined-up-top-then-elaborated overlap is accepted as
+   intentional.
+8. Cross-doc **"contract"** vocabulary — **RESOLVED: keep it (option A).**
+   `build_approach.md` uses **"signature"** (a seam's interface — the inputs it takes
+   and the shape it returns) and retired its one loose "contract" use as redundant
+   *there*. `build_implementation.md` and the code keep **"contract"** for a distinct
+   concept: the agreed set of shapes / protocol crossing a boundary — the `shared`
+   package's client-safe DTO surface, and the Lens↔model prompt-and-parse protocol.
+   Signature ≠ contract (one interface's inputs/return vs. a whole boundary's agreed
+   shapes), so this is not a vocabulary collision: "contract" is precise, idiomatic
+   jargon, kept on the same basis as "web layer" / "enforcement layer." No sweep.
+   (The L21–22 "Inclusity↔Human Lens contract" is a third, process-agreement sense —
+   also kept.)
 
 ## Environment
 VSCode on Windows. (Pandoc + MiKTeX / LuaLaTeX / EB Garamond is the *proposal's*
