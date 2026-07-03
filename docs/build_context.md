@@ -64,9 +64,10 @@ partner and the writer of `build_approach.md`.
   intake → normalize → de-identify gate → lens processing → assemble → human review
   → capture; emits a **Brief**; also defines **stage** = one step, **spine** = the
   ordered run of stages) → **Lens wave** (the lens-processing stage's internal
-  structure: five ordered waves Evidence→Aggregate→Interpret→Guardrail→Openings;
-  lenses in a wave run in parallel and read earlier waves' findings from one shared
-  pool; waves are NOT stages) → **Gate** (a stage material must clear; the
+  structure: six ordered waves Evidence→Meaning→Aggregate→Interpret→Guardrail→
+  Openings; only Evidence reads the units, later waves read earlier waves' findings
+  from one shared pool; units stay in scope as anchor targets; lenses in a wave run
+  in parallel; waves are NOT stages) → **Gate** (a stage material must clear; the
   de-identification gate — de-id proper is upstream at Inclusity, the gate verifies)
   → **Brief** (a module's deliverable to Inclusity in two **types**: **internal
   brief** = the complete candid finding set, for facilitator + Dr. Campbell;
@@ -133,7 +134,7 @@ partner and the writer of `build_approach.md`.
   review & capture; evaluation; **Success Criteria** (relocated in); open questions
   & deferred decisions.
 - Three Mermaid diagrams embedded as fenced ```mermaid blocks: (1) macro pipeline
-  spine — after the pipeline-spine prose; (2) lens processing, 5 lens waves
+  spine — after the pipeline-spine prose; (2) lens processing, 6 lens waves
   — end of the staged-pipeline subsection; (3) version progression V0→V4 — top of
   "### Version Roadmap" (Part 3). Standalone `.mermaid` copies also in
   `/mnt/user-data/outputs/` (module1_macro_spine, module1_lens_pipeline,
@@ -205,13 +206,38 @@ partner and the writer of `build_approach.md`.
   omit rather than fabricate; no-op + "insufficient material" when too few).
   `speaker_token` keeps support honest: count "N units across M sources/segments",
   never "N people".
-- Lens processing = STAGED PIPELINE. The 7 Module-1 lenses form 5 lens waves:
-  Evidence (Listening, Human Meaning) → Aggregate (Culture Pattern,
+- Lens processing = STAGED PIPELINE. The 7 Module-1 lenses form 6 lens waves:
+  Evidence (Listening) → Meaning (Human Meaning) → Aggregate (Culture Pattern,
   Tension) → Interpret (Inclusity Objective) → Guardrail (Facilitator
-  Discernment) → Openings (Action Opening). Each lens is a separate, versioned
+  Discernment) → Openings (Action Opening). Only Evidence reads the units; every
+  later wave reads the findings of earlier waves (units stay in scope as anchor
+  targets, not re-read as input). Each lens is a separate, versioned
   prompt. Discernment runs late so it can audit prior findings; its flags drive
   the internal/client-safe split. Independent lenses within a wave may run in parallel.
   (Rejected: single composite call; seven independent passes.)
+- **Evidence funnel — only Listening reads the units (LOCKED, this session).**
+  Human Meaning was the lone non-Listening lens reading raw units as input; every
+  other interpretive lens already reads prior findings and anchors to the units
+  behind them. Since Listening is verbatim (faithful, whole-voice), reading its
+  finding ≈ reading the unit, so funneling loses ~nothing. DECISION: Listening alone
+  reads units (Evidence wave, now single-lens); Human Meaning moves to its own
+  **Meaning** wave — placed between Evidence and Aggregate, its own wave (NOT grouped
+  with Aggregate, so Culture Pattern/Tension can still build on its noticings) — and
+  reads Listening's findings; all six non-Listening lenses read findings + anchor to
+  the units behind them. Units stay universally in scope as ANCHOR TARGETS
+  (finding→unit trust guarantee), just not re-read as input. Waves 5→6. Accepted
+  cost: Listening's recall becomes the pipeline ceiling (a voice Listening drops is
+  invisible downstream) — judged a feature (single evidentiary base; Listening's
+  surfacing discipline protects the whole pipeline) over a risk. RECONCILED:
+  `build_approach.md` (How-to-Read term; wave list + new Meaning bullet; Aggregate
+  "set of findings"; staged-pipeline prose; lens-processing diagram; roadmap V1
+  node) and this file (How-to-Read summary, diagram inventory, the wave entry above,
+  the Human Meaning build-log entry), plus the standalone
+  `module1_lens_pipeline.mermaid` (redrawn, byte-identical to the embedded block).
+  PENDING: CODE (add `meaning` to `WAVE_ORDER`, flip
+  Human Meaning's `wave` + input from units to Listening findings) — carried when
+  Human Meaning goes real. SEPARATE OPEN: Model B (`noticing` vs `verbatim`) before
+  it goes real.
 - Common **Finding** interface (finding_id, lens, verbatim/translation/
   source_language, evidence_links → unit_ids, support_set, cleared_to_client_safe,
   sensitivity, finding_kind, parent). Rules:
@@ -457,7 +483,11 @@ invariants above). The whole project is the **case study**; its first built vers
   impact). Evidence pair (Listening + Human Meaning) run against the same units + empty
   prior snapshot, independent (tested: `[[], []]`). Full set:
   `[listening, humanMeaning, tension, culturePattern, objective, discernment, opening]`.
-  69/69 Vitest green; lints clean. No spec note.
+  69/69 Vitest green; lints clean. No spec note. **SUPERSEDED by the Evidence-funnel
+  decision (Locked architecture, above): Human Meaning moves to its own `Meaning` wave
+  and its input flips from units to Listening findings; the "Evidence sibling / reads
+  units" facts above describe the code as first built. Code change pending, carried
+  when it goes real.**
 - **Read slice built — first full-stack path; frontend now live.** Seeded fixture
   engagement → `GET /engagements/:id/brief` (runs the pipeline via the self-protecting
   `BriefService`, returns the client-safe brief only) → `AxiosBriefApi` → `BriefStore`

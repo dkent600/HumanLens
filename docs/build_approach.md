@@ -33,8 +33,8 @@ de-identify gate → lens processing → assemble → human review → capture. 
 their work in the lens-processing stage, organized into **lens waves** (below). (Part 2 details the spine.)
 
 **Lens wave** — the lens-processing stage runs the module's lenses grouped into an
-ordered sequence of five waves: Evidence → Aggregate → Interpret → Guardrail →
-Openings. Each wave is comprised of a set of lenses sharing a particular role
+ordered sequence of six waves: Evidence → Meaning → Aggregate → Interpret →
+Guardrail → Openings. Each wave is comprised of a set of lenses sharing a particular role
 (suggested by the name of the wave). Lenses in a wave are independent of one
 another, run in parallel, and read the findings of earlier waves' lenses (all
 findings accumulate in one shared pool, tagged by the lens that produced them).
@@ -808,35 +808,38 @@ The `speaker_token` is what keeps later counting honest. When the brief reports 
 
 #### Lens processing: a staged pipeline
 
-The seven lenses are defined above, but defining them does not say how they run. The temptation is to treat them as seven independent passes over the units, or to fold all seven into a single prompt. Both are wrong, for the same reason: **the lenses are not peers — they form five lens waves**, and some lenses cannot do their work until earlier ones have produced something to work from.
+The seven lenses are defined above, but defining them does not say how they run. The temptation is to treat them as seven independent passes over the units, or to fold all seven into a single prompt. Both are wrong, for the same reason: **the lenses are not peers — they form six lens waves**, and some lenses cannot do their work until earlier ones have produced something to work from.
 
 Read in that light, the seven lenses sort into waves:
 
-- **Evidence** — the Listening Lens and the Human Meaning Lens, which read the units directly.
-- **Aggregate** — the Culture Pattern Lens and the Tension Lens, which work across the whole set of units rather than one at a time.
+- **Evidence** — the Listening Lens, which reads the units directly and surfaces each voice verbatim.
+- **Meaning** — the Human Meaning Lens, which reads the Listening findings (not the units) and asks what each voice means at the human level.
+- **Aggregate** — the Culture Pattern Lens and the Tension Lens, which work across the whole set of findings rather than one at a time.
 - **Interpret** — the Inclusity Objective Lens, which maps what has been found onto the survey domains and the PROSCI/ADKAR change vocabulary.
 - **Guardrail** — the Facilitator Discernment Lens, which reviews everything found so far for overreach, thin evidence, and what should be handled with care.
 - **Openings** — the Action Opening Lens, which points toward possible next steps.
 
-Each wave reads the units and the findings of earlier waves. This is what makes a **staged pipeline** the right structure rather than the two alternatives. A single composite prompt would collapse all seven lenses into one, so no lens could be revised or evaluated on its own, evidence and interpretation would blur together in a single pass, and the Discernment Lens could not do its job — it is meant to scrutinize the other findings, which it cannot do if they do not yet exist. Seven fully independent passes would avoid that but waste the structure: the Tension Lens would re-derive what the Culture Pattern Lens already found, and the Objective and Discernment lenses would be working from raw material instead of from the findings they are supposed to interpret and check.
+Only the first wave — Evidence, the Listening Lens — reads the units; every later wave reads the findings of earlier waves. The units stay in scope throughout, but as *anchor targets* (every finding must trace to units), not as input each lens re-reads. This is what makes a **staged pipeline** the right structure rather than the two alternatives. A single composite prompt would collapse all seven lenses into one, so no lens could be revised or evaluated on its own, evidence and interpretation would blur together in a single pass, and the Discernment Lens could not do its job — it is meant to scrutinize the other findings, which it cannot do if they do not yet exist. Seven fully independent passes would avoid that but waste the structure: the Tension Lens would re-derive what the Culture Pattern Lens already found, and the Objective and Discernment lenses would be working from raw material instead of from the findings they are supposed to interpret and check.
 
 The staged pipeline keeps each lens a separate, individually versioned prompt — which matters for both evaluation and the later learning loop, since a single lens can be revised without disturbing the others — while letting later lenses build on earlier ones. Two further properties follow:
 
 - The **Discernment Lens runs late**, so it can actually audit the accumulated findings. Its flags are not advisory notes; they drive what happens at Assemble, deciding which findings may appear in the client-safe brief and which are held to the internal one. It does this by *revising* the findings it audits rather than emitting a separate side channel: Discernment sets a finding's `cleared_to_client_safe` and `sensitivity` by re-emitting that finding under its original `finding_id`, rebuilt through the same sanctioned factory the lenses use — so support stays derived and anchoring re-enforced, disposition is never hand-set, and it lives on the finding itself (one source of truth, leaving Assemble unchanged). The orchestrator lets only this late Guardrail stage supersede a finding by id; every other wave appends, so revising another lens's finding is the auditor's privilege alone, and a stray id collision in any other wave stays a visible append rather than a silent drop on the path that gates client exposure.
-- Within a wave, lenses that do not depend on each other can run in parallel. This matters because a staged pipeline is inherently slower than a single call, and the Listening and Human Meaning lenses, or the Culture Pattern and Tension lenses, need not wait on each other.
+- Within a wave, lenses that do not depend on each other can run in parallel. This matters because a staged pipeline is inherently slower than a single call, and the Culture Pattern and Tension lenses need not wait on each other.
 
 One more property holds at the lens↔model edge itself, and it is a trust boundary. When the model returns something a lens cannot use — malformed output, off-format, or a refusal — the lens **fails safe to silence**: it emits no findings, never a fabricated one, and never crashes the run. When the *infrastructure* fails instead — the call cannot complete — that failure **propagates** as an error rather than being disguised as silence. The distinction is load-bearing: an empty result must always mean the model genuinely surfaced nothing, never that something broke on the way — so *nothing to surface* and *the call failed* can never be confused. (The wiring — parse tolerance, refusal handling, transport retries — lives in `build_implementation.md`.)
 
 ```mermaid
 ---
-title: "Module 1 — Lens processing: seven lenses, five lens waves"
+title: "Module 1 — Lens processing: seven lenses, six lens waves"
 ---
 flowchart TD
     U["Cleared units<br/>(de-identified)"]
 
-    subgraph L1["Evidence — read units directly"]
-        direction LR
+    subgraph L1["Evidence — reads units directly"]
         LIS["Listening Lens"]
+    end
+
+    subgraph LM["Meaning — reads Listening findings"]
         HM["Human Meaning Lens"]
     end
 
@@ -850,11 +853,11 @@ flowchart TD
     L4["Guardrail — Facilitator Discernment Lens<br/>runs late · audits all prior findings"]
     L5["Openings — Action Opening Lens<br/>points toward possible next steps"]
 
-    U --> L1 --> L2 --> L3 --> L4 --> L5
+    U --> L1 --> LM --> L2 --> L3 --> L4 --> L5
     L4 -->|"sensitivity + cleared-to-client-safe<br/>drive the internal/client-safe split"| OUT["→ Assemble"]
     L5 --> OUT
 
-    NOTE["Each wave reads the units AND every finding from earlier waves.<br/>Lenses within a wave are independent — may run in parallel.<br/>Every finding shares one interface; interpretive findings must be<br/>evidence-anchored (validation rule). Absence findings are exempt."]
+    NOTE["Only the Evidence wave reads the units; every later wave reads the findings<br/>of earlier waves. Units stay in scope as anchor targets for all.<br/>Lenses within a wave are independent — may run in parallel.<br/>Every finding shares one interface; interpretive findings must be<br/>evidence-anchored (validation rule). Absence findings are exempt."]
 ```
 
 #### The Finding
@@ -970,7 +973,7 @@ title: "Version progression — one structure: V1 brings it online, V2–V4 refi
 flowchart TD
     V0["V0 · Manual Prompt Lab<br/>no pipeline — prove the thinking,<br/>and define the rubric WITH Mitchell (V0's real deliverable)"]
 
-    V1["V1 · THE TRUSTWORTHY ENGINE — full spine online<br/>• scoping (engagement + actor) on every record<br/>• de-identify gate (basic scan + human checkpoint)<br/>• staged lens pipeline — 7 lenses, 5 waves<br/>• Finding with enforced evidence anchoring<br/>• brief as ONE projection (client-safe ⊆ internal)<br/>• human review + capture<br/>• structural evaluation tier<br/>• auth/authz SEAMS present (resolve trivially: identity assumed, access granted)"]
+    V1["V1 · THE TRUSTWORTHY ENGINE — full spine online<br/>• scoping (engagement + actor) on every record<br/>• de-identify gate (basic scan + human checkpoint)<br/>• staged lens pipeline — 7 lenses, 6 waves<br/>• Finding with enforced evidence anchoring<br/>• brief as ONE projection (client-safe ⊆ internal)<br/>• human review + capture<br/>• structural evaluation tier<br/>• auth/authz SEAMS present (resolve trivially: identity assumed, access granted)"]
 
     V2["V2 · Reliability & Refinement — same spine, components stronger<br/>• cross-language de-identification detector<br/>• multilingual fidelity (meaning preserved, not just detected)<br/>• evaluation harness + seeded set with Mitchell → recall test on sensitive flags<br/>• output comparison + per-lens prompt versioning"]
 
