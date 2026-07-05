@@ -42,8 +42,10 @@ function clearedUnit(position: number, speakerToken: string, content: string, la
 // unnoticed: u3/u15), within-voice structure drawn softly (u3 dash, u9 narrative
 // sequence, u15 sequence), inference bait (u14 "since the reorg"), thin/opaque units
 // (u4/u10), intentionally messy punctuation/casing (u16 — verbatim, do not correct), and
-// the one genuinely-contentless case (u17 "n/a" — the only kind Listening drops:
-// eval_set_draft.md L7b).
+// an authored terse token (u17 "n/a" — now SURFACED verbatim, as the fact it was said).
+// The surfacing bar is "did the person author an utterance?", so ONLY non-authored
+// structural emptiness (empty/whitespace) drops — of which this fixture has none; every
+// authored voice, including u17, surfaces.
 const SAMPLE_UNITS: readonly Unit[] = [
   clearedUnit(0, 'spk-a', 'The workload has been heavy for months and it\'s hard to keep up.'),
   clearedUnit(1, 'spk-b', 'When I raise something with leadership, I genuinely feel heard and they act on it.'),

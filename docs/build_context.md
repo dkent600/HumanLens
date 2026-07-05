@@ -590,6 +590,42 @@ invariants above). The whole project is the **case study**; its first built vers
   ("starts smarter than the last"). Unresolved.
 - De-identification detector sophistication (gate position fixed).
 - Voice-calibration mechanism (single-source constraint noted above).
+- **Human Meaning — interpretive-depth calibration (eval-rubric work w/ Maria [voice-fidelity]
+  + Mitchell [rubric]; NOT a code matter).** First real-model run (18-unit eval) confirmed the
+  mechanics (single-unit anchors, translation, silence, per-voice multi-noticing) but surfaced
+  the live frontier — *how much* Meaning should read into *thin* material:
+  - *Depth on thin utterances.* From near-empty voices ("things are fine, I guess"; "No
+    comment.") Meaning reached fairly loaded, hedged readings (e.g. "a lack of safety to
+    speak"). Doing its job + double-hedged + anchored — but the amount of inference-from-little
+    is the judgment to calibrate.
+  - *Doug's call — DECIDED, relayed to Human Code (this session):* certain answers ("n/a," "idk,"
+    "no comment," and the like) are **answers whose potential meaning and importance are best
+    understood contextually — worth exploring as such**, not empty and not to be assigned a known
+    meaning (not even "expresses uncertainty" — that itself assumes a meaning). CHANGE (now): a
+    Human Meaning prompt rule — where a response's meaning can't be grounded in the words
+    themselves, Meaning names it as an answer worth exploring contextually and stops, without
+    characterizing it or classifying token type. Prompt-only; no new capability; shape unchanged
+    (normal noticing, per-voice, single-unit, held). The actual exploration, if feasible, is
+    deferred to **ensuing lenses** (may or may not be the deferred questions-worth-asking
+    capability — separate open thread). Trigger = the epistemic condition (meaning not readable
+    from the unit alone), not a token list. See build_approach §2.
+  - *Frame-vocabulary flattening (watch).* "recognition / psychological safety / burnout" recur;
+    often faithful, but thin voices pulled toward a small set of house frames risks collapsing
+    distinct voices. Name in the rubric to watch over time.
+  - *"n/a" boundary — RESOLVED (surface).* Any authored token, however brief (n/a, idk, no comment, a
+    bare ".") surfaces — the bar is "did the person author an utterance?", drop = non-authored
+    structural emptiness only (build_approach L573 rewritten to this general framing; auto-fill is
+    irrelevant under the Inclusity data contract — every unit is a real human voice — an ingestion
+    concern if ever). **LANDED (Human Code): Listening surfaces authored tokens.** Drop
+    point confirmed *prompt-side* — the lens code only drops empty/whitespace (kept "n/a"); the
+    model dropped it solely because the system prompt named "a pure form-artifact" contentless
+    (the de-id gate never runs in the eval). Fix is the Listening system prompt: binary bar "did
+    the person author an utterance?", no token-type classification. Tests updated (structural-
+    emptiness drops; authored tokens surface, verbatim intact); u17 now surfaces (real-model
+    confirmed); backend 118 green. **Interim gap — now being closed:** the loaded readings Meaning
+    gives these surfaced answers are addressed by the Human Meaning prompt-rule change decided this
+    session (above, relayed to Human Code); pending that landing, the readings remain
+    held-by-default / internal, an eval/review matter, not client-facing.
 - When the structural eval tier gets automated (depends on pipeline existing).
 - Lens orchestration detail (parallelism, finding-passing) — implementation.
 - Auth/authz IMPLEMENTATION (seam settled; real login/roles/grant-revoke deferred

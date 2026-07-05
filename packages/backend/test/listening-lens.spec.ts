@@ -159,10 +159,24 @@ describe('Listening lens — real-model output: tolerant parse + anchoring on th
     expect([...out[0].evidenceLinks]).toEqual(['u2']);
   });
 
-  it('drops a candidate with empty verbatim (contentless)', async () => {
-    const provider = textProvider('{"findings":[{"verbatim":"   ","evidenceUnitIds":["u1"]}]}');
-    const out = await new ListeningLens().run(units, [], provider);
-    expect(out).toHaveLength(0);
+  it('drops a candidate with empty or whitespace-only verbatim (non-authored structural emptiness)', async () => {
+    // Structural emptiness — the person authored nothing — is the ONLY drop category.
+    const empty = await new ListeningLens().run(units, [], textProvider('{"findings":[{"verbatim":"","evidenceUnitIds":["u1"]}]}'));
+    const whitespace = await new ListeningLens().run(units, [], textProvider('{"findings":[{"verbatim":"   ","evidenceUnitIds":["u1"]}]}'));
+    expect(empty).toHaveLength(0);
+    expect(whitespace).toHaveLength(0);
+  });
+
+  it('surfaces an authored terse token verbatim, however opaque ("n/a", ".", "IDK", "No comment")', async () => {
+    // The surfacing bar is "did the person author an utterance?" — any authored token
+    // surfaces as the fact it was said, its verbatim intact. Listening does NOT classify
+    // what such a token means (declination vs. uncertainty vs. thin-but-real is downstream).
+    for (const token of ['n/a', '.', 'IDK', 'No comment']) {
+      const provider = textProvider(`{"findings":[{"verbatim":${JSON.stringify(token)},"evidenceUnitIds":["u1"]}]}`);
+      const out = await new ListeningLens().run(units, [], provider);
+      expect(out, `authored token ${JSON.stringify(token)} should surface`).toHaveLength(1);
+      expect(out[0].verbatim).toBe(token); // carried verbatim, intact
+    }
   });
 
   it('trims an out-of-scope (hallucinated) id while keeping the valid anchor', async () => {
