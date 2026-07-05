@@ -91,12 +91,12 @@ export function buildContainer(options: BuildContainerOptions = {}): AwilixConta
     lensPipeline: asFunction(
       // Registered in wave order for readability; the pipeline groups by each
       // lens's declared wave and runs the waves in WAVE_ORDER regardless. The full
-      // seven-lens set: Listening + Human Meaning are both Evidence — independent
-      // siblings in one wave; Tension and Culture Pattern are both Aggregate;
-      // Objective (Interpret) runs after them and before Discernment (Guardrail), so
-      // Discernment audits its findings. Opening (Openings) runs LAST — after
-      // Discernment — so its findings are never audited and stay held internal-only
-      // (their promoter is human review, deferred).
+      // seven-lens set: Listening (Evidence) reads the units; Human Meaning (Meaning)
+      // reads Listening's findings and interprets each voice; Tension and Culture
+      // Pattern are both Aggregate; Objective (Interpret) runs after them and before
+      // Discernment (Guardrail), so Discernment audits its findings. Opening (Openings)
+      // runs LAST — after Discernment — so its findings are never audited and stay held
+      // internal-only (their promoter is human review, deferred).
       ({
         deidGate,
         llmProvider,

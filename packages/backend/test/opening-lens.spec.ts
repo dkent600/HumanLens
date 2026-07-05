@@ -81,7 +81,7 @@ describe('Action Opening lens — Openings wave, reads the audited picture', () 
   it('enforces anchoring on its output — drops an opening with no in-scope unit anchor', async () => {
     const rogue = new FakeLlmProvider(
       (): LensResponsePayload => ({
-        findings: [{ verbatim: 'an ungrounded next step', evidenceUnitIds: ['not-in-scope'] }],
+        findings: [{ noticing: 'an ungrounded next step', evidenceUnitIds: ['not-in-scope'] }],
       }),
     );
     const out = await new OpeningLens().run(units, [priorFinding('objective:0', ['u1'])], rogue);

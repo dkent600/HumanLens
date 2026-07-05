@@ -209,11 +209,10 @@ describe('lens pipeline — staged: Evidence → Aggregate', () => {
     expect([...(culture?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
   });
 
-  it('runs the two Evidence siblings against the same units — neither sees the other', async () => {
+  it('funnels Evidence -> Meaning: Human Meaning reads the Listening findings, not the units', async () => {
     const { gate } = await clearedScopeWithUnits();
 
-    // Record the prior-finding ids each emit call was handed (Evidence reads units,
-    // so its prior-findings snapshot is empty).
+    // Record the prior-finding ids each emit call was handed.
     const seenPriorIds: string[][] = [];
     const spy = new FakeLlmProvider((payload) => {
       if (payload.task !== 'disposition') {
@@ -227,17 +226,23 @@ describe('lens pipeline — staged: Evidence → Aggregate', () => {
       new HumanMeaningLens(),
     ]).synthesize(scope);
 
-    // Both Evidence lenses ran against an EMPTY prior-findings snapshot — neither saw
-    // the other's output (no 'listening:0' in Human Meaning's view). The analog of the
-    // Aggregate pair's [['listening:0'], ['listening:0']], one wave earlier.
-    expect(seenPriorIds).toEqual([[], []]);
+    // Listening (Evidence) read the units — its prior-findings snapshot is empty.
+    // Human Meaning (Meaning, one wave later) read Listening's finding — the funnel: the
+    // interpretive lens works from the surfaced voices, not the raw units directly.
+    expect(seenPriorIds).toEqual([[], ['listening:0']]);
 
-    // Both produced a finding anchored to the same units.
+    // Listening surfaced the voice (verbatim); Human Meaning interpreted it (noticing),
+    // INHERITING the single unit behind the Listening finding it named (not both units —
+    // a meaning finding structurally carries exactly one unit).
     expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0', 'meaning:0']);
     const listening = brief.internal.find((f) => f.findingId === 'listening:0');
     const meaning = brief.internal.find((f) => f.findingId === 'meaning:0');
+    expect(listening?.verbatim).not.toBeNull(); // surfacing
+    expect(listening?.noticing).toBeNull();
+    expect(meaning?.verbatim).toBeNull(); // interpretive
+    expect(meaning?.noticing).not.toBeNull();
     expect([...(listening?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
-    expect([...(meaning?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
+    expect([...(meaning?.evidenceLinks ?? [])]).toEqual(['u1']); // inherited listening:0's single anchor
   });
 });
 

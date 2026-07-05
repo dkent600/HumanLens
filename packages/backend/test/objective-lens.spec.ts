@@ -84,7 +84,7 @@ describe('Inclusity Objective lens — Interpret wave, reads Aggregate output', 
   it('enforces anchoring on interpretive output — drops an interpretation with no in-scope anchor', async () => {
     const rogue = new FakeLlmProvider(
       (): LensResponsePayload => ({
-        findings: [{ verbatim: 'an ungrounded implication', evidenceUnitIds: ['not-in-scope'] }],
+        findings: [{ noticing: 'an ungrounded implication', evidenceUnitIds: ['not-in-scope'] }],
       }),
     );
     const out = await new ObjectiveLens().run(units, [finding('tension', 'tension:0', ['u1'])], rogue);

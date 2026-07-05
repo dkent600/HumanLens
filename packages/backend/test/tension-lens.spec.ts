@@ -87,7 +87,7 @@ describe('Tension lens — Aggregate wave, reads prior findings', () => {
     // finding exists, an unanchored interpretive finding is a defect, never asserted.
     const rogue = new FakeLlmProvider(
       (): LensResponsePayload => ({
-        findings: [{ verbatim: 'an ungrounded tension', evidenceUnitIds: ['not-in-scope'] }],
+        findings: [{ noticing: 'an ungrounded tension', evidenceUnitIds: ['not-in-scope'] }],
       }),
     );
     const prior = [evidenceFinding('listening:0', ['u1'])];

@@ -91,12 +91,23 @@ export interface LensPromptPayload {
 }
 
 export interface LensResponseCandidate {
-  /** The speaker's words exactly as given (surfacing lenses) / the lens's noticing text. */
-  readonly verbatim: string;
+  /** Surfacing lenses (Listening): the speaker's words exactly as given. Exactly one of verbatim/noticing carries the text. */
+  readonly verbatim?: string;
+  /** Interpretive lenses (Human Meaning, Tension, Culture Pattern, Objective, Opening): the lens's noticing. */
+  readonly noticing?: string;
   /** Literal English translation — present only when `verbatim` is not usable English. Paired with `sourceLanguage`. */
   readonly translation?: string;
   /** Source language name — present only when `translation` is. */
   readonly sourceLanguage?: string;
+  /**
+   * The findingId of the single PRIOR voice a per-voice interpretive lens (Human Meaning)
+   * interprets. That lens derives its anchor by inheriting the named finding's unit rather
+   * than trusting a model-emitted unit link, and a source it cannot resolve is dropped
+   * (silence). The fake emits it alongside `evidenceUnitIds` so ONE response shape serves
+   * both Human Meaning (reads `sourceFindingId`) and the Aggregate+ lenses (read
+   * `evidenceUnitIds`); each lens ignores the field it does not use.
+   */
+  readonly sourceFindingId?: string;
   readonly evidenceUnitIds: readonly string[];
 }
 
@@ -134,12 +145,13 @@ export type FakeLensResponse = LensResponsePayload | DiscernmentResponsePayload;
  * Default rules, selected by the payload so ONE fake drives every lens reproducibly:
  *   - `task: 'disposition'` (the Discernment audit): promote nothing, flag nothing —
  *     the safe default, so held-by-default stands out of the box.
- *   - With prior findings (an Aggregate+ emit call): surface ONE finding that cites
- *     the units BEHIND those prior findings — proving the later stage read the prior
- *     findings, not just the units, and that interpretive output stays anchored.
- *   - Otherwise (an Evidence-layer emit call — Listening, Human Meaning): surface ONE
- *     finding that cites every unit it was given — so the derived support set spans
- *     all the distinct sources, exercising honest cross-source counting.
+ *   - With prior findings (an interpretive emit call — Human Meaning, Aggregate+):
+ *     emit ONE INTERPRETIVE finding (`noticing`) that cites the units BEHIND those
+ *     prior findings — proving the later stage read the prior findings, not just the
+ *     units, and that interpretive output stays anchored.
+ *   - Otherwise (a surfacing Evidence emit call — Listening): surface ONE finding
+ *     (`verbatim`) that cites every unit it was given — so the derived support set
+ *     spans all the distinct sources, exercising honest cross-source counting.
  * With nothing to work from it returns no findings. A custom `respond` can script
  * other shapes for tests (e.g. a verdict that promotes or flags a finding).
  */
@@ -163,18 +175,24 @@ export function defaultFakeResponse(payload: LensPromptPayload): FakeLensRespons
   }
   const priorFindings = payload.priorFindings ?? [];
   if (priorFindings.length > 0) {
-    // Any emit lens that reads prior findings (Aggregate: Tension, Culture Pattern;
-    // Interpret: Inclusity Objective; Openings: Action Opening): anchor to the units
-    // BEHIND the prior findings (deduped), so the output is provably derived from
-    // what earlier stages found. Neutral content — it stands in for any such lens.
+    // Any INTERPRETIVE emit lens that reads prior findings (Meaning: Human Meaning;
+    // Aggregate: Tension, Culture Pattern; Interpret: Inclusity Objective; Openings:
+    // Action Opening): anchor to the units BEHIND the prior findings (deduped), so the
+    // output is provably derived from what earlier stages found. Its text is a
+    // `noticing` — an interpretation, not a quote (Model B). Neutral content — it
+    // stands in for any such lens.
     const unitIds = [...new Set(priorFindings.flatMap((f) => f.evidenceUnitIds))];
     if (unitIds.length === 0) {
       return { findings: [] };
     }
+    // `sourceFindingId` names the first prior finding — so the per-voice lens (Human
+    // Meaning) inherits that one voice's unit — while `evidenceUnitIds` still carries the
+    // union for the Aggregate+ lenses. One shape drives every interpretive lens.
     return {
       findings: [
         {
-          verbatim: 'A pattern runs across the surfaced findings.',
+          noticing: 'A pattern runs across the surfaced findings.',
+          sourceFindingId: priorFindings[0].findingId,
           evidenceUnitIds: unitIds,
         },
       ],
@@ -183,10 +201,9 @@ export function defaultFakeResponse(payload: LensPromptPayload): FakeLensRespons
   if (payload.units.length === 0) {
     return { findings: [] };
   }
-  // Any Evidence-layer emit lens that reads the units directly (Listening, Human
-  // Meaning): surface ONE finding that cites every unit it was given — so the derived
-  // support set spans all the distinct sources. Neutral content — it stands in for
-  // any such lens.
+  // The surfacing Evidence emit lens that reads the units directly (Listening): surface
+  // ONE finding (`verbatim`) that cites every unit it was given — so the derived support
+  // set spans all the distinct sources.
   return {
     findings: [
       {

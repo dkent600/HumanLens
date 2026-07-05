@@ -4,6 +4,7 @@ import type { LlmProvider } from '../seams/llm-provider.js';
 import { ANTHROPIC_MODEL } from '../seams/anthropic-llm-provider.js';
 import { hasAnthropicKey, selectLlmProvider } from '../seams/select-llm-provider.js';
 import { ListeningLens } from '../engine/lenses/listening-lens.js';
+import { HumanMeaningLens } from '../engine/lenses/human-meaning-lens.js';
 
 // Dev / eval harness — the manual path for eyeballing REAL model output on ONE lens,
 // the loop where a lens's prompt gets tuned. It is NOT part of the server: buildContainer
@@ -15,9 +16,10 @@ import { ListeningLens } from '../engine/lenses/listening-lens.js';
 //   to the deterministic fake, so the harness still runs end to end (just not the model).
 //
 // EXTENDING TO THE NEXT LENS: when a sibling lens gets its own real system contract +
-// tolerant parse, add ONE entry to LENS_RUNNERS. An Evidence-layer lens reads the units
-// with an empty prior-findings snapshot (like Listening below); a later-layer lens would
-// build representative prior findings first. Keep this the place prompts are tuned.
+// tolerant parse, add ONE entry to LENS_RUNNERS. An Evidence-wave lens reads the units
+// with an empty prior-findings snapshot (like Listening below); a later-wave lens builds
+// representative prior findings first (like `meaning`, which runs Listening for real to
+// get the voices, then interprets them). Keep this the place prompts are tuned.
 
 function clearedUnit(position: number, speakerToken: string, content: string, language = 'en'): Unit {
   return {
@@ -69,6 +71,15 @@ type LensRunner = (units: readonly Unit[], provider: LlmProvider) => Promise<rea
 // first; add the next as a sibling entry.
 const LENS_RUNNERS: Record<string, LensRunner> = {
   listening: (units, provider) => new ListeningLens().run(units, [], provider),
+  // Meaning is INTERPRETIVE and reads the Listening findings, so build them first (for
+  // real) and then interpret each voice. The bilingual SAMPLE_UNITS carry Spanish (u5,
+  // u8) and mixed (u13) voices, so the translation path is exercised end to end here: the
+  // Spanish lives in the underlying Listening finding's verbatim/translation, and Human
+  // Meaning's noticing comes back in English (Item 9, EN/ES).
+  meaning: async (units, provider) => {
+    const listeningFindings = await new ListeningLens().run(units, [], provider);
+    return new HumanMeaningLens().run(units, listeningFindings, provider);
+  },
 };
 
 async function main(): Promise<void> {
@@ -94,7 +105,12 @@ async function main(): Promise<void> {
   console.log(`${findings.length} finding(s):\n`);
   for (const finding of findings) {
     console.log(`[${finding.findingId}] (${finding.lens})`);
-    console.log(`  verbatim:   ${finding.verbatim ?? '(none — absence finding)'}`);
+    // Model B: a surfacing finding carries verbatim, an interpretive one a noticing.
+    if (finding.noticing !== null) {
+      console.log(`  noticing:   ${finding.noticing}`);
+    } else {
+      console.log(`  verbatim:   ${finding.verbatim ?? '(none — absence finding)'}`);
+    }
     if (finding.translation !== undefined) {
       console.log(`  translation:${finding.translation} (translated from ${finding.sourceLanguage})`);
     }

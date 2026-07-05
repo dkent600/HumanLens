@@ -4,6 +4,7 @@ import {
   isEvidenceAnchored,
   makeAbsenceFinding,
   makeOrdinaryFinding,
+  MissingNoticingError,
   MissingVerbatimError,
   UnanchoredFindingError,
   UnpairedTranslationError,
@@ -107,6 +108,45 @@ describe('Finding — disposition defaults to held', () => {
     });
     expect(finding.clearedToClientSafe).toBe(false);
     expect(finding.sensitivity).toBe('normal');
+  });
+});
+
+describe('Finding — surfacing vs interpretive (Model B XOR)', () => {
+  it('a surfacing finding carries verbatim, with noticing null', () => {
+    const finding = makeOrdinaryFinding({
+      findingId: 'listening:0',
+      lens: 'listening',
+      verbatim: 'people raise workload',
+      evidenceLinks: ['u1'],
+      units,
+    });
+    expect(finding.verbatim).toBe('people raise workload');
+    expect(finding.noticing).toBeNull(); // exactly one of the two is populated
+  });
+
+  it('an interpretive finding carries noticing, with verbatim null', () => {
+    const finding = makeOrdinaryFinding({
+      findingId: 'meaning:0',
+      lens: 'meaning',
+      noticing: 'a signal of eroding trust',
+      evidenceLinks: ['u1'],
+      units,
+    });
+    expect(finding.noticing).toBe('a signal of eroding trust');
+    expect(finding.verbatim).toBeNull(); // the interpretation is not a quote
+    expect(isEvidenceAnchored(finding)).toBe(true); // interpretive output is still anchored
+  });
+
+  it('an interpretive finding cannot be built with empty noticing (runtime mirror of the type)', () => {
+    expect(() =>
+      makeOrdinaryFinding({
+        findingId: 'meaning:0',
+        lens: 'meaning',
+        noticing: '   ', // whitespace-only is contentless
+        evidenceLinks: ['u1'],
+        units,
+      }),
+    ).toThrow(MissingNoticingError);
   });
 });
 

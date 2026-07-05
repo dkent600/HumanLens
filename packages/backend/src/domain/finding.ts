@@ -27,6 +27,13 @@
 //      gate). Sensitivity asks whether a finding, even fully anonymous and true,
 //      is charged enough that surfacing it could do harm. It is a backstop on
 //      promotion (see assemble.ts).
+//   5. VERBATIM XOR NOTICING (Model B). An ordinary finding carries EITHER the
+//      speaker's exact words (`verbatim`, a surfacing lens) OR the lens's own
+//      interpretation (`noticing`, an interpretive lens) — exactly one, never both.
+//      The discriminated union below (SurfacingFinding | InterpretiveFinding) makes
+//      that XOR a compile-time property, so a quote can never be confused with an
+//      inference. An absence finding is exempt: both are null (its text home is a
+//      deferred decision).
 
 import type { UnitId } from './types.js';
 
@@ -89,8 +96,11 @@ interface FindingCommon {
   readonly parent?: FindingId;
 }
 
-/** An ordinary finding: MUST be anchored to at least one unit. */
-export interface OrdinaryFinding extends FindingCommon {
+/**
+ * A SURFACING finding: carries the speaker's own words verbatim; `noticing` is null.
+ * MUST be anchored to at least one unit. Produced by a surfacing lens (Listening).
+ */
+export interface SurfacingFinding extends FindingCommon {
   readonly findingKind: 'ordinary';
   /**
    * The speaker's own words exactly as given — original language, punctuation, run-ons,
@@ -100,19 +110,48 @@ export interface OrdinaryFinding extends FindingCommon {
    * the only sanctioned transformation is the literal `translation` (when language forces it).
    */
   readonly verbatim: string;
+  /** Null on a surfacing finding — the speaker's words live in `verbatim` (Model B XOR). */
+  readonly noticing: null;
   readonly evidenceLinks: NonEmpty<UnitId>;
 }
+
+/**
+ * An INTERPRETIVE finding: carries the lens's own noticing (its interpretation), not a
+ * speaker's quote; `verbatim` is null. MUST be anchored to at least one unit — the
+ * interpretation traces back to the voice(s) behind it. Produced by an interpretive lens
+ * (Human Meaning, Tension, Culture Pattern, Objective, Action Opening).
+ */
+export interface InterpretiveFinding extends FindingCommon {
+  readonly findingKind: 'ordinary';
+  /** Null on an interpretive finding — it does not quote; its text lives in `noticing` (Model B XOR). */
+  readonly verbatim: null;
+  /**
+   * The lens's noticing — the model's interpretation of the material, distinct from any
+   * speaker's exact words (which never appear here). This is what makes an interpretive
+   * finding legible as inference-not-quote on the page.
+   */
+  readonly noticing: string;
+  readonly evidenceLinks: NonEmpty<UnitId>;
+}
+
+/**
+ * An ordinary (evidence-anchored) finding. Model B: exactly one of {verbatim, noticing}
+ * is non-null — the union makes that XOR a compile-time property, not a runtime hope.
+ */
+export type OrdinaryFinding = SurfacingFinding | InterpretiveFinding;
 
 /** The sanctioned exception: a finding about silence/absence, which by nature has no anchor. */
 export interface AbsenceFinding extends FindingCommon {
   readonly findingKind: 'absence';
   /**
    * Null: an absence finding has no source to quote (consistent with its anchoring
-   * exemption). How an absence finding carries its noticing text is a DEFERRED decision —
+   * exemption). How an absence finding carries its descriptive text is a DEFERRED decision —
    * settled when an absence-emitting lens lands; no V1 lens emits one (Listening drops a
    * zero-anchor candidate rather than inventing an absence finding).
    */
   readonly verbatim: null;
+  /** Null too — an absence finding is exempt from the verbatim-XOR-noticing rule (see above). */
+  readonly noticing: null;
   readonly evidenceLinks: readonly [];
 }
 
@@ -147,11 +186,19 @@ export class UnanchoredFindingError extends Error {
   }
 }
 
-/** Thrown when an ordinary finding is constructed with empty `verbatim` — the runtime mirror of the type. */
+/** Thrown when a surfacing finding is constructed with empty `verbatim` — the runtime mirror of the type. */
 export class MissingVerbatimError extends Error {
   constructor(findingId: FindingId) {
     super(`ordinary finding ${findingId} has no verbatim (the speaker's words are required for a surfaced finding)`);
     this.name = 'MissingVerbatimError';
+  }
+}
+
+/** Thrown when an interpretive finding is constructed with empty `noticing` — the runtime mirror of the type. */
+export class MissingNoticingError extends Error {
+  constructor(findingId: FindingId) {
+    super(`ordinary finding ${findingId} has no noticing (an interpretive finding's text is required)`);
+    this.name = 'MissingNoticingError';
   }
 }
 
@@ -163,15 +210,10 @@ export class UnpairedTranslationError extends Error {
   }
 }
 
-interface MakeOrdinaryArgs {
+/** Fields common to constructing either flavor of ordinary finding. */
+interface MakeOrdinaryBase {
   readonly findingId: FindingId;
   readonly lens: LensId;
-  /** The speaker's words exactly as given (see `OrdinaryFinding.verbatim`). Required, non-empty. */
-  readonly verbatim: string;
-  /** Literal English translation — present only when the source isn't usable English. Paired with `sourceLanguage`. */
-  readonly translation?: string;
-  /** Source language name — present only when `translation` is. */
-  readonly sourceLanguage?: string;
   readonly evidenceLinks: readonly UnitId[];
   readonly units: readonly SupportableUnit[];
   readonly sensitivity?: Sensitivity;
@@ -179,19 +221,65 @@ interface MakeOrdinaryArgs {
   readonly parent?: FindingId;
 }
 
+/** Args to construct a SURFACING finding (the speaker's verbatim words). */
+interface MakeSurfacingArgs extends MakeOrdinaryBase {
+  /** The speaker's words exactly as given (see `SurfacingFinding.verbatim`). Required, non-empty. */
+  readonly verbatim: string;
+  /** Literal English translation — present only when the source isn't usable English. Paired with `sourceLanguage`. */
+  readonly translation?: string;
+  /** Source language name — present only when `translation` is. */
+  readonly sourceLanguage?: string;
+  readonly noticing?: never;
+}
+
+/** Args to construct an INTERPRETIVE finding (the lens's noticing). */
+interface MakeInterpretiveArgs extends MakeOrdinaryBase {
+  /** The lens's interpretation (see `InterpretiveFinding.noticing`). Required, non-empty. */
+  readonly noticing: string;
+  readonly verbatim?: never;
+  readonly translation?: never;
+  readonly sourceLanguage?: never;
+}
+
+/** Exactly one text flavor — verbatim (surfacing) or noticing (interpretive) — enforced at the type level. */
+type MakeOrdinaryArgs = MakeSurfacingArgs | MakeInterpretiveArgs;
+
 /**
  * Build an ordinary (evidence-anchored) finding. Provider output arrives untyped,
  * so this is the single sanctioned construction path: it enforces anchoring AND a
- * non-empty `verbatim` at runtime (the types already enforce them at compile time),
- * keeps `translation`/`sourceLanguage` paired, and DERIVES the support set from the
- * evidence — a caller cannot assert a strength. Disposition defaults to held and
- * sensitivity to normal. The finding is built from the speaker's words verbatim; this
- * factory never paraphrases or de-personalizes.
+ * non-empty text field at runtime (the types already enforce them at compile time),
+ * DERIVES the support set from the evidence (a caller cannot assert a strength), and
+ * upholds the Model B XOR — a SURFACING finding carries `verbatim` (noticing null),
+ * an INTERPRETIVE finding carries `noticing` (verbatim null). Which branch runs is
+ * chosen by whether the caller passes `noticing` or `verbatim`. Disposition defaults
+ * to held, sensitivity to normal. The factory never paraphrases: surfacing carries
+ * the speaker's words untouched; interpretive carries the lens's own noticing.
  */
 export function makeOrdinaryFinding(args: MakeOrdinaryArgs): OrdinaryFinding {
   if (args.evidenceLinks.length === 0) {
     throw new UnanchoredFindingError(args.findingId);
   }
+  const [first, ...rest] = args.evidenceLinks;
+  const common = {
+    findingKind: 'ordinary' as const,
+    findingId: args.findingId,
+    lens: args.lens,
+    evidenceLinks: [first, ...rest] as NonEmpty<UnitId>,
+    supportSet: deriveSupportSet(args.evidenceLinks, args.units),
+    sensitivity: args.sensitivity ?? 'normal',
+    clearedToClientSafe: args.clearedToClientSafe ?? false,
+    ...(args.parent !== undefined ? { parent: args.parent } : {}),
+  };
+
+  if (args.noticing !== undefined) {
+    // Interpretive finding — its text is the lens's noticing; no verbatim, no translation.
+    if (args.noticing.trim() === '') {
+      throw new MissingNoticingError(args.findingId);
+    }
+    return { ...common, verbatim: null, noticing: args.noticing };
+  }
+
+  // Surfacing finding — the speaker's verbatim words, with the optional translation pair.
   if (args.verbatim.trim() === '') {
     throw new MissingVerbatimError(args.findingId);
   }
@@ -200,20 +288,13 @@ export function makeOrdinaryFinding(args: MakeOrdinaryArgs): OrdinaryFinding {
   if (hasTranslation !== hasSourceLanguage) {
     throw new UnpairedTranslationError(args.findingId);
   }
-  const [first, ...rest] = args.evidenceLinks;
   return {
-    findingKind: 'ordinary',
-    findingId: args.findingId,
-    lens: args.lens,
+    ...common,
     verbatim: args.verbatim,
+    noticing: null,
     ...(hasTranslation
       ? { translation: args.translation, sourceLanguage: args.sourceLanguage }
       : {}),
-    evidenceLinks: [first, ...rest],
-    supportSet: deriveSupportSet(args.evidenceLinks, args.units),
-    sensitivity: args.sensitivity ?? 'normal',
-    clearedToClientSafe: args.clearedToClientSafe ?? false,
-    ...(args.parent !== undefined ? { parent: args.parent } : {}),
   };
 }
 
@@ -236,6 +317,7 @@ export function makeAbsenceFinding(args: MakeAbsenceArgs): AbsenceFinding {
     findingId: args.findingId,
     lens: args.lens,
     verbatim: null,
+    noticing: null,
     evidenceLinks: [],
     supportSet: { sourceCount: 0, unitCount: 0 },
     sensitivity: args.sensitivity ?? 'normal',
@@ -257,11 +339,12 @@ export interface DispositionChange {
  * `promote()` helper: a NEW finding is constructed through the same factories, so
  * the support set is RE-DERIVED from the unchanged evidence (never hand-set) and the
  * anchoring invariant is re-enforced. Everything that identifies the finding —
- * `findingId`, `lens`, `verbatim`, `translation`/`sourceLanguage`, `evidenceLinks`,
- * `parent` — is carried through verbatim, so the revision shares the original's id and
- * the Guardrail stage can supersede the original in place. Discernment never rewords:
- * the surfaced words pass through untouched. Fields the change leaves unset keep the
- * finding's current value.
+ * `findingId`, `lens`, its text (`verbatim`+`translation`/`sourceLanguage` for a
+ * surfacing finding, `noticing` for an interpretive one), `evidenceLinks`, `parent` —
+ * is carried through untouched, so the revision shares the original's id and the
+ * Guardrail stage can supersede the original in place. Discernment never rewords: the
+ * finding's text passes through as-is. Fields the change leaves unset keep the finding's
+ * current value.
  */
 export function reviseDisposition(
   finding: Finding,
@@ -279,6 +362,20 @@ export function reviseDisposition(
       ...(finding.parent !== undefined ? { parent: finding.parent } : {}),
     });
   }
+  if (finding.noticing !== null) {
+    // Interpretive finding — rebuild through the noticing branch (verbatim stays null).
+    return makeOrdinaryFinding({
+      findingId: finding.findingId,
+      lens: finding.lens,
+      noticing: finding.noticing,
+      evidenceLinks: finding.evidenceLinks,
+      units,
+      sensitivity,
+      clearedToClientSafe,
+      ...(finding.parent !== undefined ? { parent: finding.parent } : {}),
+    });
+  }
+  // Surfacing finding — rebuild through the verbatim branch, carrying the translation pair.
   return makeOrdinaryFinding({
     findingId: finding.findingId,
     lens: finding.lens,

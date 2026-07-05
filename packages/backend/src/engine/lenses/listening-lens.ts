@@ -137,17 +137,19 @@ export class ListeningLens implements Lens {
     const findings: Finding[] = [];
     candidates.forEach((candidate, index) => {
       const evidenceLinks = candidate.evidenceUnitIds.filter((id) => inScope.has(id));
-      if (evidenceLinks.length === 0) {
-        // No valid anchor — an ordinary finding cannot exist without one. The
-        // Listening lens deals only in evidence, so it drops it rather than
-        // inventing an absence finding.
+      const verbatim = candidate.verbatim;
+      if (evidenceLinks.length === 0 || verbatim === undefined) {
+        // No valid anchor (or no verbatim) — a surfacing finding cannot exist without
+        // one. The Listening lens deals only in evidence, so it drops it rather than
+        // inventing an absence finding. (parseCandidates already guarantees a non-empty
+        // `verbatim`; the guard also narrows the wire type's optional field.)
         return;
       }
       findings.push(
         makeOrdinaryFinding({
           findingId: `${this.id}:${index}`,
           lens: 'listening',
-          verbatim: candidate.verbatim,
+          verbatim,
           ...(candidate.translation !== undefined
             ? { translation: candidate.translation, sourceLanguage: candidate.sourceLanguage }
             : {}),

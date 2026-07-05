@@ -84,7 +84,7 @@ describe('Culture Pattern lens — Aggregate wave, reads prior findings', () => 
     // finding present, an unanchored interpretive finding is a defect, never asserted.
     const rogue = new FakeLlmProvider(
       (): LensResponsePayload => ({
-        findings: [{ verbatim: 'an ungrounded pattern', evidenceUnitIds: ['not-in-scope'] }],
+        findings: [{ noticing: 'an ungrounded pattern', evidenceUnitIds: ['not-in-scope'] }],
       }),
     );
     const prior = [evidenceFinding('listening:0', ['u1'])];

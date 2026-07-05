@@ -11,16 +11,17 @@ import type { LlmProvider } from '../../seams/llm-provider.js';
 // with the unit type-specific extensions, so for now a lens runs over all the
 // cleared units handed to it.
 
-// The seven Module-1 lenses are not peers — they form five dependency waves
+// The seven Module-1 lenses are not peers — they form six dependency waves
 // (build_approach.md, "Lens processing: a staged pipeline"). A lens declares which
 // wave it belongs to; the orchestrator runs the waves in this canonical order,
 // and each wave reads the units plus the findings of the waves ABOVE it.
-export type Wave = 'evidence' | 'aggregate' | 'interpret' | 'guardrail' | 'openings';
+export type Wave = 'evidence' | 'meaning' | 'aggregate' | 'interpret' | 'guardrail' | 'openings';
 
 /** The dependency order the staged orchestrator iterates. Earlier waves feed later ones. */
 export const WAVE_ORDER: readonly Wave[] = [
-  'evidence', // Listening, Human Meaning — read units directly
-  'aggregate', // Culture Pattern, Tension — work across the whole set / prior findings
+  'evidence', // Listening — reads the units directly, surfaces each voice verbatim
+  'meaning', // Human Meaning — reads Listening findings, interprets each voice on its own
+  'aggregate', // Culture Pattern, Tension — work across the whole set of prior findings
   'interpret', // Inclusity Objective — maps findings to survey domains + ADKAR
   'guardrail', // Facilitator Discernment — audits all prior findings, runs late
   'openings', // Action Opening — points toward possible next steps

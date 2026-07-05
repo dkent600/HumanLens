@@ -21,6 +21,7 @@ describe('brief-page', () => {
             findingId: 'listening:0',
             lens: 'listening',
             verbatim: 'A recurring signal runs across the comments.',
+            noticing: null,
             evidenceLinks: ['u1', 'u2'],
             support: { sourceCount: 2, unitCount: 2 },
             findingKind: 'ordinary',
@@ -29,9 +30,20 @@ describe('brief-page', () => {
             findingId: 'listening:1',
             lens: 'listening',
             verbatim: 'No me siento seguro',
+            noticing: null,
             translation: 'I do not feel safe',
             sourceLanguage: 'Spanish',
             evidenceLinks: ['u3'],
+            support: { sourceCount: 1, unitCount: 1 },
+            findingKind: 'ordinary',
+          },
+          {
+            // An interpretive finding — its text lives in `noticing`, verbatim null.
+            findingId: 'meaning:0',
+            lens: 'meaning',
+            verbatim: null,
+            noticing: 'a signal of eroding trust in leadership',
+            evidenceLinks: ['u1'],
             support: { sourceCount: 1, unitCount: 1 },
             findingKind: 'ordinary',
           },
@@ -62,6 +74,8 @@ describe('brief-page', () => {
     expect(appHost.textContent).toContain('No me siento seguro');
     expect(appHost.textContent).toContain('I do not feel safe');
     expect(appHost.textContent).toContain('translated from Spanish');
+    // An interpretive finding renders its `noticing` (verbatim null): noticing ?? verbatim.
+    expect(appHost.textContent).toContain('a signal of eroding trust in leadership');
   });
 
   it('renders a not-found message when the brief is unavailable', async () => {

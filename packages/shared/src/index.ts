@@ -49,9 +49,11 @@ export interface ClientSafeSupport {
  *   - `clearedToClientSafe` and `sensitivity` are internal gating signals — a
  *     finding's disposition is decided inside the engine, never shipped outward.
  *   - `verbatim` / `translation` / `sourceLanguage` carry the speaker's own words (and a
- *     literal English translation when the source isn't English). They are surfaced
- *     as-is — the projection never rewords; client-facing voicing is a separate, deferred
- *     shaping stage, not this DTO.
+ *     literal English translation when the source isn't English), for a SURFACING finding.
+ *     `noticing` carries the lens's interpretation, for an INTERPRETIVE finding. Model B:
+ *     exactly one of verbatim/noticing is non-null (both null for an absence finding). All
+ *     are surfaced as-is — the projection never rewords; client-facing voicing is a
+ *     separate, deferred shaping stage, not this DTO.
  *   - `evidenceLinks` ARE preserved, so traceability survives into the client view.
  *
  * Because the internal layer is *every* finding and the client-safe layer is the
@@ -62,8 +64,10 @@ export interface ClientSafeFinding {
   readonly findingId: string;
   /** Which lens produced it. */
   readonly lens: string;
-  /** The speaker's words exactly as given; null for an absence finding (no source to quote). */
+  /** Surfacing finding: the speaker's words exactly as given. Null for an interpretive or absence finding. */
   readonly verbatim: string | null;
+  /** Interpretive finding: the lens's noticing (its interpretation). Null for a surfacing or absence finding. */
+  readonly noticing: string | null;
   /** A literal English translation of `verbatim` — present only when the source isn't English. Paired with `sourceLanguage`. */
   readonly translation?: string;
   /** The source language name (e.g. "Spanish") — present only when `translation` is. */

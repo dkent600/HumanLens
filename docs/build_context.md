@@ -234,10 +234,11 @@ partner and the writer of `build_approach.md`.
   node) and this file (How-to-Read summary, diagram inventory, the wave entry above,
   the Human Meaning build-log entry), plus the standalone
   `module1_lens_pipeline.mermaid` (redrawn, byte-identical to the embedded block).
-  PENDING: CODE (add `meaning` to `WAVE_ORDER`, flip
-  Human Meaning's `wave` + input from units to Listening findings) — carried when
-  Human Meaning goes real. SEPARATE OPEN: Model B (`noticing` vs `verbatim`) before
-  it goes real.
+  DONE (this session): CODE landed — `meaning` added to `WAVE_ORDER`; Human Meaning's
+  `wave` → `'meaning'` and input flipped from units to Listening findings. Model B also
+  LANDED (see the "Human Meaning REAL" build-log entry below). Single-unit
+  cap for Human Meaning: LANDED (structural — `human-meaning-lens.ts` inherits the source
+  Listening voice's anchor via `sourceFindingId`). Nothing remaining.
 - Common **Finding** interface (finding_id, lens, verbatim/translation/
   source_language, evidence_links → unit_ids, support_set, cleared_to_client_safe,
   sensitivity, finding_kind, parent). Rules:
@@ -486,8 +487,43 @@ invariants above). The whole project is the **case study**; its first built vers
   69/69 Vitest green; lints clean. No spec note. **SUPERSEDED by the Evidence-funnel
   decision (Locked architecture, above): Human Meaning moves to its own `Meaning` wave
   and its input flips from units to Listening findings; the "Evidence sibling / reads
-  units" facts above describe the code as first built. Code change pending, carried
-  when it goes real.**
+  units" facts above describe the code as first built. Code change pending — now REALIZED this session (see the "Human Meaning REAL" entry below).** **GRANULARITY LOCKED (this session): Human Meaning is PER-VOICE —
+  it interprets each voice (each Listening finding) on its own and does NOT consolidate across
+  voices. Each meaning finding is anchored to the single unit of the Listening finding it
+  interprets (single-unit `evidence_links`, no finding spans >1 unit); it MAY emit multiple
+  noticings per voice (e.g. an unmet need and a fear → `meaning:0`, `meaning:1`, both anchored
+  to that one unit — this is what first exercises multi-finding-per-lens, Item 11). Cross-voice
+  consolidation stays Aggregate's job (Culture Pattern/Tension). Emits `noticing` (Model B),
+  `verbatim` null. To be reflected in the versioned prompt when it goes real.**
+- **Human Meaning REAL — Model B + Evidence funnel landed (this session).** Realizes the
+  funnel code change and Model B plumbing recorded above. **Model B:** Finding split into a
+  discriminated union `SurfacingFinding (verbatim, noticing null) | InterpretiveFinding
+  (verbatim null, noticing) | AbsenceFinding (both null)` — the verbatim⊕noticing XOR is now a
+  COMPILE-TIME property, not a runtime check (absence exempt). `MissingNoticingError`;
+  `makeOrdinaryFinding` takes a discriminated arg; `reviseDisposition` preserves an interpretive
+  finding's `noticing` through Discernment revision. Five interpretive fakes migrated to
+  `noticing`; Listening stays `verbatim`. Resolver `noticing ?? translation ?? verbatim`.
+  Client-safe DTO gains `noticing`; Assemble projects it; frontend renders `noticing ??
+  verbatim` (root + subtheme). **Funnel:** `WAVE_ORDER` = evidence → meaning → aggregate →
+  interpret → guardrail → openings; Human Meaning `wave='meaning'`, reads Listening findings
+  (not units), per-voice, single-unit anchors, may emit multiple noticings per voice; real
+  versioned `system` prompt + tolerant defensive parse (malformed → silence; transport →
+  propagates). Server/`buildContainer` stay on the fake. **Live real-model eval** (`npm run
+  eval -- meaning`, real `claude-opus-4-8`): 17 per-voice findings, each single-unit anchored,
+  `noticing` populated; Spanish voices (u5, u8) and mixed (u13) returned as English noticings
+  anchored to source units — translation path confirmed end-to-end. **135 green** (backend 116
+  + frontend 19); tsc/vite/eslint/stylelint clean. Items 9 (EN/ES) + 11 (multi-finding) closed
+  by new automated tests. **Single-unit cap — STRUCTURAL, LANDED (follow-up this session).** The
+  model no longer emits unit links; per noticing it names `sourceFindingId` (the one Listening
+  voice it interprets) and the lens inherits that voice's anchor (`source.evidenceLinks[0]`,
+  sliced to one) → a meaning finding provably carries exactly one unit, cannot consolidate a
+  source's units or span voices; an unresolvable/hallucinated `sourceFindingId` → silence.
+  Entirely in `human-meaning-lens.ts`; shared factory/validation untouched; only shared-seam
+  change is an optional `sourceFindingId?` on `LensResponseCandidate` (fake emits it, so one
+  response shape drives every interpretive lens). **136 green** (backend 117 + frontend 19);
+  structural "exactly one unit even when the source spans several" + "named source missing →
+  silence" tests added; real-model eval hit the multi-noticing case (`meaning:6`+`meaning:7` →
+  same unit).
 - **Read slice built — first full-stack path; frontend now live.** Seeded fixture
   engagement → `GET /engagements/:id/brief` (runs the pipeline via the self-protecting
   `BriefService`, returns the client-safe brief only) → `AxiosBriefApi` → `BriefStore`
@@ -636,13 +672,14 @@ invariants above). The whole project is the **case study**; its first built vers
     passthrough; frontend dangling-parent→root in `brief-store.ts`): `parent` tested only
     in the frontend grouping; no backend finding carries one. → rides the **real-model /
     prompts** work or the first lens that actually emits a subtheme.
-  - *Item 9 — multilingual* (every unit is `'en'`): "language is tagged" and "a Spanish/
-    mixed unit isn't silently dropped by the gate or a lens" are V1 Unit properties,
-    unguarded. Cheap (`'es'` fixture). → do when next touching units/gate, or with the
-    model work; it's an EN/ES-from-the-start constraint, so don't let it drift far.
-  - *Item 11 — single-vs-multiple per lens*: every fake emits one finding per lens, so
-    id-suffixing past `:0`, multi-finding accumulation, and ordering are unexercised. →
-    rides the **model work** (a multi-candidate fake is useful infra there anyway).
+  - *Item 9 — multilingual* — **CLOSED (this session):** EN/ES now exercised end-to-end via the
+    Human Meaning real-model eval (Spanish u5/u8 + mixed u13 → English noticings anchored to
+    source units) plus new automated tests; the `'es'` fixture landed. (Was: every unit `'en'`,
+    the EN/ES-from-the-start constraint unguarded.)
+  - *Item 11 — single-vs-multiple per lens* — **CLOSED (this session):** Human Meaning emitting
+    multiple noticings per voice (`meaning:0`, `meaning:1`, …) exercises id-suffixing past `:0`,
+    multi-finding accumulation, and ordering; covered by new automated tests. (Was: every fake
+    emitted one finding per lens.)
   - *Minor / opportunistic:* de-id gate idempotency (`scanPending` skip-non-pending;
     `recordHumanDecision('flagged')` re-flag) and `repository.setDeidStatus` not-found
     branch — low blast radius; pick up when touching the gate/repo.
@@ -676,16 +713,24 @@ invariants above). The whole project is the **case study**; its first built vers
   happen to a verbatim field) and the downstream-English requirement (lenses read
   `translation ?? verbatim`, resolved in one place in `prompt-projection`). Full spec in
   `two_field_finding_draft.md`; plan approved. **Two deferrals it surfaced (don't rediscover):**
-  - *Absence findings have no text field.* `verbatim: null` for absence (decision 1a) means an
-    absence finding currently has nowhere to carry its descriptive noticing ("no one mentioned
-    X"). Harmless now — **no V1 lens emits absence findings** (Listening drops zero-anchor
-    candidates). → When an absence-emitting lens lands, decide how absence carries its noticing
-    text (likely a `noticing`/`observation` field used instead of `verbatim`).
-  - *`verbatim` is Listening-centric.* The six interpretive lenses produce *noticings* (the
-    model's interpretation), not a speaker's quote, so `verbatim` is a borrowed label while
-    they're fake placeholders. → When each interpretive lens goes real, decide whether it wants
-    `verbatim` or a distinct `noticing` field. (Same shape of question as absence; resolve
-    per-lens at realness.)
+  - *Absence findings have no text field — but absence is NOT fully deferred (REVIEW later).*
+    `verbatim: null` for absence (decision 1a) means an absence finding has nowhere to carry its
+    descriptive noticing ("no one mentioned X"); how absence carries its text is still open.
+    HOWEVER, the infra slice is already coded: `finding_kind: 'absence'` and its exemption from
+    the anchoring-validation rule are built and tested (`absence-through-projection`, June 2026).
+    The exemption's only current consumer is the Discernment anchoring-audit path (an absence
+    finding must not be flagged unanchored). No lens *emits* absence (Listening drops zero-anchor
+    candidates). → When an absence-emitting lens lands, REVIEW the existing slice (emission, text
+    field, client-safe flow) as one design pass — NOT a clean slate. (Doug flagged: verify "only
+    consumer is Discernment" against the source at review time.)
+  - *`verbatim` is surfacing-only — RESOLVED (Model B, LOCKED this session).* Interpretive
+    lenses produce *noticings* (the model's interpretation), not a speaker's quote. DECISION: a
+    distinct `noticing` field carries interpretive text; `verbatim` stays "speaker's exact words"
+    and is `null` on interpretive findings. Invariant: `verbatim` XOR `noticing` (exactly one
+    populated; surfacing → verbatim, interpretive → noticing). Resolver: `noticing ?? translation
+    ?? verbatim` (Doug's order — prefer the finding's own text; also robust if the XOR is ever
+    violated). `finding_kind` orthogonally marks the anchoring exemption. Absence-text home stays
+    open (deferred, above) — B does NOT lock it. Recorded in build_approach Finding interface.
   - *Edge confirmed:* a real model emitting non-English `verbatim` with no `translation` →
     **keep** the finding (degraded-but-present voice beats a suppressed one), seeded eval catches
     it as a model-quality issue. *§1 reconciled* to first-person + structural flag (was

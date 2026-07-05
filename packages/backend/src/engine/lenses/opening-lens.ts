@@ -70,16 +70,18 @@ export class OpeningLens implements Lens {
     const findings: Finding[] = [];
     parsed.findings.forEach((candidate, index) => {
       const evidenceLinks = candidate.evidenceUnitIds.filter((id) => inScope.has(id));
-      if (evidenceLinks.length === 0) {
-        // No valid unit anchor — the anchoring invariant forbids an unanchored
-        // ordinary finding, so the opening is dropped rather than asserted.
+      const noticing = candidate.noticing;
+      if (evidenceLinks.length === 0 || noticing === undefined) {
+        // No valid unit anchor (or no noticing text) — the anchoring invariant forbids
+        // an unanchored ordinary finding, so the opening is dropped rather than asserted.
+        // An interpretive lens emits its text as `noticing`, not `verbatim` (Model B).
         return;
       }
       findings.push(
         makeOrdinaryFinding({
           findingId: `${this.id}:${index}`,
           lens: 'opening',
-          verbatim: candidate.verbatim,
+          noticing,
           evidenceLinks,
           units,
         }),

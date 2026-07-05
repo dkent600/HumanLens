@@ -32,10 +32,12 @@ function clearedUnit(unitId: string, speakerToken: string): Unit {
 const units: readonly Unit[] = [clearedUnit('u1', 'spk-a'), clearedUnit('u2', 'spk-b')];
 
 function priorFinding(findingId: string, evidenceLinks: readonly string[]): Finding {
+  // An interpretive (Aggregate) finding — carries a `noticing`, so revising it exercises
+  // reviseDisposition's interpretive branch (verbatim stays null through the rebuild).
   return makeOrdinaryFinding({
     findingId,
     lens: 'tension',
-    verbatim: 'a prior finding',
+    noticing: 'a prior finding',
     evidenceLinks,
     units,
   });
