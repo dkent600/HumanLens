@@ -184,4 +184,41 @@ describe('Human Meaning lens — Meaning wave, inherits its anchor from the sour
     expect(out[0]?.verbatim).toBeNull();
     expect([...out[0]!.evidenceLinks]).toEqual(['u-es']); // inherited the Spanish voice's unit
   });
+
+  // An answer whose meaning cannot be read from its own words ("n/a", "idk", "No comment",
+  // ".") must be FLAGGED as best understood in context, not assigned a (even hedged) meaning;
+  // a normal thin-but-readable answer is still interpreted. The flag-vs-interpret decision is
+  // a PROMPT rule the model applies — the lens carries whatever noticing it returns without
+  // special-casing, so these tests pin the SHAPE side of the contract (both produce an ordinary
+  // held single-unit noticing). The model's JUDGMENT itself is exercised against the real model
+  // in the eval (`npm run eval -- meaning`).
+  it('carries a flag-for-exploration noticing as an ordinary held single-unit finding (shape unchanged)', async () => {
+    const prior = [listeningFinding('listening:0', ['u1'])]; // stands in for an "n/a"-type voice
+    const flags = new FakeLlmProvider((): LensResponsePayload => ({
+      findings: [
+        {
+          noticing:
+            'This response is best understood in context; its potential meaning and importance are worth exploring.',
+          sourceFindingId: 'listening:0',
+          evidenceUnitIds: [],
+        },
+      ],
+    }));
+
+    const [meaning] = await new HumanMeaningLens().run(units, prior, flags);
+    expect(meaning.noticing).toMatch(/best understood in context/); // flags rather than interprets
+    expect(meaning.verbatim).toBeNull();
+    expect([...meaning.evidenceLinks]).toEqual(['u1']); // per-voice, single-unit
+    expect(meaning.clearedToClientSafe).toBe(false); // held by default
+  });
+
+  it('still interprets a normal thin-but-readable answer (pins the boundary)', async () => {
+    const prior = [listeningFinding('listening:0', ['u1'])];
+    const out = await new HumanMeaningLens().run(
+      units,
+      prior,
+      interpretsFirstVoice('an unmet need for recognition'),
+    );
+    expect(out[0]?.noticing).toBe('an unmet need for recognition'); // a real interpretation, carried
+  });
 });

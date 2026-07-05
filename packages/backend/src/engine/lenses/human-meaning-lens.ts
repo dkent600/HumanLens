@@ -39,6 +39,16 @@ import { toPromptFinding } from './prompt-projection.js';
 // tolerant parse means malformed/bad model output -> SILENCE (no findings, never
 // fabricated, never a crash), while a transport failure PROPAGATES from the provider.
 //
+// CONTEXTUAL ANSWERS (prompt rule, shape unchanged; build_approach.md "The Human Meaning
+// Lens" — "Where meaning can't be grounded in the words…"). When a response's potential
+// meaning cannot be grounded in the words themselves — any reading would have to be imported
+// from context the unit doesn't carry ("n/a", "idk", "No comment", "." are the clear cases, matched by
+// that condition, not the string) — the prompt directs the model NOT to supply a meaning,
+// not even a hedged one, but to emit a noticing that flags the answer as best understood in
+// context, worth exploring, and stop. Any actual exploration is a later lens's job. This is
+// still an ordinary noticing (per-voice, single-unit, verbatim null, held) — its CONTENT
+// flags-for-exploration rather than interprets; the lens needs no special handling.
+//
 // Disposition stays HELD: promotion to the client-safe layer is the Discernment lens /
 // human review's affirmative act, not a Meaning-wave concern.
 
@@ -79,6 +89,17 @@ const SYSTEM = [
   '- Stay close to what the voice could plausibly mean. Do not add a story, a cause, or surrounding',
   '  context the voice does not carry; where you would have to guess, say less. A convincing guess',
   '  reads exactly like evidence, which is why it is prohibited.',
+  '- For some responses the potential meaning cannot be grounded in the words themselves: any reading',
+  '  would have to be imported from context this unit does not carry. "n/a", "idk", "No comment", a',
+  '  bare "." are the clear cases — but judge by that CONDITION (meaning not grounded in the words',
+  '  alone), not the exact string. For such a response, do NOT supply a meaning, not even a hedged one',
+  '  ("may signal uncertainty" already assigns a meaning). Emit a noticing that NAMES it as an answer',
+  '  whose potential meaning and importance are best understood in context — worth exploring as such',
+  '  — and stop there. Do NOT characterize the answer ("empty", "a non-answer", and the like are out)',
+  '  and do NOT classify what kind of token it is; leave any actual exploration of its contextual',
+  '  meaning to later lenses. A response whose meaning IS discernible in its own words (for example',
+  '  "I\'ve stopped putting in extra effort — it just goes unnoticed") is not this case — interpret',
+  '  it normally.',
   '',
   'Emit each finding\'s interpretation in the "noticing" field — your own words describing the human',
   'meaning, NOT a quote of the speaker (the speaker\'s words are surfaced by an earlier lens). Return',
