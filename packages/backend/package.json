@@ -9,7 +9,8 @@
     "dev": "tsc -b --watch",
     "clean": "tsc -b --clean",
     "test": "vitest run",
-    "eval": "tsc -b && node --env-file-if-exists=.env dist/eval/run-lens.js"
+    "eval": "tsc -b && node --env-file-if-exists=.env dist/eval/run-lens.js",
+    "completeness": "tsc -b && node dist/eval/completeness/run-completeness.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.106.0",
@@ -22,6 +23,7 @@
   "devDependencies": {
     "@types/node": "^22.19.21",
     "@vitest/coverage-v8": "^2.1.9",
+    "fast-check": "^4.9.0",
     "vitest": "^2.1.9"
   }
 }

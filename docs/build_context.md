@@ -904,7 +904,8 @@ invariants above). The whole project is the **case study**; its first built vers
         caught two things owner-chat missed (run-scoping; the behavior-g orphan); owner-chat raised G-1. A single
         walk would have shipped without run-scoping. Pass now COMPLETE; the three properties fold into the V-1
         spec (above) on Doug's freeze go.
-    - *GATE:* package → decidable when V-1 green + V-2 captured/reconciled (DONE) + V-3 defined-with-owners +
+    - *GATE:* package → decidable when V-1 green (**DONE ✓ — with ★ prerequisite**) + V-2 captured/reconciled
+      (DONE ✓) + V-3 defined-with-owners (DONE) +
       **the traceability pass complete (DONE — three gaps reconciled)**. Spec is freezable/relayable to Claude Code only after the pass. Doug
       then decides with evidence. Nothing before that gate lands in canon.
     - *BUILD-PHASE GOVERNANCE (in effect before the V-1 relay goes out — the guardrail for the phase we're
@@ -920,6 +921,30 @@ invariants above). The whole project is the **case study**; its first built vers
       seeds, and any shrunk counterexamples-turned-fixtures — the "don't trust a 200" discipline applied to our
       own test run. (4) **F1–F3 raw to both chats**, not summarized; F2 reports THREE numbers — measured hit
       rate, break-even hit rate, worst-case 0%-hit arithmetic — so pass/fail is legible, not a verdict.
+    - *V-1 RESULT — BUILT, CLEAN GREEN (eval-scaffolding; NOT mechanism adoption; production seam/engine/server
+      untouched; u9 open). All PROPOSED.* P1–P9 + G-1 + A9 + A7 green across ~7,000 seeded runs (pinned,
+      reproducible); crash acceptance (SIGKILL @ 50% → restart → totality restored, 0 re-execution) ran 3×,
+      non-flaky; no shrunk counterexamples (clean). Choices reported: run-scoping = composite `(run_id, voice_id)`
+      + one-writer-per-run (not the lock); behavior g stamped in code as spec-drafting invention; ledger =
+      `node:sqlite` (eval-tier needs Node ≥22.5; server/engine still ≥20). No asterisks; PROPOSED_BEHAVIORS
+      empty (no new behavior found). **★ HIGHEST-SIGNAL FINDING — a first-class MECHANISM-ADOPTION PREREQUISITE
+      (do not lose):** the production `AnthropicLlmProvider` **discards `stop_reason`** (collapses refusal →
+      `{text:''}`, returns only `{text}`). So G-1 / finish-reason gating is **unenforceable on the REAL path**
+      until the lens↔model seam surfaces `stop_reason` (+ HTTP status): a truncated/filtered empty arrives as
+      `{text:''}`, indistinguishable from chosen-empty → recorded answered-empty → P7 never-retry → **permanent
+      silent drop** = exactly the A6 failure, on the real path. V-1 proved the accounting sound in simulation AND
+      discovered the real seam can't yet supply the inputs it depends on — found in scaffolding at zero
+      production risk. IF the mechanism is adopted, surfacing `stop_reason`/status is the FIRST required change.
+      **A9 exception-mapping — reasonable V-1 default, recorded as an OPEN sub-decision (Doug), not silently
+      locked:** Claude Code mapped StreamError(payload-decode)→delivered-but-unusable (⇒ model-layer retry) and
+      TransportError/TeardownError/unexpected→failed (⇒ infra backoff). Underdetermined by the spec and has
+      retry-semantics consequences (a decode error that's really transport corruption should backoff, not
+      re-ask) → accept as V-1 default, revisit at mechanism adoption. **Meta (four layers, four catches — the
+      closing evidence the layered validation was load-bearing, not over-process):** survey caught the
+      phenomenon; adversarial review caught durability + truncation (survey knowledge lost in transmission);
+      the traceability pass caught termination + run-scoping (spec gaps); the BUILD caught the production seam
+      discarding `stop_reason` (an implementation-reality gap no analysis layer could see). Each catch was
+      invisible to the layer above it.
 - Learning loop mechanism (S5-2): human-authored prompt edits; prompts as
   versioned, engagement-aware artifacts. Auto-vs-manual unresolved.
 - Scope of a learned edit: engagement-scoped vs graduates to baseline
