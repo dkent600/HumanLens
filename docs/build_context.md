@@ -45,6 +45,32 @@ partner and the writer of `build_approach.md`.
   "first version" not "first MVP"; full name + title at first reference, first
   name after. The word "prompts" must not appear in the client-facing proposal
   (it is fine in the internal build doc).
+- **Lens validation method (each lens, on going real).** Fake/unit tests cover only shape and
+  mechanics (a finding has the right structure; the seam behaves) — they CANNOT establish whether
+  the model surfaces the right *meaning*, which is model judgment. Correctness of meaning is
+  established by a **real-model eval run + Doug review + discussion here**: Doug runs `npm run eval
+  -- <lens>`, relays the output, and we assess it together against the lens's intended output and
+  voice-fidelity, recording findings + any prompt adjustments as calibration. Every lens goes
+  through this loop as it goes real; green fake tests are necessary, not sufficient. The eval
+  fixture must probe **both** directions: *coverage* (each intended output has at least one clear
+  occasion in the fixture) AND *false-positives / over-reach* (control voices — neutral, positive,
+  or genuinely context-dependent — where the correct move is restraint: no manufactured category,
+  no loaded reading, a flag not a guess). A fixture that only tests coverage rewards over-reading.
+- **Relay sheds load (multi-chat transmission hazard).** Knowledge moves between chats by relay; each hop can
+  silently drop a load-bearing detail. Proven live: the two completeness attacks that landed (ledger durability,
+  finish_reason/truncation) were BOTH in the original research survey and lost across survey→package→spec. So:
+  any spec distilled from a source must stay AUDITABLE BACK TO that source, and consolidation of a
+  distilled spec includes a deliberate bidirectional traceability pass against the source before it freezes
+  (source item → covered-or-consciously-excluded; spec property → traces to source-or-recorded-decision). This
+  is a standing hazard for every relay, not a completeness-spec quirk.
+- **Disposition totality (relay-sheds-load, applied to reviews).** When dispositioning a review or attack
+  packet, walk the **targets REQUESTED**, not just the responses RECEIVED — every requested target ends
+  attacked / declined / unaddressed-carry-forward, never silent. Proven live: the concurrent-run seam was in the
+  Packet-B target list but never attacked, and the attack-by-attack disposition had no row for un-attacked
+  targets, so it fell out unanswered (found only by the parallel traceability walk). The symmetry is the lesson —
+  the disposition process itself violated "totality / no silent path," the same completeness property the
+  *product* enforces, missing from our *process*. Applies to any review, diff, or packet whose requested scope
+  is larger than what came back.
 
 ## State of `build_approach.md` (as of last good edit)
 - ~1042 lines. **Reorganized into three Parts** under the title (Option A
@@ -266,7 +292,7 @@ partner and the writer of `build_approach.md`.
   Maria — client-safe voice). Rating signals: useful / generic / overreaching /
   missing nuance / unsafe. Capture keys edits+signals to finding+lens+unit,
   engagement/actor-scoped; keeps learning (patterns), not raw voices.
-- Evaluation = two tiers. STRUCTURAL (automated invariants: anchoring,
+- Evaluation = two kinds. STRUCTURAL (automated invariants: anchoring,
   projection integrity, sensitivity populated + gate enforced, language tagged /
   no dropped units, subtheme hierarchy, capacity) — regression guards once the
   pipeline exists. QUALITATIVE (Mitchell's rubric, expressed via the rating
@@ -584,6 +610,303 @@ invariants above). The whole project is the **case study**; its first built vers
 - B1 (context doc): module numbers — William White 7→8, Terrance Collins 6→7.
 
 ## Open / deferred (resume triggers)
+- **⭑ TOP PRIORITY — LLM voice-processing completeness (open decision; nothing agreed).**
+  - *The challenge (universal).* Any LLM call can silently fail to process a voice it was given —
+    the model may emit nothing for an input it received. This applies to **every LLM call in the
+    system — every lens, throughout the pipeline**: per-voice lenses (Listening, Human Meaning),
+    cross-voice lenses (Culture Pattern, Tension), and the Interpret / Guardrail / Openings lenses
+    alike. All LLMs are subject to it. Diagnosed concretely via u9 (submitted in the Human Meaning
+    batch, no output emitted; stochastic — dropped/dropped/surfaced across three runs); confirmed
+    latent in Listening; inherent to every LLM call.
+  - *Requirement (Doug, standing, top priority).* A **deterministic guarantee that every voice is
+    processed by the LLM** — submitted *and* accounted for in the output. "Deterministic" governs
+    **delivery and accounting only**: every voice provably gets its turn. The **output** of that
+    processing is and stays **stochastic** — no guarantee is asked (or possible) about *what* the
+    model returns, only that no voice is silently skipped. Solving this comes **first** — ahead of
+    new lenses, the Aggregate wave, and the Human Meaning completeness fix (now just one instance of
+    this general problem).
+  - *A consequence, not a solution.* A bare single batched call can never meet the bar: submission ≠
+    processing (the voice is in the prompt but the model emits nothing for it), and it isn't
+    verifiable per-voice. So the bar rules out "one batched call, trust the model" — but does NOT
+    pick a mechanism. Candidates (per-voice calls, batch + per-voice guard + retry, chunking
+    discipline, input formatting, structured decoding) are all **open and unagreed**.
+  - *Two forms of the guarantee.* Per-voice lenses: "every voice processed" = every input voice
+    yields output, checkable per input id. Cross-voice lenses: one-output-per-voice doesn't apply;
+    the guarantee is that the whole set is provably ingested/considered (no silent truncation,
+    nothing lost between chunks). Defining the cross-voice form is part of what must be solved, as a
+    whole, before any lens is patched.
+  - **⏸ PROPOSED — CONVERGED BETWEEN CHATS — AWAITING DOUG (preserved analysis, NOT decisions;
+    the live decision status is the TOP-PRIORITY entry ABOVE, unchanged: nothing agreed).**
+    Inter-chat convergence (this chat + Fable) is NOT approval — recorded only so the analysis isn't lost.
+    - *GATE (Item 8) — pending external evaluation.* Doug intends to subject this converged package to
+      stronger independent evaluation (possibly a different model family / other means) BEFORE approving
+      anything below. This gate sits in front of the whole block. Relatedly (Item 7a): two-chat convergence
+      is weak independent evidence (same model family, same survey inputs) — the validators of record are
+      empirical (the research survey + the u9 eval), not agreement between chats.
+    - *Conditions attached (recorded WITH the proposals they gate).*
+      - **1a** — if Edit C is ever drafted, the same pass must reconcile Edit A's middle terminal state
+        (a voice provably covered that surfaced nothing) with C's ≥1-per-voice invariants: those invariants
+        CLOSE that middle state for these two lenses (Listening: survives only for non-authored structural
+        emptiness; Human Meaning: never), and the text must present this as a DERIVATION from each lens's
+        contract, not an exception to A — else A and C read as contradictory to a careful reader (Mitchell).
+      - **1b** — the "residual as facilitator-facing signal / product feature" framing (Edit D) stays in
+        internal design docs ONLY; it must not migrate into AI_Development_Plan.md or client-facing material
+        without separate Doug approval after the mechanism exists and has been seen working (cf. S4-A/S4-C
+        rework + client-facing language discipline).
+    - *Item 1 — Edit A (proposed, not landed).* Completeness = accounting property, guaranteed in code,
+      never in a prompt; every voice ends in an explicit terminal state, matched by the orchestrator, never
+      inferred from the model's claim to be thorough. **TERMINAL-STATE COUNT — resolved (converged both chats)
+      toward FOUR, pending cross-family check.** V-1's P4 surfaced that the earlier THREE-state enumeration
+      (findings / covered-and-empty / propagated-failure) collapsed two distinct outcomes. Deciding rule: *a
+      ledger state earns existence iff it routes differently* (retry semantics or the honest claim), reasons
+      annotate but don't multiply states. Four states: (i) answered-with-findings; (ii) **answered-empty
+      (chosen silence) — NEVER retried**; (iii) **delivered-but-unusable** (refusal | malformed) — retryable at
+      the *model* layer, then surfaces as an explicit gap; (iv) **failed** (transport/infra) — retryable at the
+      *infra* layer, then a gap. Plus the excluded fifth: UNACCOUNTED (the silent drop) — not a state, the hole
+      P1 closes ("no fifth state"). Key args: retrying chosen-empty = manufacturing findings under retry
+      pressure = the mechanical form of the overreach the lenses refuse → (ii) non-retryable *by rule* → its own
+      state; four-state leaves the standing trust-boundary paragraph UNCHANGED (it governs lens behavior, which
+      is identical; the accounting distinction is new) — a *smaller* canon change than fold-into-propagated,
+      which would force rewriting the boundary. Refusal-as-facilitator-signal (surface (iii)-refused to review)
+      noted but **GATED by 1b** (product-feature framing; not part of the four-state justification). Edit A's
+      proposed text moves to the four-state form + "no fifth state" clause; canonical proposed text lives in the
+      Fable→owner relay of this exchange — recorded BY REFERENCE, not pasted here. Proposed placement: "Lens
+      processing: a staged pipeline," after the trust-boundary paragraph, before the mermaid. Supersedes both
+      the "arithmetic over identifiers…" wording and the three-state wording; nothing is in canon.
+      **Fork evidence after V-2 (record precisely):** four-ness + machine-failures-split-in-two = converged
+      cross-family (Gemini, cold); A6 (truncated/filtered empty MUST be retryable while chosen-empty must NOT)
+      independently FORCES the empty/unusable split — a concrete failure unrouteable under three states. The
+      refusal|malformed grouping specifically remains Claude-derived; A7 (provider content-rejection = "a human
+      should look") is its first independent adversarial corroboration (still 1b-gated). Not "ratified" — the
+      evidence column is materially heavier on four, refusal-grouping still lightest.
+    - *Item 2 — Edit B:* proposed DROPPED (absorbed by A's second paragraph); not formally dropped until Doug says so.
+    - *Item 3 — Edit C (shape only, no text drafted):* invariant stated in each lens's section AND checked in
+      structural evaluation. Listening: every authored voice → ≥1 finding (zero for an authored voice is a
+      provable error, not a judgment). Human Meaning: every voice → ≥1 finding (a worth-exploring flag counts).
+      "Accounted for" is the universal invariant; ≥1-per-voice is a lens-DERIVED strengthening, never imposed on
+      cross-voice lenses; future lenses declare their invariant at design time. Must include the 1a reconciliation.
+      Spanish bullet: proposed SPLIT — completeness half folds into the general structural check (parenthetical
+      trace that it subsumes the multilingual case, so the client commitment stays easy to point to);
+      translation-fidelity half → qualitative evaluation. build_implementation companion (if approved): under any
+      batched mechanism, ≥1-per-voice contracts are a termination PRECONDITION for gap-retry (a legitimately
+      silent voice is otherwise indistinguishable from a drop; retries never converge).
+    - *Item 4 — Edit D (shape only, no text drafted):* Aggregate/Interpret coverage as an ORCHESTRATOR-computed
+      audit over existing provenance (sourceFindingId / evidence_links): every upstream finding is either cited
+      by some aggregate/interpret finding or in a computed, surfaced residual. Residual computed in code, NEVER
+      emitted by the lens. Non-empty residual is EXPECTED and correct — the guarantee is "nothing silently
+      uncited," not "residual empty." Residual surfaces to human review as candidate outliers (subject to 1b).
+      Placement: principle in the Aggregate-wave description (beside A); check in the structural-eval list;
+      mechanics in build_implementation. **Proposed refinement (from the Gemini/Fable V-2 read, below):** residual
+      EXISTENCE is legitimate; residual MAGNITUDE is signal — surface the cited/provided inclusion ratio as a
+      structural metric to human review alongside the residual contents. **Auto-retry-on-low-ratio is REJECTED**
+      (Gemini proposed it): retrying synthesis until more gets cited is citation-under-pressure — the aggregate
+      analogue of retrying a chosen-empty voice, hollow citations for hollow findings. (arg #1 applied one level up.)
+      *A4 refinement:* the coverage audit + inclusion ratio are orchestrator diagnostics surfaced to REVIEW —
+      NEVER stated to the model as a target; the synthesis prompt never instructs exhaustive citation (findings
+      cite what they actually use; the residual absorbs the rest legitimately). *A5 refinement:* record a product
+      metric — residual triage time must beat reading the raw voices; if it doesn't at pilot scale, hierarchical
+      aggregation moves UP the roadmap (the trigger that promotes it from "scale-contingent").
+    - *Item 5 — Mechanism (the TOP-PRIORITY open decision — REMAINS OPEN).* Joint recommendation, recorded as
+      recommendation ONLY: the voice is the unit of work AND of accounting for the per-voice lenses; both
+      per-voice lenses on the same mechanism; first embodiment = synchronous parallel fan-out (one call per
+      voice, keyed by voice id — preserves the fast build→look→tune loop); scale swap behind the SAME seam via
+      provider batch API (one voice/request, request id = voice id, explicit terminal statuses, `expired`
+      retryable) — SAME accounting semantics, DIFFERENT transport AND latency class (A2: "pure transport" struck
+      as overclaim — a 24h retry loop is a different product): interactive/eval runs stay sync PERMANENTLY; the
+      batch path serves only non-interactive scale runs (acceptance test if/when built: fail 5% of a batch, measure
+      time+code to totality). Doesn't touch the lens seam (why this hybrid is OK where structured outputs
+      were not); voice-id keying on every call and write from day one; Option 2 (k-voice batching +
+      id-reconciliation + retry tiers + dead-letter) NOT built, kept adoptable. Rationale: fan-out REMOVES the
+      failure-generating step (vs. detect-and-recover); chosen silence is structurally observable only under
+      per-voice semantics; output tokens identical under both options and dominate cost, while prompt caching
+      cuts the overhead batching would save; Aggregate reads compact findings → chunking is scale-contingent and
+      reuses none of voice-batch reconciliation, so consistency doesn't tip the choice.
+    - *Item 6 — u9: REMAINS OPEN, status unchanged* (open decision + live reproducible defect). Proposed (not
+      adopted) handling IF Doug approves the mechanism: split the entry — decision half closes on approval;
+      defect half converts to fix-decided/impl-pending, closing only when Falsifier 1 passes.
+    - *Item 7 — Falsifiers (epistemics of the proposal).* (a) two-chat convergence = weak evidence (above).
+      (b) Falsifier 1: once per-voice calls exist, repeated u9 re-runs must show the silent drop is STRUCTURALLY
+      IMPOSSIBLE, not merely rarer — any unaccounted voice under fan-out falsifies the analysis. (c) Falsifier 2:
+      real token counts from first runs must confirm output-token dominance; if input overhead dominates at
+      actual prompt sizes, the Option-2 cost question legitimately reopens.
+  - **▶ VALIDATION PLAN — AUTHORIZED TO BUILD (validators only; NOT package approval).** Doug authorizes
+    building the VALIDATORS below; this does NOT approve the architectural package (Edits A–D, mechanism).
+    The minimal orchestrator skeleton V-1 needs is **eval-tier scaffolding, not adoption** — a passing V-1
+    does NOT auto-promote the skeleton to the chosen mechanism; the decision still routes through Doug after
+    V-1/V-2/V-3. Validators produce inputs to Doug's decision, not substitutes for it. Nothing here lands in
+    `build_approach.md`; u9 stays open. (Full V-1 spec is BY REFERENCE — the Fable→owner validation relay;
+    it drafts into `build_implementation.md` as a PROPOSED eval-spec only on Doug's separate go, then relays
+    to Claude Code.)
+    - *Governance rule (adopt into the V-1 spec):* new adversarial behavior found in implementation →
+      proposed property → owner-chat records → Doug approves. The property list stays canonical in the spec,
+      never drifts in test code.
+    - *V-1 — adversarial simulation (build first).* Minimal per-voice fan-out orchestrator behind the lens↔model
+      seam (one call per voice, keyed by voice id, run ledger) + a hostile behavioral model mock producing, per
+      call, seeded/reproducible (fast-check): valid / empty / malformed / refusal / hallucinated-id /
+      duplicate / **cross-voice (g: findings for a DIFFERENT valid voice)** / transport-fail / truncation.
+      Properties P1–P7: P1 totality (every id in exactly one of the four states); P2 no-silent-path — **now:
+      resolved-empty requires a USABLE response** (four-state); P3 provenance integrity — **each finding's id
+      checked against the id sent in THAT call** (this is what catches (g); qualifies "drops impossible" →
+      "impossible *given the per-call provenance check*"); P4 — **rewritten: malformed/refusal → (iii)
+      delivered-but-unusable, never resolved-empty, never conflated with transport; transport → (iv) failed**;
+      P5 idempotent retry; P6 report accuracy; **P7 (new) — chosen-empty is NEVER retried** (the anti-fabrication
+      rule as a testable property). Acceptance: hold across thousands of seeded runs; shrunk counterexamples
+      become fixtures.
+      **Packet-B strengthenings (adopted PROPOSED — the two ★ change V-1 ACCEPTANCE CRITERIA, don't miss them
+      at build greenlight):** ★ *A3 durability* — the ledger is PERSISTENT from V-1 (SQLite suffices); ledger
+      write precedes/atomic-with finding persistence (no finding may exist the ledger can't account for);
+      + behavior **j** (crash/kill mid-run); + **P8 recoverability** (after crash+restart, totality restorable —
+      every voice terminal or provably-pending, no zombies, completed voices not re-run); acceptance test:
+      SIGKILL at 50% → restart → perfect resume. ★ *A6 finish_reason gating* — answered-empty requires BOTH a
+      usable empty payload AND natural completion (`stop`/`end_turn`); any `length`/`content_filter` finish →
+      delivered-but-unusable (retryable); + behavior **k** (schema-valid empty payload with non-natural finish);
+      P2 strengthened (routing needs response metadata, not just body shape — this STRENGTHENS four-state, adds
+      no fifth). *A9 adapter totality* — the seam adapter is a TOTAL function: every SDK/network outcome
+      (incl. exceptions in parse/stream/teardown) maps to exactly one of the four states, no unhandled path
+      (P1 pushed down a level, testable); behavior-c corpus extended (HTML-in-200, mid-token JSON truncation,
+      encoding garbage, oversized). *A7 4xx routing row* — non-retryable HTTP 4xx → terminal, reason-code
+      `provider-rejected`, surfaced to review, no backoff (distinct from retryable 429/5xx/timeout).
+      **Traceability-pass additions (PROPOSED via governance; three reconciled gaps — full detail in the pass
+      result under V-2):** *P9 TERMINATION* (+ behavior **l** perpetual-poison) — every voice reaches a terminal
+      state within bounded attempts, run provably ends, exhaustion → reason-code `retries-exhausted`, never
+      loops. *Run-scoping* — key = **run_id + voice_id**, one writer per run, P1/P5/P6/P8 asserted per-run (or
+      single-active-run lock) — closes concurrent-run ledger corruption P5 alone doesn't. *G-1 property (routing
+      + persistence)* — answered-with-findings/answered-empty reachable only on natural finish (non-natural →
+      unusable regardless of parse); findings persisted IFF terminal state is answered-with-findings (truncated
+      partials never authoritative). *Provenance:* behavior **g** stamped as a spec-drafting invention (per-voice
+      analogue of the batch drop; no survey source), not an orphan.
+    - *V-2 — cross-family derivation (run in parallel; validates reasoning, not the guarantee).* Packet A
+      (requirement-only, **REVISED** — state set derived by the other family, NOT handed; see the drafted
+      revision) run clean in the other provider's own interface → **capture, stop, look** → Packet B
+      (adversarial critique, ≥8 attack attempts) shaped by A's actual landing. Both responses recorded as
+      reference, not canon. Landing on four-with-reason-codes = cross-lineage signal on the fork; landing
+      elsewhere = the difference is the artifact to study.
+      - *Packet A RESULT — Gemini (cross-family, cold), REFERENCE only; nothing promoted, still under the gate.*
+        **Mechanism: strong independent convergence.** Gemini landed cold on "Strict 1:1 Execution Mapping
+        (one voice = one prompt)" with our exact reasoning — remove routing from the model; drops
+        structurally impossible; **provenance attached by the application, not trusted from the model**; total
+        per-voice isolation. Reached sync fan-out first with a concurrency limiter (`p-limit`) + defer heavy
+        orchestration (queues/Temporal/Kafka), and independently named the **"System Prompt Tax"** as the real
+        cost (our output-dominates / caching point from the other side). Its "A+B+C+D must equal input voices"
+        is our P1 totality, independently derived. Q5/Edit D: clean convergence — traceability via citation,
+        audit cited-vs-provided IDs, inclusion ratio, non-full-coverage expected-and-inspectable (not a hard
+        guarantee). **The fork (Q4): partial.** Gemini produced FOUR outcomes — findings / genuinely-empty /
+        formatting-parsing-error / infra-error — and folds *refusal into malformed* (agrees refusal isn't its
+        own state, matching our reason-code call). BUT it did **NOT** independently surface our load-bearing
+        arg #1 — that genuinely-empty must be **non-retryable by rule** to avoid fabrication-under-retry. So
+        four-state *structure* gets outside support; our strongest *justification* did not replicate → flag as
+        possibly Claude-native, one for Mitchell/Packet B. **Caught overreach (values-relevant):** Gemini's
+        proof-of-empty = "instruct the model to output `[]` and trust it looked" — the exact model-attestation
+        trap Edit A forbids ("never inferred from the model's claim to be thorough"). Accounting stays safe
+        under fan-out (the call resolved, keyed to the voice), but the *interpretation* overreaches; good
+        concrete illustration of why we drew the observable-not-attested line. → Packet B should concentrate
+        fire on (a) the un-replicated non-retryable-empty argument, (b) the `[]`-attestation trap (does the
+        package anywhere lean on model-attested emptiness?), (c) cost arithmetic + sync-vs-batch sequencing
+        Gemini didn't examine — not on re-litigating fan-out (cross-family converged).
+      - *Fable's cold read of the same Gemini response (owner + Fable agree on what it means → Packet B safe to shape).*
+        Fable independently confirmed the two flags above — the **anti-fabrication (non-retryable-empty) argument
+        did not replicate** in Gemini, and the **caching claim has NO independent validation** (Gemini named the
+        system-prompt tax, never mentioned caching — so F2 is load-bearing, not confirmatory). **Sharpened fork
+        line (record precisely):** cross-family confirms *four-ness* AND *machine-failures split into two states*
+        (findings / empty / machine-unusable / infra) — but Gemini folds refusal INTO parse-error, so the
+        specific **refusal|malformed grouping (and refusal-as-facilitator-signal) is still Claude-only, unconfirmed.**
+        So: "four, machine-split confirmed cross-family; the refusal grouping is not," NOT "our four-state ratified."
+        **Residual-semantics divergence Fable caught (owner had glossed as convergence):** Gemini treats a low
+        cited/provided inclusion ratio as FAILURE → auto-retry the synthesis; the package treats non-empty residual
+        as expected/reviewable. → proposed Edit-D refinement (see Item 4): residual EXISTENCE legitimate, residual
+        MAGNITUDE = signal surfaced to review; **auto-retry-on-low-ratio REJECTED** as citation-under-pressure (the
+        aggregate-stage analogue of retrying a chosen-empty voice — hollow citations for hollow findings; arg #1 one
+        level up). All reference/proposed; nothing promoted.
+      - *Packet B RESULT — Gemini adversarial review (10 attacks) + Fable scorecard, REFERENCE; PROPOSED via governance.*
+        Verdict: **directionally right, operationally fragile** — the architecture SURVIVED (fan-out, four-state
+        ledger, cited-or-residual audit all stand), but two attacks LANDED at spec level. **Meta-finding (the real
+        headline):** both LANDS were things the original research survey ALREADY KNEW (persistent ledger =
+        survey Technique 8; "check stop reason / truncation-masquerading-as-completion" = a listed failure mode),
+        lost in transmission survey→package→spec. The process caught its own transcription losses. **LANDS:** A3
+        crash-wipes-in-memory-ledger (→ durability/P8/j, above; also retroactively validates the
+        skeleton≠mechanism firewall — Packet A's p-limit framing had drifted toward in-memory); A6 truncated/
+        filtered empty recorded as chosen-empty & never retried = permanent drop (→ finish_reason gating/k/P2,
+        above; independently FORCES the empty/unusable split → strengthens four-state on the open fork).
+        **PARTIAL/refinement (adopted):** A1 cache-miss-under-burst (real; magnitude = F2's question; → F2 upgrade
+        + pre-warm note, below); A2 "pure transport" overclaim (→ struck, Item 5); A4 hollow-citation incentive
+        (→ Edit-D "audit never a model target", Item 4); A5 residual-at-scale (partly misreads — reviewers triage
+        compact grouped residual, don't read raw — but → residual-triage-time product metric + roadmap trigger
+        for hierarchical aggregation, Item 4); A7 provider-rejected 4xx (→ routing row, above; also **first
+        independent adversarial corroboration of refusal-as-signal** — provider content-rejection on a listening
+        voice IS the "a human should look" case → refusal-as-signal moves from Claude-only-unconfirmed to
+        Claude-derived-with-one-adversarial-corroboration, still 1b-gated). A8 refusal-classification brittleness
+        CONFIRMS reason-code (not state) placement (misclassification costs diagnostics, never a voice). A9
+        200-with-HTML-body (→ adapter totality, above). **REJECTED (with reason):** batch-reconciliation day-one
+        (A2 — contradicts deferral + two-person constraint); Toxiproxy chaos tier (A9 — over-tooling at this
+        scale; F1-real-provider is live-fire); auto-retry-on-ratio (re-rejected — citation-under-pressure);
+        A10's "make models build a prompt-guarantee, else it's echo" settling test (epistemically backwards —
+        echoing well-evidenced literature is what correct answers look like). **UNCHANGED:** four terminal
+        states; reason-code placement (A7+A8 strengthen it); residual semantics; sync-first; fan-out mechanism.
+        **1b-critical sentence (record against client-facing discipline):** the accounting guarantees DELIVERY,
+        never UNDERSTANDING — and must never be described, internally or to the client, as guaranteeing
+        understanding (A10's surviving caution; convergence validates the engineering pattern, not the fit of
+        accounting-thinking to qualitative synthesis — which is why the aggregate answer is "audit PLUS human
+        judgment," the product's own posture). V-2 stage now COMPLETE: cold-derivation convergence (A) +
+        adversarial review absorbed (B).
+    - *V-3 — empirical falsifiers (defined now, owners; run when V-1 skeleton + real model exist).* F1
+      silent-drop-impossibility (≥50 u9 runs; pass = ledger totality every run, i.e. drops manifest as
+      (iii)/(iv), never unaccounted). **F2 (UPGRADED per A1):** instrument cache_read / cache_write / miss tokens
+      under a REAL CONCURRENT burst (not sequential — cold-start fan-out can all pay cache writes); report the
+      measured hit rate AND the worst-case 0%-hit arithmetic alongside the actual; pass = the cost case survives
+      at the MEASURED hit rate and the team knows the break-even hit rate. (Impl note: pre-warm the cache with a
+      `max_tokens:0` request before each fan-out burst; consider 1h TTL for spaced runs.) F3 eval-loop latency
+      (wall-clock a full per-voice pass under sync fan-out; pass = interactive, target single minutes).
+    - *V-4 — human review (opportunistic).* 4a: ~1h with a distributed-systems/data engineer on pattern
+      hygiene (idempotent keyed writes, terminal-state ledger, retry semantics) — uncorrelated priors,
+      highest signal/hour. 4b: Mitchell on the 1a readability question, once drafted text exists — the one
+      qualified validator for "does A's four states + C's invariants read as coherent derivation."
+    - *Excluded:* custom/fine-tuned "never-drop" model — unsolved research problem, and forbidden by the
+      package's own principle (never trust model behavior as the guarantee).
+    - *TRACEABILITY PASS — the defined final step of spec consolidation; PREREQUISITE of spec freeze (owner-chat runs).*
+      Prompted by A3/A6 (both were survey knowledge lost survey→package→spec). Before the V-1 spec can freeze,
+      the owner-chat walks it **bidirectionally**: (forward) every item on the survey's "failure modes,
+      consolidated" list is either covered by a V-1 behavior/property or consciously excluded with reason — no
+      dropped load; (reverse) every V-1 property traces back to a survey failure mode or an explicitly-recorded
+      design decision — no invented/orphan load. "Spec freeze" = "audited complete in both directions." The pass
+      is an audit that PRODUCES findings — expect it to surface ≥1 more A3-shaped gap (new gaps → PROPOSED via
+      governance); "found nothing" is the surprising outcome, not the default. Runs AFTER the Packet-B
+      dispositions above are recorded (so it audits the complete proposed spec), BEFORE freeze.
+      - *TRACEABILITY PASS — COMPLETE & RECONCILED (two independent walks, owner-chat + Fable, diffed by Doug;
+        Fable confirmed the reconciliation, one mechanism corrected. All PROPOSED via governance; not in canon.)*
+        Both walked the 11 survey failure modes + reverse trace. **Agreement on 8+ rows** (same dispositions,
+        reasons, gates). **RECONCILED GAP SET = THREE** (was two before the diff):
+        (1) **P9 TERMINATION** (disclosed via Doug's note, NOT independent in either walk) — P1 totality is
+        evaluated at run END, so an unbounded retry loop never *fails* P1, it never *reaches* end; a poison voice
+        (always c/d/h) loops unnoticed. Property: every voice reaches a terminal state within bounded attempts
+        (caps at both layers: model-layer unusable-retries, infra-layer failure-backoff); run provably ends;
+        exhaustion → reason-code `retries-exhausted` on unusable/failed, surfaced, never silent. + mock behavior
+        **l** (perpetual poison).
+        (2) **RUN-SCOPING / concurrent-run isolation** (INDEPENDENT — Fable's FM7 walk; owner-chat MISSED it).
+        P5 covers *within-run* retry; but two overlapping runs of one engagement produce DIFFERENT stochastic
+        findings for the same voice, and voice-id-only-keyed writes interleave two accountings into one corrupted
+        ledger. Fix: key = **run_id + voice_id**, one writer per run, P1/P5/P6/P8 asserted per-run (or a
+        single-active-run-per-engagement lock; impl-level choice). **Mechanism corrected by Fable:** the seam did
+        NOT come from Gemini (its attack 3 was crash-only) — it was in Fable's own Packet-B target list T1,
+        *never attacked*, and Fable's disposition had no row for un-attacked targets, so it fell out unanswered
+        (not transcribed away). → generalized lesson recorded (Working conventions).
+        (3) **G-1 → GAP-CLOSED-BY-PROPERTY** (INDEPENDENT — owner-chat; Fable agrees, label sharpened: pre-diff
+        P2 genuinely did NOT cover the non-empty case, so record it as a real gap now closed, not "needs a test").
+        One property, two enforceable halves: (a) ROUTING — answered-with-findings and answered-empty reachable
+        only on NATURAL finish; any non-natural finish → unusable regardless of body parseability (generalizes
+        strengthened-P2 past the empty case); (b) PERSISTENCE — findings persisted IFF the call's terminal state
+        is answered-with-findings (partial findings from truncated responses never become authoritative — closes
+        a leak P5 doesn't cover).
+        **Reverse-trace correction (owner-chat missed; Fable caught; confirmed):** behavior **g**
+        (cross-contamination) has NO survey source — invented in Fable's V-1 drafting as the per-voice analogue
+        of the batch drop; justified invented load, now **provenance-stamped as a spec-drafting decision** (owner-
+        chat's "no orphans" was wrong — exactly the invented load the reverse walk exists to catch).
+        **Method note (record — evidence the two-walk method is load-bearing, not ceremonial):** Fable's walk
+        caught two things owner-chat missed (run-scoping; the behavior-g orphan); owner-chat raised G-1. A single
+        walk would have shipped without run-scoping. Pass now COMPLETE; the three properties fold into the V-1
+        spec (above) on Doug's freeze go.
+    - *GATE:* package → decidable when V-1 green + V-2 captured/reconciled (DONE) + V-3 defined-with-owners +
+      **the traceability pass complete (DONE — three gaps reconciled)**. Spec is freezable/relayable to Claude Code only after the pass. Doug
+      then decides with evidence. Nothing before that gate lands in canon.
 - Learning loop mechanism (S5-2): human-authored prompt edits; prompts as
   versioned, engagement-aware artifacts. Auto-vs-manual unresolved.
 - Scope of a learned edit: engagement-scoped vs graduates to baseline
@@ -619,6 +942,38 @@ invariants above). The whole project is the **case study**; its first built vers
   - *Frame-vocabulary flattening (watch).* "recognition / psychological safety / burnout" recur;
     often faithful, but thin voices pulled toward a small set of house frames risks collapsing
     distinct voices. Name in the rubric to watch over time.
+  - *The eight outputs — RESOLVED by eval: keep prescriptive/closed; coverage confirmed.*
+    build_approach §2 lists eight interpretive outputs (unmet needs, fears, hopes, identity,
+    belonging, trust, dignity, pain/aspiration) — prompt *scope* realized by model judgment, not
+    typed fields. The Human Meaning prompt states them as a **prescriptive/closed enumeration**
+    ("notice what it may reveal about:" + closed bulleted list; only "may reveal" as epistemic
+    softening). The open worry was that a closed menu drives false-positives (a model handed a fixed
+    list feels it must pick). RESOLVED by the real-model eval (u0–u24): the restraint controls all
+    held — u20 (bus/hours) → "not carried by the words… better understood in context" (NO
+    manufactured category); u21 (coffee machine) → "low-stakes satisfaction" (no invented concern);
+    u4 (hedged) → flagged-for-exploration, not "lack of safety" (vs. the *first* eval, where the
+    equivalent thin voice read "not feeling safe"); u10/u17 (No comment / n/a) → clean flag phrasing.
+    So the closed list did NOT drive over-reach → **keep prescriptive/closed; illustrative not
+    warranted on this data.** COVERAGE confirmed: all eight surfaced on their clean singles (hope
+    u18, aspiration u19, identity u22, belonging u23, dignity u24, etc.); u6 held both halves in one
+    finding (within-voice binding intact). WATCH (not acted on): "unmet need" / "dignity" recur
+    across findings — the frame-flattening item above, rubric-radar. Entanglement caveat still
+    stands: identity/belonging/dignity intertwine in real data, so discrete per-category attribution
+    may itself be the wrong frame for the eventual rubric.
+  - *u9 silent-drop — DIAGNOSED: stochastic model-side batch-completeness (fix under decision).*
+    u9 ("After I disclosed a health condition…") intermittently omitted — dropped, dropped, surfaced
+    across three runs, same priors each time. Trace (Claude Code): Listening is clean (all 25 units
+    surface; `eval-u9 → listening:9`, so u9 reliably reaches Human Meaning); the drop is **model-side
+    (case 1)** — in the batched Human Meaning call the model returned candidates for a subset,
+    `listening:9` simply absent from the `sourceFindingId` sequence (no candidate for u9 at all). NOT
+    mechanical (when the candidate exists, parse/anchor/`sourceFindingId` all work) and NOT
+    flag-over-fire (when emitted, u9 is a real grounded dignity/trust reading, never flagged). ROOT:
+    interpreting many voices in one batched call — the model occasionally skips one. → **GENERAL
+    risk, not u9-specific:** any batched lens has it, incl. **Listening** (clean this run, same latent
+    skip; a Listening skip = silent invisibility everywhere). Fix space = completeness (not parse/
+    anchor, not the flag/prompt rules). Recommendation under discussion: **per-voice calls**
+    (structural — no batch to skip) **+ a completeness guard** (every input voice → ≥1 finding, else
+    a flagged defect — visible, not silent). Fix relay pending Doug's direction.
   - *"n/a" boundary — RESOLVED (surface).* Any authored token, however brief (n/a, idk, no comment, a
     bare ".") surfaces — the bar is "did the person author an utterance?", drop = non-authored
     structural emptiness only (build_approach L573 rewritten to this general framing; auto-fill is
@@ -635,7 +990,7 @@ invariants above). The whole project is the **case study**; its first built vers
     judgment, confirmable only via a real-model `npm run eval -- meaning` (not yet run). Until
     confirmed, any residual loaded readings remain held-by-default / internal, an eval/review
     matter, not client-facing.
-- When the structural eval tier gets automated (depends on pipeline existing).
+- When structural eval gets automated (depends on pipeline existing).
 - Lens orchestration detail (parallelism, finding-passing) — implementation.
 - Auth/authz IMPLEMENTATION (seam settled; real login/roles/grant-revoke deferred
   to platform layer). **Authorization model — design intent (deferred platform layer),
@@ -728,13 +1083,13 @@ invariants above). The whole project is the **case study**; its first built vers
   - *Minor / opportunistic:* de-id gate idempotency (`scanPending` skip-non-pending;
     `recordHumanDecision('flagged')` re-flag) and `repository.setDeidStatus` not-found
     branch — low blast radius; pick up when touching the gate/repo.
-  - **In the current test-adding increment (Option B):** Tier 1 (absence-through-
+  - **In the current test-adding increment (Option B):** Batch 1 (absence-through-
     projection; Listening anchoring-drop; units-exist-none-cleared boundary) + Guardrail-
     append + support-text singular + the two write-path HTTP route tests (item 4).
     **DONE (June 2026): +20 tests, 91→111 green (repo-wide: backend 75→92, frontend
     16→19), no production change, no test failed
     against production** (every guarded behavior matched production). Item 8 is now the
-    *last* structural-tier uncovered arm — `assemble.ts:54` (projecting a finding that
+    *last* structural uncovered arm — `assemble.ts:54` (projecting a finding that
     carries a `parent`) + the parent ternaries in `finding.ts` (160/184/219/230) — the
     cleanest-isolated remaining structural gap, still deferred to its trigger (model work
     / first lens that emits a subtheme). The append-branch test confirmed the real
@@ -845,7 +1200,7 @@ decisions" above. Genuinely-open work remaining:
    markdown-only as an internal doc.
 7. **Layer revisit — COMPLETE (design docs + code).** "Layer" retired in both senses:
    output → **Brief** (internal/client-safe **types**; client-safe is the exported
-   deliverable), processing → **Lens wave** (5 ordered waves inside the lens-
+   deliverable), processing → **Lens wave** (6 ordered waves inside the lens-
    processing stage). Also: **Client** added as a How-to-Read term; **Platform**
    de-parenthesized (the wrapper around the engine); directionality made horizontal
    (earlier/later, never above/below); body sweep complete (residual "layer" = only
@@ -881,6 +1236,14 @@ decisions" above. Genuinely-open work remaining:
    jargon, kept on the same basis as "web layer" / "enforcement layer." No sweep.
    (The L21–22 "Inclusity↔Human Lens contract" is a third, process-agreement sense —
    also kept.)
+9. **Human Meaning — real-model review run (DONE; reviewed).** Ran `npm run eval -- meaning` on
+   the u0–u24 fixture (24 findings). OUTCOME: coverage confirmed (all eight surfaced on their clean
+   singles); restraint controls all held (u20/u21 clean, u4 flagged not over-read, u10/u17 clean
+   flags) → **prescriptive/closed kept** (see calibration note above); within-voice binding intact
+   (u6). ONE MISS caught: **u9 (health disclosure) silent-dropped** — a false-negative, now OPEN
+   under diagnosis (calibration note + relay out). First application of the standing lens-validation
+   method (Working conventions) — worked as intended: fakes were green, the real run surfaced a real
+   behavioral miss the tests could not.
 
 ## Environment
 VSCode on Windows. (Pandoc + MiKTeX / LuaLaTeX / EB Garamond is the *proposal's*
