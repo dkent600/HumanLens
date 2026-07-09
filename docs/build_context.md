@@ -907,6 +907,19 @@ invariants above). The whole project is the **case study**; its first built vers
     - *GATE:* package → decidable when V-1 green + V-2 captured/reconciled (DONE) + V-3 defined-with-owners +
       **the traceability pass complete (DONE — three gaps reconciled)**. Spec is freezable/relayable to Claude Code only after the pass. Doug
       then decides with evidence. Nothing before that gate lands in canon.
+    - *BUILD-PHASE GOVERNANCE (in effect before the V-1 relay goes out — the guardrail for the phase we're
+      entering).* (1) **Epistemic rule.** V-1 is CODE-validated, not opinion-validated: seeded property tests +
+      fast-check counterexamples have no training bias, so the two-Claude-correlation concern that dominated the
+      *design* phase relaxes for a CLEAN GREEN run — two Claudes may settle that. But model-family correlation can
+      creep back at the *interpretation of ambiguous results*: **any asterisk — a flaky property, a shrunk
+      counterexample debatably "mock-infidelity," a property someone wants to relax — routes to DOUG; two Claudes
+      must NOT agree it's benign.** That is the exact spot the whole validation architecture exists to protect.
+      (2) **Properties are the acceptance contract; no weakening-to-pass.** A failing property is either a code
+      bug (fix the code) or a genuine spec error (→ back through governance to Doug) — NEVER edited/relaxed in
+      test code to go green. (3) **Green is inspectable, not asserted.** A green run reports what was tested, the
+      seeds, and any shrunk counterexamples-turned-fixtures — the "don't trust a 200" discipline applied to our
+      own test run. (4) **F1–F3 raw to both chats**, not summarized; F2 reports THREE numbers — measured hit
+      rate, break-even hit rate, worst-case 0%-hit arithmetic — so pass/fail is legible, not a verdict.
 - Learning loop mechanism (S5-2): human-authored prompt edits; prompts as
   versioned, engagement-aware artifacts. Auto-vs-manual unresolved.
 - Scope of a learned edit: engagement-scoped vs graduates to baseline
