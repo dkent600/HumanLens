@@ -36,16 +36,34 @@ function clearedUnit(position: number, speakerToken: string, content: string, la
   };
 }
 
-// The deliberate eval fixture: 18 de-identified units, all with distinct speaker tokens,
-// built to exercise the Listening contract (build_approach.md §1) — bilingual + mixed
-// units (u5/u8/u13), recurrence across separate voices (workload: u0/u11; effort going
-// unnoticed: u3/u15), within-voice structure drawn softly (u3 dash, u9 narrative
-// sequence, u15 sequence), inference bait (u14 "since the reorg"), thin/opaque units
-// (u4/u10), intentionally messy punctuation/casing (u16 — verbatim, do not correct), and
-// an authored terse token (u17 "n/a" — now SURFACED verbatim, as the fact it was said).
-// The surfacing bar is "did the person author an utterance?", so ONLY non-authored
-// structural emptiness (empty/whitespace) drops — of which this fixture has none; every
-// authored voice, including u17, surfaces.
+// The deliberate eval fixture: 25 de-identified units, all with distinct speaker tokens.
+//
+// LISTENING contract (build_approach.md §1) — bilingual + mixed units (u5/u8/u13),
+// recurrence across separate voices (workload: u0/u11; effort going unnoticed: u3/u15),
+// within-voice structure drawn softly (u3 dash, u9 narrative sequence, u15 sequence),
+// inference bait (u14 "since the reorg"), thin/opaque units (u4/u10), intentionally messy
+// punctuation/casing (u16 — verbatim, do not correct), and an authored terse token (u17
+// "n/a" — SURFACED verbatim). The surfacing bar is "did the person author an utterance?",
+// so ONLY non-authored structural emptiness (empty/whitespace) drops — of which this
+// fixture has none; every authored voice surfaces.
+//
+// HUMAN MEANING probes (build_approach.md "The Human Meaning Lens" — the eight outputs +
+// the flag-don't-read principle). The eight, and where each has a clear occasion:
+//   unmet needs        u0, u3, u8, u11, u12, u16
+//   fears              u5, u9, u16
+//   hopes              u18 (clean) — was thin (u1/u6/u13 lean trust/mixed/fading)
+//   identity concerns  u22 (clean); u2 (bundled w/ belonging+dignity)
+//   belonging signals  u23 (clean); u2 (bundled)
+//   trust signals      u1, u7 (+), u12, u13 (−)
+//   dignity concerns   u24 (clean); u9, u2 (bundled)
+//   pain / aspiration  pain: u0, u8, u11, u15; ASPIRATION: u19 (clean) — u15 entangles pain+aspiration
+// Each of the eight now has a clean single-category occasion; u2/u9 stay bundled ON PURPOSE
+// (they probe multi-category surfacing — one voice yielding several noticings).
+// RESTRAINT controls — correct behavior is NOT to manufacture meaning:
+//   u4  mildly hedged ("things are fine, I guess") — must NOT become "lack of safety"
+//   u17 flag-class ("n/a") — must stay flag-for-exploration, not interpreted
+//   u20 neutral/administrative — no human-meaning category; must not be read into
+//   u21 positive low-stakes — benign; must not be twisted into a hidden concern
 const SAMPLE_UNITS: readonly Unit[] = [
   clearedUnit(0, 'spk-a', 'The workload has been heavy for months and it\'s hard to keep up.'),
   clearedUnit(1, 'spk-b', 'When I raise something with leadership, I genuinely feel heard and they act on it.'),
@@ -65,6 +83,24 @@ const SAMPLE_UNITS: readonly Unit[] = [
   clearedUnit(15, 'spk-p', 'I used to put in real effort. Two years of it going unnoticed. Now I just do the minimum.'),
   clearedUnit(16, 'spk-q', 'the training got rushed half of us are still just guessing'),
   clearedUnit(17, 'spk-r', 'n/a'),
+  // ── Human Meaning coverage voices (clean, largely single-category) ──
+  // u18 — HOPE (forward-looking optimism, not entangled with a concern).
+  clearedUnit(18, 'spk-s', 'Honestly, I\'m hopeful about the direction we\'re heading — it finally feels like things are starting to move.'),
+  // u19 — ASPIRATION (a moment of aspiration: a personal desire to grow, not pain-entangled like u15).
+  clearedUnit(19, 'spk-t', 'What I\'d really love is a chance to take on more mentoring — that\'s the work that makes me feel most alive here.'),
+  // ── Human Meaning restraint / over-reach controls (correct behavior is NOT to manufacture meaning) ──
+  // u20 — NEUTRAL / ADMINISTRATIVE: readable but carries no human-meaning-level category; must not be
+  // read into (e.g. "logistics focus signals disengagement" would be over-reach).
+  clearedUnit(20, 'spk-u', 'I usually come in on the 8:15 bus and head out around five.'),
+  // u21 — POSITIVE, LOW-STAKES: genuinely benign; must not be twisted into a hidden concern.
+  clearedUnit(21, 'spk-v', 'The new coffee machine in the break room is a nice little upgrade — no complaints from me.'),
+  // ── Clean singles for the bundled three (dominant target, minimal spillover; u2/u9 stay bundled) ──
+  // u22 — IDENTITY concerns (assumptions tied to who someone is / where they're from).
+  clearedUnit(22, 'spk-w', 'There\'s an assumption I\'ll naturally handle anything tied to my culture — like where I\'m from decides what I get put on.'),
+  // u23 — BELONGING signals (being on the inside or outside; fitting in).
+  clearedUnit(23, 'spk-x', 'Everyone else already seems to have their people here; I still feel like I\'m on the outside looking in.'),
+  // u24 — DIGNITY concerns (being talked over / treated as less-than).
+  clearedUnit(24, 'spk-y', 'I\'ll make a point in a meeting and get talked right over — then a minute later someone says the same thing and everyone nods.'),
 ];
 
 type LensRunner = (units: readonly Unit[], provider: LlmProvider) => Promise<readonly Finding[]>;
