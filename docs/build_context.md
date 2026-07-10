@@ -758,7 +758,8 @@ invariants above). The whole project is the **case study**; its first built vers
       + behavior **j** (crash/kill mid-run); + **P8 recoverability** (after crash+restart, totality restorable —
       every voice terminal or provably-pending, no zombies, completed voices not re-run); acceptance test:
       SIGKILL at 50% → restart → perfect resume. ★ *A6 finish_reason gating* — answered-empty requires BOTH a
-      usable empty payload AND natural completion (`stop`/`end_turn`); any `length`/`content_filter` finish →
+      usable empty payload AND natural completion (Anthropic: `end_turn`/`stop_sequence`/`tool_use`); any
+      non-natural finish (`max_tokens`/`refusal`/`pause_turn`) →
       delivered-but-unusable (retryable); + behavior **k** (schema-valid empty payload with non-natural finish);
       P2 strengthened (routing needs response metadata, not just body shape — this STRENGTHENS four-state, adds
       no fifth). *A9 adapter totality* — the seam adapter is a TOTAL function: every SDK/network outcome
@@ -942,12 +943,17 @@ invariants above). The whole project is the **case study**; its first built vers
       (`{"findings":[{"…`), which the production seam's existing **parse-exception guard already catches** →
       retryable, correct. Lowering `max_tokens` gives *more*-broken JSON, not clean-empty, so the drop is NOT
       reproducible this way (mechanism-explained, not luck). → **★ is smaller and more precise than first
-      stated:** the `max_tokens` variant is **self-mitigating** (parse guard catches it); the residual, still-
-      UNPROVEN risk is the **`content_filter` (or any clean-empty-body + non-natural finish) variant** — the one
-      that returns *parseable-empty*, slips the parse guard, and reads as chosen-empty → silent drop. **The
-      prerequisite STANDS** (seam still discards `stop_reason`; surfacing it is what guards the content_filter
-      variant) — just for a narrower trigger than "all truncations." Content_filter reproduction NOT pursued
-      (Doug's call — option 1): fiddly to trigger, conclusion unchanged (fix stays on the list), no adoption
+      stated:** the `max_tokens` variant is **self-mitigating** (parse guard catches it); the residual risk is
+      the **`refusal` variant** (corrected from "content_filter" — Anthropic has NO `content_filter` stop_reason;
+      set = end_turn / max_tokens / stop_sequence / tool_use / pause_turn / **refusal**). The production seam has
+      an actual line `stop_reason === 'refusal' → { text: '' }` that collapses a refusal to a **clean, parseable
+      empty** with no signal — nothing for the parse guard to catch (unlike truncation's broken JSON) → reads as
+      chosen-empty → P7 never-retry → silent drop. So the residual ★ is **reproducible against a named production
+      line**, not hypothetical — *sharper* than the original framing (Claude Code caught the error and routed it
+      up rather than silently editing). **The prerequisite STANDS** (seam still discards `stop_reason`; surfacing
+      it is what guards the refusal variant) — generalize the trigger as "**refusal / any non-natural finish the
+      seam empties to clean text**." Behavioral reproduction NOT pursued
+      (Doug's call — option 1): conclusion unchanged (fix stays on the list), no adoption
       happening now. This is the falsifier working: it falsified the easy ★ and sharpened the claim.
       **A9 exception-mapping — reasonable V-1 default, recorded as an OPEN sub-decision (Doug), not silently
       locked:** Claude Code mapped StreamError(payload-decode)→delivered-but-unusable (⇒ model-layer retry) and
