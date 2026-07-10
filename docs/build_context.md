@@ -935,6 +935,20 @@ invariants above). The whole project is the **case study**; its first built vers
       silent drop** = exactly the A6 failure, on the real path. V-1 proved the accounting sound in simulation AND
       discovered the real seam can't yet supply the inputs it depends on — found in scaffolding at zero
       production risk. IF the mechanism is adopted, surfacing `stop_reason`/status is the FIRST required change.
+      **★ NARROWED by F1-b real run (`claude-opus-4-8`, 2 real calls, `max_tokens` 16 then 8; disposition-total
+      harness — flagged non-divergence, did not dress up):** attempting to reproduce the silent drop via
+      `max_tokens` truncation FAILED to fire it (2/2 YES/YES — both paths correctly routed to
+      delivered-but-unusable). Why: `max_tokens` truncation yields a **partial, UNPARSEABLE** body
+      (`{"findings":[{"…`), which the production seam's existing **parse-exception guard already catches** →
+      retryable, correct. Lowering `max_tokens` gives *more*-broken JSON, not clean-empty, so the drop is NOT
+      reproducible this way (mechanism-explained, not luck). → **★ is smaller and more precise than first
+      stated:** the `max_tokens` variant is **self-mitigating** (parse guard catches it); the residual, still-
+      UNPROVEN risk is the **`content_filter` (or any clean-empty-body + non-natural finish) variant** — the one
+      that returns *parseable-empty*, slips the parse guard, and reads as chosen-empty → silent drop. **The
+      prerequisite STANDS** (seam still discards `stop_reason`; surfacing it is what guards the content_filter
+      variant) — just for a narrower trigger than "all truncations." Content_filter reproduction NOT pursued
+      (Doug's call — option 1): fiddly to trigger, conclusion unchanged (fix stays on the list), no adoption
+      happening now. This is the falsifier working: it falsified the easy ★ and sharpened the claim.
       **A9 exception-mapping — reasonable V-1 default, recorded as an OPEN sub-decision (Doug), not silently
       locked:** Claude Code mapped StreamError(payload-decode)→delivered-but-unusable (⇒ model-layer retry) and
       TransportError/TeardownError/unexpected→failed (⇒ infra backoff). Underdetermined by the spec and has

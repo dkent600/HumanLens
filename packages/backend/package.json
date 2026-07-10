@@ -10,7 +10,11 @@
     "clean": "tsc -b --clean",
     "test": "vitest run",
     "eval": "tsc -b && node --env-file-if-exists=.env dist/eval/run-lens.js",
-    "completeness": "tsc -b && node dist/eval/completeness/run-completeness.js"
+    "completeness": "tsc -b && node dist/eval/completeness/run-completeness.js",
+    "f1a": "tsc -b && node --env-file-if-exists=.env dist/eval/completeness/real/f1a-silent-drop.js",
+    "f1b": "tsc -b && node --env-file-if-exists=.env dist/eval/completeness/real/f1b-star.js",
+    "f2": "tsc -b && node --env-file-if-exists=.env dist/eval/completeness/real/f2-cache.js",
+    "f3": "tsc -b && node --env-file-if-exists=.env dist/eval/completeness/real/f3-walltime.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.106.0",
