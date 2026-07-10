@@ -71,6 +71,15 @@ partner and the writer of `build_approach.md`.
   the disposition process itself violated "totality / no silent path," the same completeness property the
   *product* enforces, missing from our *process*. Applies to any review, diff, or packet whose requested scope
   is larger than what came back.
+- **Plain-language derivatives over-claim certainty (review heuristic; Fable).** Human-destined glosses of the
+  precise design tend to quietly claim certainty the system doesn't have. Proven live: the completeness gloss's
+  "what the residual asks of a human" block was corrected TWICE by Doug reading skeptically — first for reading
+  delivery as understanding ("the residual is not unprocessed work"), then for reading honestly-sparse output as
+  run-failure ("treat the run as incomplete", which excluded the thin-material explanation). Same species both
+  times. So: every human-destined derivative of the precise text (onboarding, reviewer material, client-facing)
+  gets a deliberate skeptical human read specifically hunting for over-claimed certainty, before it's treated as
+  final. The recursion is the point — the product's own thesis is "the machine delivers, the human's skeptical
+  look supplies the judgment," and that same skeptical read is the working control on the docs *about* it.
 
 ## State of `build_approach.md` (as of last good edit)
 - ~1042 lines. **Reorganized into three Parts** under the title (Option A
@@ -706,6 +715,58 @@ invariants above). The whole project is the **case study**; its first built vers
       cite what they actually use; the residual absorbs the rest legitimately). *A5 refinement:* record a product
       metric — residual triage time must beat reading the raw voices; if it doesn't at pilot scale, hierarchical
       aggregation moves UP the roadmap (the trigger that promotes it from "scale-contingent").
+    - *Item 4b — PLAIN-ENGLISH GLOSS "Completeness, both cases" (reviewer-facing companion to Edits A + D;
+      PROPOSED with the package).* STATUS/CAUTIONS: build-doc / reviewer-facing (onboarding, plain-language
+      sections), NOT client-facing — residual-as-feature framing stays internal per the 1b caution; any
+      client-facing derivative passes the language discipline separately. Sits ALONGSIDE the precise text (Edit
+      A four-state, Edit D residual), never instead of it — those remain load-bearing; the gloss's vocabulary
+      ("genuinely nothing," "uncited") is NOT spec vocabulary. Goes into `build_approach` beside the precise text
+      IF/WHEN the package is adopted. This is the sole/superseding version (two earlier in-chat drafts overclaimed
+      — discarded). Owner-chat picks exact `build_approach` placement at adoption. VERBATIM (Fable-final):
+      > **Completeness, both cases.**
+      > *Per-voice lenses: prevent the drop.* Each voice gets its own model call. The model never sees a list, so
+      > it cannot skip an item on one. Our code holds the roster, sends one call per voice, and records one of four
+      > outcomes for each: findings, genuinely nothing, unusable response, or failure. The run is not done until
+      > every voice has an outcome. No fifth state exists; a voice cannot vanish.
+      > *Cross-voice lenses: detect the drop.* Pattern-finding requires seeing all findings at once, so these
+      > lenses receive the complete, closed set from the prior wave in one call — the list is unavoidable, and so is
+      > the risk of skipping. The guarantee therefore moves after the call: every pattern must cite the IDs of the
+      > findings it is built on; our code then subtracts cited from sent. Whatever was never cited lands in a
+      > visible residual for the reviewer. The model can fail to use a finding; it cannot hide one.
+      > *What the residual asks of a human.* The system can prove every finding was delivered to the lens. It cannot
+      > prove the model actually weighed each one. So an uncited finding is one of two things, and we can't tell
+      > which: considered and set aside, or overlooked. The reviewer's look is what settles it — that look is part of
+      > the completeness guarantee, not cleanup after it.
+      > *The task:* for each uncited finding, ask does this matter? Either it's worth naming in the brief, or it
+      > shows the patterns missed something, or it's peripheral and stays set aside — now by a person's judgment
+      > instead of the model's silence.
+      > Some findings will always go uncited; that alone means nothing. What matters is the share: the system shows
+      > what fraction of the findings ended up in the patterns and what fraction didn't. When most went uncited,
+      > don't start triaging item by item — first ask why. Skim a few uncited findings: if they're thin or beside
+      > this lens's question, the material simply didn't carry much, and the small pattern set is probably honest. If
+      > they're substantive and relevant yet uncited, the run under-delivered and should be redone rather than
+      > patched by hand. There's no fixed cutoff; that judgment belongs to the reviewer and sharpens with use.
+      > *One sentence:* where the model cannot be given a list, no list exists to drop from; where it must be given
+      > one, our code makes everything it left uncited visible — and a human's look is what turns "set aside" into
+      > "considered."
+    - *Item 4c — OPEN DESIGN ITEMS from the residual's human side (record OPEN via governance; NO answers —
+      answers belong to the normal design loop, not conversational drift).* Context: pressing on what a reviewer
+      DOES when an uncited finding turns out significant splits the handling into reviewer-promotes (single
+      stray) / defect-report (clustered misses → the u9-style fixture loop) / human-decided rerun (whole run
+      deficient; automatic-rerun-on-metric stays REJECTED). That walk exposed four unspecified things:
+      - **O-1 HUMAN-PROMOTED FINDINGS.** When a reviewer judges an uncited finding significant and names it in
+        the brief, how is that represented? The finding model has NO slot for human-authored entries with human
+        provenance. Requirement shape (not a design): promotions must be visible AS human-added — never inserted
+        among model output as if the model surfaced them; **provenance must not lie.**
+      - **O-2 BRIEF FLOW.** How do human-promoted findings flow into the internal brief vs. the client-safe
+        brief? Interacts with the LOCKED principle that the client-safe brief is a **pure filter** (removes
+        findings, never rewords) — a human-authored finding entering that filter path needs a defined treatment.
+      - **O-3 FIXTURE CAPTURE.** When a reviewer finds significant-but-uncited findings (esp. clustered), how
+        does that become a recorded test case (the u9 pattern: real miss → named fixture → lens fixed → fixture
+        proves it stays fixed) rather than evaporating after the engagement? No capture path exists today.
+      - **O-4 RESIDUAL DISPLAY** (flagged earlier, recording now to be safe): per-lens residual views vs. one
+        consolidated review view — a product/implementation choice, unmade.
+      All four OPEN; no answers proposed; not in canon; do not touch the mechanism decision.
     - *Item 5 — Mechanism (the TOP-PRIORITY open decision — REMAINS OPEN).* Joint recommendation, recorded as
       recommendation ONLY: the voice is the unit of work AND of accounting for the per-voice lenses; both
       per-voice lenses on the same mechanism; first embodiment = synchronous parallel fan-out (one call per
@@ -752,15 +813,17 @@ invariants above). The whole project is the **case study**; its first built vers
       P5 idempotent retry; P6 report accuracy; **P7 (new) — chosen-empty is NEVER retried** (the anti-fabrication
       rule as a testable property). Acceptance: hold across thousands of seeded runs; shrunk counterexamples
       become fixtures.
-      **Packet-B strengthenings (adopted PROPOSED — the two ★ change V-1 ACCEPTANCE CRITERIA, don't miss them
-      at build greenlight):** ★ *A3 durability* — the ledger is PERSISTENT from V-1 (SQLite suffices); ledger
+      **Packet-B strengthenings (adopted PROPOSED — the two [ACCEPTANCE] items change V-1 ACCEPTANCE CRITERIA, don't miss them
+      at build greenlight):** [ACCEPTANCE] *A3 durability* — the ledger is PERSISTENT from V-1 (SQLite suffices); ledger
       write precedes/atomic-with finding persistence (no finding may exist the ledger can't account for);
       + behavior **j** (crash/kill mid-run); + **P8 recoverability** (after crash+restart, totality restorable —
       every voice terminal or provably-pending, no zombies, completed voices not re-run); acceptance test:
-      SIGKILL at 50% → restart → perfect resume. ★ *A6 finish_reason gating* — answered-empty requires BOTH a
-      usable empty payload AND natural completion (Anthropic: `end_turn`/`stop_sequence`/`tool_use`); any
-      non-natural finish (`max_tokens`/`refusal`/`pause_turn`) →
-      delivered-but-unusable (retryable); + behavior **k** (schema-valid empty payload with non-natural finish);
+      SIGKILL at 50% → restart → perfect resume. [ACCEPTANCE] *A6 finish_reason gating* — answered-empty requires BOTH a
+      usable empty payload AND natural completion. **Natural-finish set (Anthropic-precise, per Fable; Claude
+      Code credited for the vocabulary catch):** natural = `end_turn` (+ `stop_sequence` ONLY if the lens
+      deliberately uses stop sequences, else treat as unexpected); **`max_tokens` / `refusal` / `pause_turn` /
+      `tool_use` → delivered-but-unusable** (a lens producing findings should never stop for a tool). + behavior
+      **k** (schema-valid empty payload with non-natural finish);
       P2 strengthened (routing needs response metadata, not just body shape — this STRENGTHENS four-state, adds
       no fifth). *A9 adapter totality* — the seam adapter is a TOTAL function: every SDK/network outcome
       (incl. exceptions in parse/stream/teardown) maps to exactly one of the four states, no unhandled path
@@ -905,7 +968,7 @@ invariants above). The whole project is the **case study**; its first built vers
         caught two things owner-chat missed (run-scoping; the behavior-g orphan); owner-chat raised G-1. A single
         walk would have shipped without run-scoping. Pass now COMPLETE; the three properties fold into the V-1
         spec (above) on Doug's freeze go.
-    - *GATE:* package → decidable when V-1 green (**DONE ✓ — with ★ prerequisite**) + V-2 captured/reconciled
+    - *GATE:* package → decidable when V-1 green (**DONE ✓ — with the fake-empty-drop prerequisite**) + V-2 captured/reconciled
       (DONE ✓) + V-3 defined-with-owners (DONE) +
       **the traceability pass complete (DONE — three gaps reconciled)**. Spec is freezable/relayable to Claude Code only after the pass. Doug
       then decides with evidence. Nothing before that gate lands in canon.
@@ -928,7 +991,7 @@ invariants above). The whole project is the **case study**; its first built vers
       non-flaky; no shrunk counterexamples (clean). Choices reported: run-scoping = composite `(run_id, voice_id)`
       + one-writer-per-run (not the lock); behavior g stamped in code as spec-drafting invention; ledger =
       `node:sqlite` (eval-tier needs Node ≥22.5; server/engine still ≥20). No asterisks; PROPOSED_BEHAVIORS
-      empty (no new behavior found). **★ HIGHEST-SIGNAL FINDING — a first-class MECHANISM-ADOPTION PREREQUISITE
+      empty (no new behavior found). **FAKE-EMPTY DROP — HIGHEST-SIGNAL FINDING — a first-class MECHANISM-ADOPTION PREREQUISITE
       (do not lose):** the production `AnthropicLlmProvider` **discards `stop_reason`** (collapses refusal →
       `{text:''}`, returns only `{text}`). So G-1 / finish-reason gating is **unenforceable on the REAL path**
       until the lens↔model seam surfaces `stop_reason` (+ HTTP status): a truncated/filtered empty arrives as
@@ -936,25 +999,30 @@ invariants above). The whole project is the **case study**; its first built vers
       silent drop** = exactly the A6 failure, on the real path. V-1 proved the accounting sound in simulation AND
       discovered the real seam can't yet supply the inputs it depends on — found in scaffolding at zero
       production risk. IF the mechanism is adopted, surfacing `stop_reason`/status is the FIRST required change.
-      **★ NARROWED by F1-b real run (`claude-opus-4-8`, 2 real calls, `max_tokens` 16 then 8; disposition-total
+      **Fake-empty drop NARROWED by F1-b real run (`claude-opus-4-8`, 2 real calls, `max_tokens` 16 then 8; disposition-total
       harness — flagged non-divergence, did not dress up):** attempting to reproduce the silent drop via
       `max_tokens` truncation FAILED to fire it (2/2 YES/YES — both paths correctly routed to
       delivered-but-unusable). Why: `max_tokens` truncation yields a **partial, UNPARSEABLE** body
       (`{"findings":[{"…`), which the production seam's existing **parse-exception guard already catches** →
       retryable, correct. Lowering `max_tokens` gives *more*-broken JSON, not clean-empty, so the drop is NOT
-      reproducible this way (mechanism-explained, not luck). → **★ is smaller and more precise than first
+      reproducible this way (mechanism-explained, not luck). → **the fake-empty drop is smaller and more precise than first
       stated:** the `max_tokens` variant is **self-mitigating** (parse guard catches it); the residual risk is
       the **`refusal` variant** (corrected from "content_filter" — Anthropic has NO `content_filter` stop_reason;
       set = end_turn / max_tokens / stop_sequence / tool_use / pause_turn / **refusal**). The production seam has
       an actual line `stop_reason === 'refusal' → { text: '' }` that collapses a refusal to a **clean, parseable
       empty** with no signal — nothing for the parse guard to catch (unlike truncation's broken JSON) → reads as
-      chosen-empty → P7 never-retry → silent drop. So the residual ★ is **reproducible against a named production
+      chosen-empty → P7 never-retry → silent drop. So the residual fake-empty drop is **reproducible against a named production
       line**, not hypothetical — *sharper* than the original framing (Claude Code caught the error and routed it
       up rather than silently editing). **The prerequisite STANDS** (seam still discards `stop_reason`; surfacing
       it is what guards the refusal variant) — generalize the trigger as "**refusal / any non-natural finish the
       seam empties to clean text**." Behavioral reproduction NOT pursued
       (Doug's call — option 1): conclusion unchanged (fix stays on the list), no adoption
-      happening now. This is the falsifier working: it falsified the easy ★ and sharpened the claim.
+      happening now. This is the falsifier working: it falsified the easy fake-empty drop and sharpened the claim.
+      **Decision-frame (Fable): the fake-empty-drop seam fix is owed under ANY mechanism, so it does NOT tip the mechanism
+      choice** — it's a build prerequisite either way. Under batching it's strictly WORSE: a single refusal
+      collapses an ENTIRE multi-voice call to clean empty (all those voices silently dropped), vs. one voice
+      under fan-out. So the fix gates the build regardless of per-voice-vs-batch; it's owed, not a factor in the
+      decision.
       **A9 exception-mapping — reasonable V-1 default, recorded as an OPEN sub-decision (Doug), not silently
       locked:** Claude Code mapped StreamError(payload-decode)→delivered-but-unusable (⇒ model-layer retry) and
       TransportError/TeardownError/unexpected→failed (⇒ infra backoff). Underdetermined by the spec and has
@@ -965,6 +1033,29 @@ invariants above). The whole project is the **case study**; its first built vers
       the traceability pass caught termination + run-scoping (spec gaps); the BUILD caught the production seam
       discarding `stop_reason` (an implementation-reality gap no analysis layer could see). Each catch was
       invisible to the layer above it.
+      - *F2 cost — PASS (pricing-corrected; raw, real `claude-opus-4-8`, 25-concurrent burst + prewarm).*
+        Raw: `cache_read`=`cache_creation`=0 (the ~250-token shared prefix is below Anthropic's ~1024 cache
+        minimum — caching didn't engage; harness reported zeros honestly, did NOT pad the prefix to fake a hit
+        rate). input 11,932 / output 5,850 over 25 = ~477 in : ~234 out per call. **CORRECTION (Fable caught;
+        owner-chat concedes):** the earlier "2:1 input-heavy → output doesn't dominate" read compared *tokens*;
+        the question is *cost*, and Anthropic prices output ≈5× input. Repriced: 477 + 5×234 = **1,647
+        input-equivalents/call, output = 71% of COST → cost-dominance HOLDS.** My token-based alarm was the error;
+        the original premise was fine. **F2 pass criterion AMENDED: cost-dominance, not token-dominance** (so
+        future measurements don't re-trip on wording). Consequence: the cacheable/batchable prefix is ≈**15.2% of
+        per-call cost** — so the `prefix>1024`/caching question guards a **≤15% cost band, NOT the decision**;
+        break-even 21.7%, verify OPPORTUNISTICALLY when the real per-voice prompt exists (not a gate; don't chase
+        a padded number). **Option-2 consequence (re-buries batching on cost):** batching's entire savings ceiling
+        IS that ~15% band (~13.7% at k=10), and caching captures ~12–13% of it WITHOUT reconciliation machinery —
+        so the last cost argument that could favor Option 2 is quantified as too small to matter.
+      - *F3 latency — PASS (raw).* 25 voices: sequential 113.8s, **concurrent (≤8) 18.2s** — comfortably
+        interactive (single-minutes target met), ~6× speedup; sync fan-out keeps the build→look→tune loop fast.
+        Bonus real-path corroboration: all 25 → answered-with-findings, 0 empty/unusable/failed, 52 findings
+        attributed, **0 quarantined** (totality held, provenance clean, no cross-contamination) — a live sighting
+        of the ledger behaving, not a substitute for the F1-a totality run (still un-run; ~300 calls).
+      - *MEASUREMENT PHASE COMPLETE.* Gate items: V-1 green ✓ (with the fake-empty drop, narrowed to the refusal variant),
+        V-2 ✓, V-3 falsifiers run (F1-b ✓ narrowed the fake-empty drop; F2 ✓ PASS pricing-corrected; F3 ✓; F1-a totality deferred — optional,
+        costly, corroborated in spirit by F3's clean landings). **The package is now DECIDABLE.** Still nothing in
+        canon; mechanism remains the open TOP-PRIORITY decision — Doug's call, with evidence now in hand.
 - Learning loop mechanism (S5-2): human-authored prompt edits; prompts as
   versioned, engagement-aware artifacts. Auto-vs-manual unresolved.
 - Scope of a learned edit: engagement-scoped vs graduates to baseline
