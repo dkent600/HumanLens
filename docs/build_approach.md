@@ -65,6 +65,14 @@ not held back by its `sensitivity` flag. Because held is the default, the safe
 failure mode is silence: anything un-promoted or uncertain stays internal-only,
 never exposed to the client.
 
+**Completeness** — the property that every voice is provably accounted for: each is
+delivered to the lens and resolved to an explicit outcome, so no voice is ever silently
+dropped. This governs *delivery and accounting only* — it does not claim the model's
+output is correct, nor (for cross-voice lenses) that every finding was actually weighed;
+those remain matters of stochastic model output and human review. How completeness is
+enforced is a design still under decision (see `build_context`); this entry defines the
+term, not the mechanism.
+
 **Seam** — an interface boundary where the concrete implementation is injected and
 can be replaced without touching the call sites: callers depend only on the
 abstraction, while the real policy or implementation sits behind it — and may
