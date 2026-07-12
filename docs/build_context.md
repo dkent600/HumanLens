@@ -1339,6 +1339,50 @@ invariants above). The whole project is the **case study**; its first built vers
   downstream lenses. → **Trigger: develop when Tension / Discernment / Action Opening go
   real.** Full sketch in `questions_worth_asking_draft.md`.
 
+## Quality levers (cross-voice attention) — considered and shelved
+A **shelf**, not a to-do list — reach for these the day cross-voice *results* need improving; they are
+deliberately NOT mixed into the O-1..O-4 open items (which stay a live to-do list). Recorded from a Fable relay.
+
+**BOUNDARY (read first, so these are never misread as completeness changes).** Every lever below raises the
+*probability* each finding is weighed; **none makes it provable.** They do NOT change the adopted completeness
+guarantee: delivery is already guaranteed (fan-out / audit); consideration stays **audited-not-guaranteed**
+under every variant; the cited-or-residual audit is unchanged; and the **residual review by a person remains the
+completing step**. Attention operates inside the forward pass, where no instrument reaches — the design's final
+layer for the cross-voice case is, and stays, a human.
+
+**PROVENANCE (why these and not others).** Doug probed a sequence of alternatives for the cross-voice case —
+agent loop → accumulate-then-process → shared pre-populated memory — each declined as dominated (prior relays);
+the walk converged on the underlying truth: **the cross-voice gap is ATTENTION, not delivery**, and attention
+has no external control surface (no storage/delivery mechanism reaches it). Four levers *influence* it: reduce
+what competes (fewer items co-present), obligate speech (generation forces attention), sample lapses away
+(stochastic misses don't repeat), serial room (extended thinking — already on). The items below are the
+actionable residue. (No prior two-pass entry existed in this doc to merge — Q-1 enters fresh.)
+
+- **Q-1 — TWO-PASS AGGREGATION (obligated noting before synthesis).** A model can *read* a finding without
+  registering it, but can't *write* about one without registering it. Pass 1: the model jots a brief note on
+  every finding — run through the same per-item fan-out machinery the per-voice lenses use, so code confirms a
+  note exists for each finding and nothing skips. Pass 2: one synthesis call carrying the full finding set PLUS
+  the notes. Effect: every finding provably passed through full model attention at least once before
+  pattern-finding. Cost: one extra noting call per chunk. *Status: candidate, undecided.*
+- **Q-2 — K-RUN SHUFFLED SYNTHESIS with union-cited residual.** The model's misses are random — the same task
+  run twice overlooks *different* items. Run the synthesis k times (e.g. 3), shuffling finding order each run
+  (shuffling matters: mid-list items are the usual victims; shuffling buries different ones each time); code
+  takes the **union** of cited IDs across runs — a finding lands in the residual only if EVERY run left it
+  uncited. Independent-ish misses multiply down (~10%/run → ~0.1% jointly), so the reviewer's leftover pile gets
+  smaller and purer ("nothing found a home for this," not "one run happened to skip it" — a stronger outlier
+  signal). Cost: ~k× the synthesis step. **Caveat:** union-of-citations inherits the hollow-citation leak k
+  times over, so the semantic spot-checks stay load-bearing. *Status: candidate, undecided.* (Provenance: the
+  ensembling result from the batch-prompting literature, transplanted to the aggregate case — new to our record.)
+- **Q-3 — EMPIRICAL QUESTION: the chunk-size floor.** Fewer findings per look = more attention per finding, but
+  pattern-finding needs findings side by side — a model that only ever sees ten at a time may never spot a theme
+  living across forty. Somewhere between "all at once" and "ten at a time," comparison goes blind. The floor
+  can't be derived; it must be **measured** (same finding set, several group sizes, judge where pattern quality
+  collapses). Relevant to any future chunked aggregation AND to choosing co-presence size for Q-1/Q-2. *Status:
+  open empirical question; no eval designed yet.*
+
+**COMPOSABILITY.** Q-1 and Q-2 stack (noted-then-sampled synthesis), and both compose with the existing
+cited-or-residual audit unchanged — they shrink and purify what reaches the reviewer; they do not replace it.
+
 ## Queued next steps (immediate)
 Stack decisions from this session now live under "## Locked stack & implementation
 decisions" above. Genuinely-open work remaining:
