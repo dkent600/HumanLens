@@ -596,7 +596,10 @@ invariants above). The whole project is the **case study**; its first built vers
   constant, Messages API, adaptive thinking) added beside the fake. Listening gains a
   versioned `system` contract + a tolerant defensive parse; the unchanged anchoring guard
   is the hallucinated-id net on the real path. **Silence vs exception:** malformed output
-  / refusal → safe-empty; transport errors propagate (not disguised as silence).
+  / refusal → safe-empty; transport errors propagate (not disguised as silence). *(SUPERSEDED
+  2026-07-12 by the completeness adoption: refusal now routes to delivered-but-unusable, not safe-empty
+  — that collapse was the fake-empty drop; the seam-fix surfaces `stopReason`. See the ADOPTED completeness
+  entry + `build_implementation` "Completeness — orchestration.")*
   **Selection = Option A:** `buildContainer()` and the running server stay on the fake;
   the real provider is selected only by `selectLlmProvider()` (reads `ANTHROPIC_API_KEY`)
   and exercised only by a dev **eval harness** (`npm run eval -- listening`, parameterized
@@ -619,7 +622,18 @@ invariants above). The whole project is the **case study**; its first built vers
 - B1 (context doc): module numbers — William White 7→8, Terrance Collins 6→7.
 
 ## Open / deferred (resume triggers)
-- **⭑ TOP PRIORITY — LLM voice-processing completeness (open decision; nothing agreed).**
+- **✅ ADOPTED 2026-07-12 — LLM voice-processing completeness. Design of record now in `build_approach`
+  (glossary "Completeness"; "Lens processing" four-state accounting + cross-voice cited-or-residual audit +
+  per-lens invariants + plain-language recap) and `build_implementation` ("Completeness — orchestration":
+  fan-out, (run_id, voice_id) ledger, P1–P9, adapter totality, cross-voice audit, seam-fix).** What was
+  adopted: per-voice **synchronous fan-out** (voice = unit of work and of accounting; batch-API a later
+  transport swap behind the same seam; Option 2 not built, kept adoptable); the **four terminal states** (no
+  fifth); the cross-voice **cited-or-residual** audit. Unparked by **F1-a 50/50 real-model totality** (below).
+  Committed FIRST implementation task: the **fake-empty-drop seam fix** (surface `stopReason`/status; stop
+  collapsing refusal → `{text:''}`). STILL OPEN under adoption (adoption did not answer these): **O-1..O-4**
+  (Item 4c) and the **Mitchell values-review** (does non-retryable answered-empty match Inclusity's stance on
+  silence). The framing below (challenge / requirement / consequence / two forms) is retained as the problem
+  statement the adopted design answers.
   - *The challenge (universal).* Any LLM call can silently fail to process a voice it was given —
     the model may emit nothing for an input it received. This applies to **every LLM call in the
     system — every lens, throughout the pipeline**: per-voice lenses (Listening, Human Meaning),
@@ -644,9 +658,12 @@ invariants above). The whole project is the **case study**; its first built vers
     the guarantee is that the whole set is provably ingested/considered (no silent truncation,
     nothing lost between chunks). Defining the cross-voice form is part of what must be solved, as a
     whole, before any lens is patched.
-  - **⏸ PROPOSED — CONVERGED BETWEEN CHATS — AWAITING DOUG (preserved analysis, NOT decisions;
-    the live decision status is the TOP-PRIORITY entry ABOVE, unchanged: nothing agreed).**
-    Inter-chat convergence (this chat + Fable) is NOT approval — recorded only so the analysis isn't lost.
+  - **✅ ADOPTED 2026-07-12 — the block below is now the HISTORICAL RECORD of how the adopted completeness
+    design was reached (cold cross-family derivation, adversarial review, traceability audit, validators,
+    real-model falsifiers); the live design of record is in `build_approach` + `build_implementation`. Items
+    are preserved as the reasoning/validation trail, NOT pending decisions. Two things stay OPEN under adoption:
+    O-1..O-4 (Item 4c) and the Mitchell values-review. (Prior header: "PROPOSED — CONVERGED BETWEEN CHATS —
+    AWAITING DOUG"; superseded by adoption.)**
     - *GATE (Item 8) — pending external evaluation.* Doug intends to subject this converged package to
       stronger independent evaluation (possibly a different model family / other means) BEFORE approving
       anything below. This gate sits in front of the whole block. Relatedly (Item 7a): two-chat convergence
@@ -767,8 +784,8 @@ invariants above). The whole project is the **case study**; its first built vers
       - **O-4 RESIDUAL DISPLAY** (flagged earlier, recording now to be safe): per-lens residual views vs. one
         consolidated review view — a product/implementation choice, unmade.
       All four OPEN; no answers proposed; not in canon; do not touch the mechanism decision.
-    - *Item 5 — Mechanism (the TOP-PRIORITY open decision — REMAINS OPEN).* Joint recommendation, recorded as
-      recommendation ONLY: the voice is the unit of work AND of accounting for the per-voice lenses; both
+    - *Item 5 — Mechanism — ADOPTED 2026-07-12 (was the TOP-PRIORITY open decision).* The adopted mechanism:
+      the voice is the unit of work AND of accounting for the per-voice lenses; both
       per-voice lenses on the same mechanism; first embodiment = synchronous parallel fan-out (one call per
       voice, keyed by voice id — preserves the fast build→look→tune loop); scale swap behind the SAME seam via
       provider batch API (one voice/request, request id = voice id, explicit terminal statuses, `expired`
@@ -782,9 +799,10 @@ invariants above). The whole project is the **case study**; its first built vers
       per-voice semantics; output tokens identical under both options and dominate cost, while prompt caching
       cuts the overhead batching would save; Aggregate reads compact findings → chunking is scale-contingent and
       reuses none of voice-batch reconciliation, so consistency doesn't tip the choice.
-    - *Item 6 — u9: REMAINS OPEN, status unchanged* (open decision + live reproducible defect). Proposed (not
-      adopted) handling IF Doug approves the mechanism: split the entry — decision half closes on approval;
-      defect half converts to fix-decided/impl-pending, closing only when Falsifier 1 passes.
+    - *Item 6 — u9: RESOLVED per the adoption (2026-07-12).* Decision half CLOSED — mechanism adopted (fan-out).
+      Defect half → **fix-decided / implementation-pending**: the fake-empty-drop seam fix is the committed first
+      task; F1-a (Falsifier 1) PASSED 50/50 on the real model (u9 answered every run under fan-out), so the
+      structural-impossibility claim held empirically. The defect fully closes when the seam fix lands and ships.
     - *Item 7 — Falsifiers (epistemics of the proposal).* (a) two-chat convergence = weak evidence (above).
       (b) Falsifier 1: once per-voice calls exist, repeated u9 re-runs must show the silent drop is STRUCTURALLY
       IMPOSSIBLE, not merely rarer — any unaccounted voice under fan-out falsifies the analysis. (c) Falsifier 2:
@@ -1052,10 +1070,14 @@ invariants above). The whole project is the **case study**; its first built vers
         Bonus real-path corroboration: all 25 → answered-with-findings, 0 empty/unusable/failed, 52 findings
         attributed, **0 quarantined** (totality held, provenance clean, no cross-contamination) — a live sighting
         of the ledger behaving, not a substitute for the F1-a totality run (still un-run; ~300 calls).
-      - *MEASUREMENT PHASE COMPLETE.* Gate items: V-1 green ✓ (with the fake-empty drop, narrowed to the refusal variant),
-        V-2 ✓, V-3 falsifiers run (F1-b ✓ narrowed the fake-empty drop; F2 ✓ PASS pricing-corrected; F3 ✓; F1-a totality deferred — optional,
-        costly, corroborated in spirit by F3's clean landings). **The package is now DECIDABLE.** Still nothing in
-        canon; mechanism remains the open TOP-PRIORITY decision — Doug's call, with evidence now in hand.
+      - *MEASUREMENT PHASE COMPLETE → ADOPTED.* Gate items: V-1 green ✓ (with the fake-empty drop, narrowed to the refusal variant),
+        V-2 ✓, V-3 falsifiers all run — F1-b ✓ narrowed the fake-empty drop; F2 ✓ PASS pricing-corrected; F3 ✓;
+        **F1-a ✓ RUN before adoption (Doug's call): real-model totality 50/50 reps, 0 unaccounted, u9
+        answered-with-findings all 50** (the "validated in simulation" caveat upgraded to validated on the real
+        model; note all 300 calls landed answered-with-findings, so unusable/failed routing stays
+        simulation-validated). The package was DECIDABLE, and **Doug adopted it 2026-07-12** — design written into
+        `build_approach` + `build_implementation`; TOP-PRIORITY entry above flipped to ADOPTED; seam-fix is the
+        committed first task; O-1..O-4 + Mitchell carried open.
 - Learning loop mechanism (S5-2): human-authored prompt edits; prompts as
   versioned, engagement-aware artifacts. Auto-vs-manual unresolved.
 - Scope of a learned edit: engagement-scoped vs graduates to baseline
