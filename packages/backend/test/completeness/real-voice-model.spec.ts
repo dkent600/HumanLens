@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import type Anthropic from '@anthropic-ai/sdk';
-import { ANTHROPIC_MODEL, type AnthropicMessagesClient } from '../../src/seams/anthropic-llm-provider.js';
+import {
+  ANTHROPIC_MODEL,
+  AnthropicLlmProvider,
+  type AnthropicMessagesClient,
+} from '../../src/seams/anthropic-llm-provider.js';
+import { routeLlmResponse } from '../../src/seams/llm-provider.js';
 import {
   AnthropicVoiceModel,
   mapStopReason,
@@ -110,17 +115,24 @@ describe('F1-b ★ — the two-path divergence, NARROWED by the real run', () =>
     expect(result.path2TotalAdapter.state).toBe('delivered-but-unusable');
   });
 
-  it('the residual ★: a REFUSAL is collapsed to empty by the seam → reads as chosen-empty, but the adapter catches it', async () => {
+  it('the residual ★ is CLOSED: the seam now surfaces a refusal instead of laundering it to empty', async () => {
     const refused = makeMessage('', 'refusal');
+
+    // The fake-empty-drop seam fix: the production seam no longer collapses a refusal to
+    // {text:''}. The finish signal survives the seam, and the seam-boundary routing sends
+    // it to delivered-but-unusable — a refusal can never again masquerade as chosen-empty.
+    const production = new AnthropicLlmProvider(stubReturning(refused));
+    const response = await production.complete({ prompt: 'p' });
+    expect(response.stopReason).toBe('refusal');
+    expect(routeLlmResponse(response)).toEqual({ kind: 'unusable', reason: 'refused' });
+
+    // contrastPaths' PATH 1 models a consumer that IGNORES the surfaced signal — the
+    // pre-fix world, kept as the historical record of the drop. The delta against PATH 2
+    // (which reads the signal) is what ★ WAS; the fix moves every production consumer
+    // onto the PATH-2 read.
     const result = await contrastPaths(refused, 'eval-u24', new Set(['eval-u24']));
-    // The production seam maps refusal -> {text:''} (a real line in AnthropicLlmProvider)...
-    expect(result.productionSeamText).toBe('');
-    // ...so PATH 1 reads chosen silence — terminal, never retried: the silent drop.
-    expect(result.path1ProductionSeam.state).toBe('answered-empty');
-    // PATH 2 has the real stop_reason -> delivered-but-unusable (retryable): correct.
-    expect(result.path2TotalAdapter.state).toBe('delivered-but-unusable');
+    expect(result.path1ProductionSeam.state).toBe('answered-empty'); // the old, signal-blind read
+    expect(result.path2TotalAdapter.state).toBe('delivered-but-unusable'); // the signal-aware read
     expect(result.path2TotalAdapter.reasonCode).toBe('refusal');
-    // The identical response diverges by accounting — that residual delta is ★.
-    expect(result.path1ProductionSeam.state).not.toBe(result.path2TotalAdapter.state);
   });
 });

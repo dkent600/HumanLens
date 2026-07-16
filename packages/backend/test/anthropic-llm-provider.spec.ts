@@ -6,20 +6,21 @@ import {
   type AnthropicMessagesClient,
 } from '../src/seams/anthropic-llm-provider.js';
 
-// The real provider's only logic is the request shape and the response->text mapping;
-// the network is the SDK's job. So we inject a stub client and assert that mapping
-// deterministically — NO test makes a real API call (the default `new Anthropic()` is
-// never constructed because every test supplies a stub).
+// The real provider's only logic is the request shape and the response mapping (text +
+// finish signal); the network is the SDK's job. So we inject a stub client and assert
+// that mapping deterministically — NO test makes a real API call (the default
+// `new Anthropic()` is never constructed because every test supplies a stub).
 
-function stub(content: unknown[], stopReason: string) {
+function stub(content: unknown[], stopReason: string | null) {
   const create = vi.fn(
-    async () => ({ content, stop_reason: stopReason }) as unknown as Anthropic.Message,
+    async (_body: Anthropic.MessageCreateParamsNonStreaming) =>
+      ({ content, stop_reason: stopReason }) as unknown as Anthropic.Message,
   );
   return { create, client: { messages: { create } } as AnthropicMessagesClient };
 }
 
-describe('AnthropicLlmProvider — request shape and response->text mapping', () => {
-  it('concatenates text blocks and ignores thinking blocks', async () => {
+describe('AnthropicLlmProvider — request shape and response mapping (text + stopReason)', () => {
+  it('concatenates text blocks, ignores thinking blocks, and surfaces the stop reason', async () => {
     const { client } = stub(
       [
         { type: 'thinking', thinking: '' },
@@ -28,15 +29,33 @@ describe('AnthropicLlmProvider — request shape and response->text mapping', ()
       ],
       'end_turn',
     );
-    const { text } = await new AnthropicLlmProvider(client).complete({ prompt: 'p' });
-    expect(text).toBe('Hello world');
+    const response = await new AnthropicLlmProvider(client).complete({ prompt: 'p' });
+    expect(response.text).toBe('Hello world');
+    expect(response.stopReason).toBe('end_turn');
   });
 
-  it('maps a refusal to empty text (silence, not an exception)', async () => {
-    // Even if the refused message carries text, a refusal yields empty -> no findings.
-    const { client } = stub([{ type: 'text', text: 'should be ignored' }], 'refusal');
-    const { text } = await new AnthropicLlmProvider(client).complete({ prompt: 'p' });
-    expect(text).toBe('');
+  it('passes a refusal THROUGH — stopReason "refusal", text unmodified (the fake-empty-drop fix)', async () => {
+    // The prior mapping collapsed a refusal to {text:''} — indistinguishable from a
+    // chosen empty, so it was recorded answered-empty and never retried: the fake-empty
+    // drop. This test is the regression guard on the reversal: the refusal signal
+    // survives the seam so the caller can route it delivered-but-unusable.
+    const { client } = stub([{ type: 'text', text: 'I can not help with that.' }], 'refusal');
+    const response = await new AnthropicLlmProvider(client).complete({ prompt: 'p' });
+    expect(response.stopReason).toBe('refusal');
+    expect(response.text).toBe('I can not help with that.'); // no laundering to ''
+  });
+
+  it('surfaces max_tokens (truncation) so the caller can route it unusable', async () => {
+    const { client } = stub([{ type: 'text', text: '{"findings":[{"noti' }], 'max_tokens');
+    const response = await new AnthropicLlmProvider(client).complete({ prompt: 'p' });
+    expect(response.stopReason).toBe('max_tokens');
+  });
+
+  it('throws on a null stop_reason (SDK anomaly — an uncertified finish is never routed as natural)', async () => {
+    const { client } = stub([{ type: 'text', text: 'x' }], null);
+    await expect(new AnthropicLlmProvider(client).complete({ prompt: 'p' })).rejects.toThrow(
+      /stop_reason/,
+    );
   });
 
   it('sends the model id, adaptive thinking, the system prompt, and the prompt', async () => {

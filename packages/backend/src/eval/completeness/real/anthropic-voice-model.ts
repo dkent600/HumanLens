@@ -6,13 +6,12 @@ import { TransportError, type FinishReason, type RawSdkOutcome, type VoiceModel 
 // the actual claude-opus-4-8 for the F1/F2/F3 falsifiers. It is a SEPARATE, eval-only
 // adapter; it does NOT modify the production `AnthropicLlmProvider`.
 //
-// ★ THE LOAD-BEARING DIFFERENCE from the production seam: this bridge SURFACES the SDK's
-// `stop_reason` (mapped to the adapter's FinishReason) and the token `usage`. The
-// production `AnthropicLlmProvider.complete()` throws both away — it returns only `{text}`
-// (and collapses a refusal to `{text:''}`). That discard is exactly the ★ finding: G-1 /
-// finish-reason gating is unenforceable on the production path. This bridge is what a
-// finish-reason-aware seam WOULD provide, kept in eval so the ★ delta stays visible
-// (F1-b contrasts the two paths on one identical response).
+// HISTORICAL NOTE (the fix landed): this bridge originally existed because the production
+// seam discarded `stop_reason` (the ★ finding). The fake-empty-drop seam fix has since
+// landed — the production seam now surfaces `stopReason` itself. The bridge remains for
+// what the production seam still does NOT carry: per-call token `usage` (F2), in-band
+// HTTP-status mapping, and the V-1 adapter's FinishReason vocabulary. Folding it onto the
+// production seam is carried forward to the orchestrator task.
 
 /** A voice to send: its id (the provenance anchor) and its de-identified content. */
 export interface VoiceContent {

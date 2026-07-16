@@ -1,10 +1,15 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { LlmProvider, LlmRequest, LlmResponse } from './llm-provider.js';
 
-// The real LLM provider — the first real model in the system, behind the UNCHANGED
-// `complete({system?, prompt}) -> {text}` seam. It is a SECOND implementation
-// alongside FakeLlmProvider; the seam signature does not change, and the seam stays
-// domain-agnostic (prompt in, text out — it knows nothing of units or findings).
+// The real LLM provider — the first real model in the system, behind the
+// `complete({system?, prompt}) -> {text, stopReason, httpStatus?}` seam. It is a SECOND
+// implementation alongside FakeLlmProvider; the seam stays domain-agnostic (prompt in,
+// text + finish signal out — it knows nothing of units or findings). Surfacing the raw
+// `stop_reason` is the committed fake-empty-drop seam fix (build_implementation.md,
+// "Lens↔model contract"): the four-state accounting needs the finish signal to tell a
+// chosen empty from a refusal/truncation, so this provider passes it through untouched.
+// `httpStatus` stays unpopulated here: Anthropic's non-2xx outcomes THROW (and the
+// status rides the thrown APIError), so there is no in-band status on the success path.
 //
 // Selection is env-driven and lives OUTSIDE buildContainer (see select-llm-provider.ts
 // and the eval harness): buildContainer stays pure (the fake by default), so the whole
@@ -54,19 +59,27 @@ export class AnthropicLlmProvider implements LlmProvider {
       ...(request.system !== undefined ? { system: request.system } : {}),
     });
 
-    // A safety refusal is "the model declined", NOT a transport failure: map it to
-    // empty text so the lens's tolerant parse yields no findings — the silence side of
-    // the boundary. Transport/API errors are deliberately NOT caught here; they
-    // propagate as exceptions per the seam convention (and the SDK already retries
-    // 429 / 5xx / network errors before throwing).
-    if (message.stop_reason === 'refusal') {
-      return { text: '' };
+    // The SDK documents stop_reason as non-null on the non-streaming path; a null here
+    // is an SDK anomaly, and a response whose finish cannot be certified must not be
+    // routed as if it finished naturally. It propagates like any infra failure —
+    // surfaced, retryable at the infra layer — never disguised as an answer.
+    if (message.stop_reason === null) {
+      throw new Error(
+        'Anthropic returned a message with no stop_reason (unexpected on the non-streaming path)',
+      );
     }
 
+    // The finish signal is passed THROUGH, refusal included — deliberately. The prior
+    // mapping (refusal -> {text:''}) was the fake-empty drop: a refusal arrived as
+    // empty text, indistinguishable from a chosen empty, was recorded answered-empty,
+    // and was never retried — a permanently, silently dropped voice. The caller now
+    // routes by `stopReason` (routeLlmResponse): a refusal lands delivered-but-unusable,
+    // never answered-empty. Transport/API errors are still NOT caught here; they
+    // propagate per the seam convention (the SDK retries 429/5xx/network first).
     const text = message.content
       .filter((block): block is Anthropic.TextBlock => block.type === 'text')
       .map((block) => block.text)
       .join('');
-    return { text };
+    return { text, stopReason: message.stop_reason };
   }
 }

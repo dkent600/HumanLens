@@ -1,10 +1,11 @@
 import type { Unit } from '../../domain/types.js';
 import type { DispositionChange, Finding } from '../../domain/finding.js';
 import { reviseDisposition } from '../../domain/finding.js';
-import type {
-  DiscernmentResponsePayload,
-  LensPromptPayload,
-  LlmProvider,
+import {
+  routeLlmResponse,
+  type DiscernmentResponsePayload,
+  type LensPromptPayload,
+  type LlmProvider,
 } from '../../seams/llm-provider.js';
 import type { Wave, Lens } from './lens.js';
 import { toPromptFinding } from './prompt-projection.js';
@@ -59,6 +60,15 @@ export class DiscernmentLens implements Lens {
     };
 
     const response = await provider.complete({ prompt: JSON.stringify(payload) });
+
+    // Non-natural finish (refusal / truncation / out-of-protocol) — do not parse. For
+    // the audit this means NO revisions: every finding stays held by default, the safe
+    // failure mode. The accounting layer records the call delivered-but-unusable,
+    // never answered-empty (G-1 routing; see listening-lens).
+    if (routeLlmResponse(response).kind === 'unusable') {
+      return [];
+    }
+
     const parsed = JSON.parse(response.text) as DiscernmentResponsePayload;
 
     const byId = new Map(priorFindings.map((f) => [f.findingId, f]));

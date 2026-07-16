@@ -1,11 +1,12 @@
 import type { Unit } from '../../domain/types.js';
 import type { Finding } from '../../domain/finding.js';
 import { makeOrdinaryFinding } from '../../domain/finding.js';
-import type {
-  LensPromptPayload,
-  LensResponsePayload,
-  LlmProvider,
-  ObjectiveFrame,
+import {
+  routeLlmResponse,
+  type LensPromptPayload,
+  type LensResponsePayload,
+  type LlmProvider,
+  type ObjectiveFrame,
 } from '../../seams/llm-provider.js';
 import type { Wave, Lens } from './lens.js';
 import { toPromptFinding } from './prompt-projection.js';
@@ -67,6 +68,14 @@ export class ObjectiveLens implements Lens {
     };
 
     const response = await provider.complete({ prompt: JSON.stringify(payload) });
+
+    // Non-natural finish (refusal / truncation / out-of-protocol) — do not parse.
+    // Findings-level silence as ever; the accounting layer records this call
+    // delivered-but-unusable, never answered-empty (G-1 routing; see listening-lens).
+    if (routeLlmResponse(response).kind === 'unusable') {
+      return [];
+    }
+
     const parsed = JSON.parse(response.text) as LensResponsePayload;
 
     // Even an interpretive lens may only anchor to cleared units actually in scope:

@@ -2,10 +2,11 @@
 // swappable interface so the vendor (Anthropic, OpenAI, Google, ...) can change
 // without touching call sites. The choice of provider is deliberately TBD.
 //
-// The seam is GENERIC and domain-agnostic: prompt in, text out. It knows nothing
-// of units or findings — that keeps it reusable by every lens and every future
-// module. A lens owns building its prompt and parsing the response; the provider
-// only ferries text to and from "the model".
+// The seam is GENERIC and domain-agnostic: prompt in; text + finish signal out. It
+// knows nothing of units or findings — that keeps it reusable by every lens and every
+// future module. A lens owns building its prompt and parsing the response; the
+// provider ferries text to and from "the model" and reports HOW the model finished
+// (`stopReason`), which the completeness accounting depends on (see LlmResponse).
 
 export interface LlmRequest {
   /** Optional system instruction (role/posture for the model). */
@@ -14,12 +15,87 @@ export interface LlmRequest {
   readonly prompt: string;
 }
 
+/**
+ * The model's finish signal, in Anthropic-native vocabulary (the raw `stop_reason`).
+ * NATURAL completion is `end_turn` (plus `stop_sequence` only where a lens configures
+ * one); everything else is NON-natural — the model did not usably finish this answer.
+ */
+export type LlmStopReason =
+  | 'end_turn'
+  | 'stop_sequence'
+  | 'max_tokens'
+  | 'refusal'
+  | 'pause_turn'
+  | 'tool_use';
+
+/**
+ * The seam surfaces the finish signal and (where a provider reports one in-band) the
+ * HTTP status alongside the text. The completeness accounting (build_approach.md,
+ * "Lens processing"; build_implementation.md, "Lens↔model contract") depends on
+ * `stopReason`: a raw empty body cannot certify WHICH empty it is — a refusal can
+ * arrive as empty text — so answered-empty is separated from delivered-but-unusable
+ * by the finish signal, never the body alone. (The prior seam returned only `{text}`
+ * and collapsed a refusal to `{text:''}`; that collapse WAS the fake-empty drop.)
+ *
+ * `stopReason` is optional so the seam stays provider-agnostic: a provider without a
+ * finish signal simply omits it and degrades gracefully (body-only routing — such a
+ * provider inherently cannot distinguish chosen-empty from refusal, and the
+ * abstraction does not pretend otherwise). Real providers populate it.
+ */
 export interface LlmResponse {
   readonly text: string;
+  /** The model's finish signal. Absent only for a provider that carries none. */
+  readonly stopReason?: LlmStopReason;
+  /** In-band HTTP status, for providers that surface one. (Anthropic's non-2xx outcomes throw instead.) */
+  readonly httpStatus?: number;
 }
 
 export interface LlmProvider {
   complete(request: LlmRequest): Promise<LlmResponse>;
+}
+
+/**
+ * The seam-boundary routing verdict — the minimal four-state read (the G-1 routing
+ * half). `proceed` means the finish was natural (or the provider carries no signal):
+ * the caller may parse the body, and a usable empty body is a genuine answered-empty.
+ * `unusable` means a NON-natural finish: the response must route to
+ * delivered-but-unusable and may NEVER be read as answered-empty — that misread is
+ * the fake-empty drop (refusal → empty text → recorded as chosen silence → never
+ * retried → a permanently, silently dropped voice).
+ */
+export type LlmResponseRoute =
+  | { readonly kind: 'proceed' }
+  | { readonly kind: 'unusable'; readonly reason: 'refused' | 'malformed' };
+
+/**
+ * Route a response by its finish signal, before any parsing:
+ *   - `end_turn` → proceed (natural). `stop_sequence` → proceed only where the caller
+ *     declares it uses one (`allowStopSequence`); no current lens does, and the API
+ *     only emits it when custom sequences were configured, so an unexpected one is an
+ *     anomaly routed unusable rather than trusted.
+ *   - `refusal` → unusable, reason `refused`.
+ *   - `max_tokens` / `pause_turn` / `tool_use` → unusable, reason `malformed` (a
+ *     truncated or out-of-protocol response — delivered, but not an answer).
+ *   - absent → proceed (the documented degradation for a signal-less provider).
+ * Findings-level behavior stays unchanged for callers (bad output still yields no
+ * fabricated finding and never crashes); this verdict is the accounting layer's
+ * input — the fan-out orchestrator records `unusable` as delivered-but-unusable.
+ */
+export function routeLlmResponse(
+  response: Pick<LlmResponse, 'stopReason'>,
+  options: { readonly allowStopSequence?: boolean } = {},
+): LlmResponseRoute {
+  const { stopReason } = response;
+  if (stopReason === undefined || stopReason === 'end_turn') {
+    return { kind: 'proceed' };
+  }
+  if (stopReason === 'stop_sequence' && options.allowStopSequence === true) {
+    return { kind: 'proceed' };
+  }
+  if (stopReason === 'refusal') {
+    return { kind: 'unusable', reason: 'refused' };
+  }
+  return { kind: 'unusable', reason: 'malformed' };
 }
 
 /**
@@ -156,14 +232,21 @@ export type FakeLensResponse = LensResponsePayload | DiscernmentResponsePayload;
  * other shapes for tests (e.g. a verdict that promotes or flags a finding).
  */
 export class FakeLlmProvider implements LlmProvider {
+  /**
+   * @param respond scripts the payload -> response mapping (default: the deterministic rules above).
+   * @param stopReason the finish signal every completion carries — `end_turn` (natural) by
+   *   default so existing behavior is unchanged; a test passes another value to exercise the
+   *   four-state routing (e.g. `'refusal'` to prove a refusal never reads as answered-empty).
+   */
   constructor(
     private readonly respond: (payload: LensPromptPayload) => FakeLensResponse = defaultFakeResponse,
+    private readonly stopReason: LlmStopReason = 'end_turn',
   ) {}
 
   complete(request: LlmRequest): Promise<LlmResponse> {
     const payload = JSON.parse(request.prompt) as LensPromptPayload;
     const response = this.respond(payload);
-    return Promise.resolve({ text: JSON.stringify(response) });
+    return Promise.resolve({ text: JSON.stringify(response), stopReason: this.stopReason });
   }
 }
 

@@ -1078,6 +1078,19 @@ invariants above). The whole project is the **case study**; its first built vers
         simulation-validated). The package was DECIDABLE, and **Doug adopted it 2026-07-12** — design written into
         `build_approach` + `build_implementation`; TOP-PRIORITY entry above flipped to ADOPTED; seam-fix is the
         committed first task; O-1..O-4 + Mitchell carried open.
+      - *BUILD — fake-empty-drop seam fix LANDED 2026-07-12 (the committed first task).* Seam now
+        `complete(...) → {text, stopReason?, httpStatus?}`; `AnthropicLlmProvider` passes `stop_reason` through and
+        the `refusal → {text:''}` collapse is REMOVED (the deliberate reversal); `routeLlmResponse()` does the G-1
+        routing (natural = `end_turn`, + `stop_sequence` only under an explicit `allowStopSequence` opt-in;
+        `refusal`→unusable/refused; `max_tokens`/`pause_turn`/`tool_use`→unusable/malformed; absent→proceed
+        degraded); all 7 lens call sites gate on natural-finish before parsing. Regression pin in place: a refusal
+        with an empty body routes unusable, **never answered-empty**. Backend 162 / frontend 19 green. **tool_use →
+        unusable RATIFIED (Doug):** the earlier vocabulary NOTE (which had listed tool_use natural) is SUPERSEDED;
+        the doc stands (a findings lens stopping for a tool went off-script). u9 defect-half now closer to closed
+        (fully closes when the fix ships). CARRY-FORWARD to the orchestrator task: the V-1 validator's own
+        `FinishReason` type is still non-Anthropic-native (`'stop'/'length'/'content_filter'`) — align it, and fold
+        the eval bridge's usage-capture onto the production seam, when the orchestrator lands. Next build tasks:
+        fan-out orchestrator + (run_id, voice_id) ledger + P1–P9 + cross-voice audit.
 - Learning loop mechanism (S5-2): human-authored prompt edits; prompts as
   versioned, engagement-aware artifacts. Auto-vs-manual unresolved.
 - Scope of a learned edit: engagement-scoped vs graduates to baseline

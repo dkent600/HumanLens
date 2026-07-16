@@ -8,6 +8,12 @@ import { mapStopReason, PER_VOICE_SYSTEM, buildUserPrompt } from './anthropic-vo
 // The PURE core of F1-b (the ★ demonstration) — no top-level side effects, so the offline
 // test can drive it with a synthetic truncated Message and no network / no key. The CLI
 // (f1b-star.ts) makes the one real call and hands the captured Message here.
+//
+// HISTORICAL NOTE (the fix landed): the fake-empty-drop seam fix means the production
+// seam now SURFACES `stopReason` (and no longer collapses a refusal to `{text:''}`).
+// PATH 1 below therefore no longer models the seam itself — it models a consumer that
+// IGNORES the surfaced signal, i.e. the pre-fix world. It is kept as the record of the
+// drop the fix closed; the delta against PATH 2 is what ★ was.
 
 /** A stub client that always returns a captured Message — re-runs the SAME response through
  *  the production seam without a second network call (and drives the offline test). */
@@ -37,13 +43,15 @@ export async function contrastPaths(
   voiceId: string,
   knownVoiceIds: ReadonlySet<string>,
 ): Promise<TwoPathResult> {
-  // PATH 1 — the identical response through the REAL production seam → {text} only.
+  // PATH 1 — the identical response through the REAL production seam, read the PRE-FIX
+  // way: only `text` is consumed (the surfaced `stopReason` is deliberately ignored, as
+  // the old seam forced every consumer to do).
   const production = new AnthropicLlmProvider(stubClientReturning(message));
   const { text: productionSeamText } = await production.complete({
     system: PER_VOICE_SYSTEM,
     prompt: buildUserPrompt(voiceId, 'irrelevant — the stub returns the captured message'),
   });
-  // No finish reason survived the seam, so the consumer must assume natural completion:
+  // A signal-blind consumer must assume natural completion:
   const path1ProductionSeam = await observeVoiceCall(voiceId, knownVoiceIds, () =>
     Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason: 'stop', body: productionSeamText }),
   );

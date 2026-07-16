@@ -8,6 +8,11 @@ import { requireClient, sampleVoices } from './shared.js';
 // observed, side-by-side contrast on ONE identical real response. The pure two-path logic
 // lives in two-path-contrast.ts (offline-tested); this file makes the single real call.
 //
+// HISTORICAL NOTE (the fix landed): the fake-empty-drop seam fix means the production seam
+// now surfaces `stopReason`, so PATH 1 below models a consumer that IGNORES the signal —
+// the pre-fix world this harness documented. Kept as the record of the drop; a re-run now
+// demonstrates what the fix closed, not a live defect.
+//
 // A truncated real call (low max_tokens → stop_reason='max_tokens'; with thinking on, the
 // tiny budget is spent on thinking so the findings text comes back empty) is routed two ways:
 //   PATH 1 — the PRODUCTION seam, which DISCARDS stop_reason → {text:''} reads as chosen-empty

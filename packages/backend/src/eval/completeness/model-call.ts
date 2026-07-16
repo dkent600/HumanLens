@@ -1,15 +1,14 @@
-// What the seam adapter sees BELOW the domain-agnostic lens↔model seam. The real seam
-// is `complete({system?,prompt}) -> {text}` (llm-provider.ts), which already collapses
-// a refusal to {text:''} and DISCARDS the SDK's stop_reason. G-1 / finish_reason gating
-// needs that discarded metadata, so this validator models the RICHER raw outcome the
-// SDK actually produces — text PLUS finish reason, plus the transport/exception paths.
+// What the seam adapter sees BELOW the domain-agnostic lens↔model seam. This validator
+// models the RICHER raw outcome the SDK actually produces — text PLUS finish reason,
+// plus the transport/exception paths — so G-1 / finish-reason gating is testable.
 //
-// ▶ GOVERNANCE FINDING (routed to Doug, not silently worked around): if the per-voice
-//   fan-out is ever adopted as the mechanism, the REAL `AnthropicLlmProvider` must be
-//   evolved to surface `stop_reason` (and HTTP status) rather than flattening them to
-//   {text}, or G-1 cannot be enforced on the real path. The validator proves the
-//   ADAPTER is total against these outcomes; it does not (and must not) change the
-//   production seam. See the build report.
+// ▶ GOVERNANCE FINDING — RESOLVED (the fake-empty-drop seam fix landed): the production
+//   seam is now `complete({system?,prompt}) -> {text, stopReason, httpStatus?}` and
+//   `AnthropicLlmProvider` passes `stop_reason` through (the refusal → {text:''}
+//   collapse is gone). This module keeps its OWN FinishReason vocabulary from the V-1
+//   spec ('stop'/'length'/'content_filter'); aligning it to the Anthropic-native
+//   vocabulary the production seam now uses is carried forward to the orchestrator
+//   task, which will reconcile the eval adapter with the production routing.
 
 /**
  * The model's finish reason. NATURAL completion is `stop` / `end_turn`; everything else

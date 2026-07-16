@@ -1,10 +1,11 @@
 import type { Unit } from '../../domain/types.js';
 import type { Finding } from '../../domain/finding.js';
 import { makeOrdinaryFinding } from '../../domain/finding.js';
-import type {
-  LensPromptPayload,
-  LensResponseCandidate,
-  LlmProvider,
+import {
+  routeLlmResponse,
+  type LensPromptPayload,
+  type LensResponseCandidate,
+  type LlmProvider,
 } from '../../seams/llm-provider.js';
 import type { Wave, Lens } from './lens.js';
 
@@ -12,8 +13,8 @@ import type { Wave, Lens } from './lens.js';
 // saying?" (repeated themes, direct concerns, representative quotes). It reads
 // the cleared units directly, and is the FIRST lens with a real model behind it.
 //
-// The prompt-and-parse contract is split to honor the unchanged provider seam
-// (`complete({system?, prompt}) -> {text}`):
+// The prompt-and-parse contract is split to honor the provider seam
+// (`complete({system?, prompt}) -> {text, stopReason, httpStatus?}`):
 //   - the `system` prompt (SYSTEM below) carries the lens's versioned contract: its
 //     posture, its task, the evidence rule, and the exact JSON output shape the model
 //     must return. It is the half a real model needs and the deterministic fake
@@ -131,6 +132,18 @@ export class ListeningLens implements Lens {
     };
 
     const response = await provider.complete({ system: SYSTEM, prompt: JSON.stringify(payload) });
+
+    // Seam-boundary routing (the G-1 half): a NON-natural finish — refusal, truncation
+    // (max_tokens), or an out-of-protocol stop — means the model did not usably answer
+    // this call, however its body reads. Do not parse it. At the findings level this is
+    // the same safe silence as ever (nothing fabricated, no crash); the four-state
+    // accounting layer above (the fan-out orchestrator) is what records the call
+    // delivered-but-unusable rather than answered-empty — the distinction that closes
+    // the fake-empty drop (a refusal masquerading as chosen silence, never retried).
+    if (routeLlmResponse(response).kind === 'unusable') {
+      return [];
+    }
+
     const candidates = parseCandidates(response.text);
 
     // A lens only ever anchors to the cleared units it was given; ignore any unit
