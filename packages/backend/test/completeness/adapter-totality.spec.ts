@@ -10,7 +10,7 @@ import {
 } from '../../src/eval/completeness/model-call.js';
 import { TERMINAL_STATES } from '../../src/eval/completeness/terminal-state.js';
 import { MALFORMED_CORPUS } from '../../src/eval/completeness/adversarial-model.js';
-import { PROPERTIES } from '../../src/eval/completeness/properties.js';
+import { PROPERTIES } from '../../src/engine/completeness/properties.js';
 
 // The seam adapter is the level P1 is pushed down to. These are the SINGLE-CALL properties
 // the acceptance contract names: A9 (adapter totality), G-1(a) (finish-reason routing),
@@ -37,7 +37,14 @@ describe(`A9 — ${PROPERTIES.A9.title}`, () => {
     // responded with an arbitrary finish reason and an arbitrary body (incl. the corpus)
     fc
       .record({
-        finishReason: fc.constantFrom<FinishReason>('stop', 'end_turn', 'length', 'content_filter', 'refusal'),
+        finishReason: fc.constantFrom<FinishReason>(
+          'end_turn',
+          'stop_sequence',
+          'max_tokens',
+          'refusal',
+          'pause_turn',
+          'tool_use',
+        ),
         body: fc.oneof(fc.string(), fc.constantFrom(...MALFORMED_CORPUS), fc.constant(findingBody(SENT))),
       })
       .map((r) => () => Promise.resolve<RawSdkOutcome>({ kind: 'responded', ...r })),
@@ -75,7 +82,7 @@ describe(`G-1(a) — ${PROPERTIES['G-1'].title} (routing)`, () => {
   it('non-natural finish → delivered-but-unusable for ANY body', async () => {
     await fc.assert(
       fc.asyncProperty(
-        fc.constantFrom<FinishReason>('length', 'content_filter', 'refusal'),
+        fc.constantFrom<FinishReason>('max_tokens', 'pause_turn', 'tool_use', 'refusal'),
         fc.oneof(
           fc.constant('{"findings":[]}'), // a valid EMPTY payload — must NOT become answered-empty
           fc.constant(findingBody(SENT)), // a valid FINDINGS payload — must NOT become answered-with-findings
@@ -92,14 +99,14 @@ describe(`G-1(a) — ${PROPERTIES['G-1'].title} (routing)`, () => {
     );
   });
 
-  it('natural finish + valid empty payload → answered-empty (the only path to it)', async () => {
-    for (const finishReason of ['stop', 'end_turn'] as const) {
-      const obs = await observeVoiceCall(SENT, KNOWN, () =>
-        Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason, body: '{"findings":[]}' }),
-      );
-      expect(obs.state).toBe('answered-empty');
-      expect(obs.reasonCode).toBe('chosen-empty');
-    }
+  it('natural finish (end_turn) + valid empty payload → answered-empty (the only path to it)', async () => {
+    // Natural finish is `end_turn`; the eval adapter does not opt into stop_sequence, so
+    // that too routes unusable — the delegation to production routeLlmResponse is authoritative.
+    const obs = await observeVoiceCall(SENT, KNOWN, () =>
+      Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason: 'end_turn', body: '{"findings":[]}' }),
+    );
+    expect(obs.state).toBe('answered-empty');
+    expect(obs.reasonCode).toBe('chosen-empty');
   });
 });
 
@@ -122,7 +129,7 @@ describe(`A7 — ${PROPERTIES.A7.title}`, () => {
 describe(`P3 — ${PROPERTIES.P3.title} (at the adapter)`, () => {
   it('a finding for THIS voice is attributed', async () => {
     const obs = await observeVoiceCall(SENT, KNOWN, () =>
-      Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason: 'stop', body: findingBody(SENT) }),
+      Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason: 'end_turn', body: findingBody(SENT) }),
     );
     expect(obs.state).toBe('answered-with-findings');
     expect(obs.findings).toEqual([{ voiceId: SENT, noticing: 'a meaning' }]);
@@ -130,7 +137,7 @@ describe(`P3 — ${PROPERTIES.P3.title} (at the adapter)`, () => {
 
   it('a finding for a DIFFERENT valid voice (g) is quarantined, never attributed', async () => {
     const obs = await observeVoiceCall(SENT, KNOWN, () =>
-      Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason: 'stop', body: findingBody('voice:other') }),
+      Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason: 'end_turn', body: findingBody('voice:other') }),
     );
     expect(obs.state).toBe('delivered-but-unusable');
     expect(obs.reasonCode).toBe('provenance-violation');
@@ -140,7 +147,7 @@ describe(`P3 — ${PROPERTIES.P3.title} (at the adapter)`, () => {
 
   it('a hallucinated id (e) is quarantined as unknown, never attributed', async () => {
     const obs = await observeVoiceCall(SENT, KNOWN, () =>
-      Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason: 'stop', body: findingBody('voice:__nope__') }),
+      Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason: 'end_turn', body: findingBody('voice:__nope__') }),
     );
     expect(obs.state).toBe('delivered-but-unusable');
     expect(obs.quarantined).toEqual([{ claimedVoiceId: 'voice:__nope__', reason: 'unknown-voice' }]);
@@ -154,7 +161,7 @@ describe(`P3 — ${PROPERTIES.P3.title} (at the adapter)`, () => {
       ],
     });
     const obs = await observeVoiceCall(SENT, KNOWN, () =>
-      Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason: 'stop', body }),
+      Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason: 'end_turn', body }),
     );
     expect(obs.state).toBe('answered-with-findings');
     expect(obs.findings).toEqual([{ voiceId: SENT, noticing: 'same' }]);
@@ -165,7 +172,7 @@ describe(`P4 — ${PROPERTIES.P4.title} (malformed corpus → unusable, never em
   it('every malformed-corpus body on a natural finish → delivered-but-unusable', async () => {
     for (const body of MALFORMED_CORPUS) {
       const obs = await observeVoiceCall(SENT, KNOWN, () =>
-        Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason: 'stop', body }),
+        Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason: 'end_turn', body }),
       );
       expect(obs.state).toBe('delivered-but-unusable');
       expect(['malformed', 'parse-exception']).toContain(obs.reasonCode);

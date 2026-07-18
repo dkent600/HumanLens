@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { ANTHROPIC_MODEL, type AnthropicMessagesClient } from '../../../seams/anthropic-llm-provider.js';
 import { TransportError, type FinishReason, type RawSdkOutcome, type VoiceModel } from '../model-call.js';
 
-// The REAL per-voice model bridge (eval-tier) — the VoiceModel the fan-out drives against
+// The REAL per-voice model bridge (eval-side) — the VoiceModel the fan-out drives against
 // the actual claude-opus-4-8 for the F1/F2/F3 falsifiers. It is a SEPARATE, eval-only
 // adapter; it does NOT modify the production `AnthropicLlmProvider`.
 //
@@ -31,25 +31,16 @@ export interface AnthropicVoiceModelOptions {
 }
 
 /**
- * Map the Anthropic `stop_reason` to the adapter's FinishReason. NATURAL = end_turn /
- * stop_sequence; `max_tokens` (truncation) → 'length'; `refusal` → 'refusal'. Anything else
- * (`tool_use`, `pause_turn`, null) is not expected for a single-shot text lens call and is
- * routed as a NON-natural finish (mapped to 'content_filter') so the total adapter treats
- * it as unusable rather than mistaking it for a natural answer.
+ * The eval FinishReason is now the seam's Anthropic-native vocabulary (the alignment
+ * carried forward from the seam fix), so the SDK's `stop_reason` passes through as-is.
+ * A null (an SDK anomaly on the non-streaming path — an uncertifiable finish) throws,
+ * mirroring the production provider: never routed as if it finished naturally.
  */
-export function mapStopReason(stopReason: Anthropic.StopReason | null): FinishReason {
-  switch (stopReason) {
-    case 'end_turn':
-      return 'end_turn';
-    case 'stop_sequence':
-      return 'stop';
-    case 'max_tokens':
-      return 'length';
-    case 'refusal':
-      return 'refusal';
-    default:
-      return 'content_filter';
+export function finishReasonOf(stopReason: Anthropic.StopReason | null): FinishReason {
+  if (stopReason === null) {
+    throw new Error('Anthropic returned a message with no stop_reason (unexpected on the non-streaming path)');
   }
+  return stopReason;
 }
 
 /** The compact per-voice Human Meaning system contract (single voice per call). */
@@ -125,7 +116,7 @@ export class AnthropicVoiceModel implements VoiceModel {
       .filter((block): block is Anthropic.TextBlock => block.type === 'text')
       .map((block) => block.text)
       .join('');
-    return { kind: 'responded', finishReason: mapStopReason(message.stop_reason), body: text };
+    return { kind: 'responded', finishReason: finishReasonOf(message.stop_reason), body: text };
   }
 
   /** The system prompt, optionally marked cacheable (a single ephemeral cache breakpoint). */

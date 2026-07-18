@@ -7,7 +7,7 @@ import {
   failed,
   type TerminalObservation,
 } from '../../src/eval/completeness/terminal-state.js';
-import { PROPERTIES } from '../../src/eval/completeness/properties.js';
+import { PROPERTIES } from '../../src/engine/completeness/properties.js';
 
 // The ledger holds the G-1 PERSISTENCE half and the P5 idempotency guarantee at the write
 // boundary. In-memory ledgers keep these fast; the durability half (WAL survives a crash)

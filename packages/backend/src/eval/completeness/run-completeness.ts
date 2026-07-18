@@ -2,7 +2,7 @@ import { AdversarialModel, BEHAVIOR_VALUES, type Behavior, type RunPlan, type Vo
 import { runFanOut, DEFAULT_CAPS } from './fan-out.js';
 import { Ledger } from './ledger.js';
 import { buildReport, formatReport } from './report.js';
-import { BEHAVIORS, PROPERTIES } from './properties.js';
+import { BEHAVIORS, PROPERTIES } from '../../engine/completeness/properties.js';
 
 // Dev / demonstration harness for the completeness validator — the manual path for
 // eyeballing how each adversarial behavior routes through the fan-out and lands in the

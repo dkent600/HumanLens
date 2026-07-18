@@ -80,6 +80,19 @@ export class AnthropicLlmProvider implements LlmProvider {
       .filter((block): block is Anthropic.TextBlock => block.type === 'text')
       .map((block) => block.text)
       .join('');
-    return { text, stopReason: message.stop_reason };
+    return {
+      text,
+      stopReason: message.stop_reason,
+      usage: {
+        inputTokens: message.usage.input_tokens,
+        outputTokens: message.usage.output_tokens,
+        ...(message.usage.cache_read_input_tokens !== null
+          ? { cacheReadInputTokens: message.usage.cache_read_input_tokens }
+          : {}),
+        ...(message.usage.cache_creation_input_tokens !== null
+          ? { cacheCreationInputTokens: message.usage.cache_creation_input_tokens }
+          : {}),
+      },
+    };
   }
 }

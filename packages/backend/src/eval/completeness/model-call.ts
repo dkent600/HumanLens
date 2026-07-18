@@ -3,27 +3,23 @@
 // plus the transport/exception paths — so G-1 / finish-reason gating is testable.
 //
 // ▶ GOVERNANCE FINDING — RESOLVED (the fake-empty-drop seam fix landed): the production
-//   seam is now `complete({system?,prompt}) -> {text, stopReason, httpStatus?}` and
+//   seam is now `complete({system?,prompt}) -> {text, stopReason?, httpStatus?}` and
 //   `AnthropicLlmProvider` passes `stop_reason` through (the refusal → {text:''}
-//   collapse is gone). This module keeps its OWN FinishReason vocabulary from the V-1
-//   spec ('stop'/'length'/'content_filter'); aligning it to the Anthropic-native
-//   vocabulary the production seam now uses is carried forward to the orchestrator
-//   task, which will reconcile the eval adapter with the production routing.
+//   collapse is gone). VOCABULARY NOW ALIGNED (the carried-forward item, done with the
+//   orchestrator promotion): this module's FinishReason IS the seam's Anthropic-native
+//   `LlmStopReason`, and the eval adapter delegates finish-gating to the production
+//   `routeLlmResponse()` — one routing rule, eval-side and production-side.
+
+import type { LlmStopReason } from '../../seams/llm-provider.js';
 
 /**
- * The model's finish reason. NATURAL completion is `stop` / `end_turn`; everything else
- * is non-natural and, by G-1(a), routes to delivered-but-unusable regardless of what
- * the body contains.
- *   - length         → the response was truncated (behavior i / k)
- *   - content_filter → the provider filtered the output (behavior k)
- *   - refusal        → the model declined (behavior d)
+ * The model's finish reason — the seam's Anthropic-native vocabulary. NATURAL completion
+ * is `end_turn` (plus `stop_sequence` only where a lens configures one); everything else
+ * is non-natural and, by G-1(a), routes to delivered-but-unusable regardless of what the
+ * body contains: `max_tokens` (truncation — behaviors i/k), `refusal` (behavior d),
+ * `pause_turn` / `tool_use` (out-of-protocol for a single-shot text lens call).
  */
-export type FinishReason = 'stop' | 'end_turn' | 'length' | 'content_filter' | 'refusal';
-
-/** The natural-completion reasons — the ONLY ones on which answered-* is reachable. */
-export function isNaturalFinish(finishReason: FinishReason): boolean {
-  return finishReason === 'stop' || finishReason === 'end_turn';
-}
+export type FinishReason = LlmStopReason;
 
 /**
  * A raw outcome the model call RETURNS (as opposed to throws). Either the provider

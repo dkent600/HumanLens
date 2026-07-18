@@ -42,12 +42,28 @@ export type LlmStopReason =
  * provider inherently cannot distinguish chosen-empty from refusal, and the
  * abstraction does not pretend otherwise). Real providers populate it.
  */
+/**
+ * Per-call token usage, provider-agnostic field names. Optional end to end: a provider
+ * that reports none omits it (the fake does). Carried on the seam so cost/cache
+ * instrumentation (the F2 falsifier and any future accounting) reads the same seam the
+ * lenses do, instead of a parallel eval-only bridge.
+ */
+export interface LlmUsage {
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  /** Prompt-cache reads/writes, where the provider supports caching. */
+  readonly cacheReadInputTokens?: number;
+  readonly cacheCreationInputTokens?: number;
+}
+
 export interface LlmResponse {
   readonly text: string;
   /** The model's finish signal. Absent only for a provider that carries none. */
   readonly stopReason?: LlmStopReason;
   /** In-band HTTP status, for providers that surface one. (Anthropic's non-2xx outcomes throw instead.) */
   readonly httpStatus?: number;
+  /** Per-call token usage, where the provider reports it. */
+  readonly usage?: LlmUsage;
 }
 
 export interface LlmProvider {

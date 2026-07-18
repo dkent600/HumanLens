@@ -794,7 +794,7 @@ invariants above). The whole project is the **case study**; its first built vers
       batch path serves only non-interactive scale runs (acceptance test if/when built: fail 5% of a batch, measure
       time+code to totality). Doesn't touch the lens seam (why this hybrid is OK where structured outputs
       were not); voice-id keying on every call and write from day one; Option 2 (k-voice batching +
-      id-reconciliation + retry tiers + dead-letter) NOT built, kept adoptable. Rationale: fan-out REMOVES the
+      id-reconciliation + retry rounds + dead-letter) NOT built, kept adoptable. Rationale: fan-out REMOVES the
       failure-generating step (vs. detect-and-recover); chosen silence is structurally observable only under
       per-voice semantics; output tokens identical under both options and dominate cost, while prompt caching
       cuts the overhead batching would save; Aggregate reads compact findings → chunking is scale-contingent and
@@ -810,7 +810,7 @@ invariants above). The whole project is the **case study**; its first built vers
       actual prompt sizes, the Option-2 cost question legitimately reopens.
   - **▶ VALIDATION PLAN — AUTHORIZED TO BUILD (validators only; NOT package approval).** Doug authorizes
     building the VALIDATORS below; this does NOT approve the architectural package (Edits A–D, mechanism).
-    The minimal orchestrator skeleton V-1 needs is **eval-tier scaffolding, not adoption** — a passing V-1
+    The minimal orchestrator skeleton V-1 needs is **eval-side scaffolding, not adoption** — a passing V-1
     does NOT auto-promote the skeleton to the chosen mechanism; the decision still routes through Doug after
     V-1/V-2/V-3. Validators produce inputs to Doug's decision, not substitutes for it. Nothing here lands in
     `build_approach.md`; u9 stays open. (Full V-1 spec is BY REFERENCE — the Fable→owner validation relay;
@@ -919,7 +919,7 @@ invariants above). The whole project is the **case study**; its first built vers
         Claude-derived-with-one-adversarial-corroboration, still 1b-gated). A8 refusal-classification brittleness
         CONFIRMS reason-code (not state) placement (misclassification costs diagnostics, never a voice). A9
         200-with-HTML-body (→ adapter totality, above). **REJECTED (with reason):** batch-reconciliation day-one
-        (A2 — contradicts deferral + two-person constraint); Toxiproxy chaos tier (A9 — over-tooling at this
+        (A2 — contradicts deferral + two-person constraint); Toxiproxy chaos harness (A9 — over-tooling at this
         scale; F1-real-provider is live-fire); auto-retry-on-ratio (re-rejected — citation-under-pressure);
         A10's "make models build a prompt-guarantee, else it's echo" settling test (epistemically backwards —
         echoing well-evidenced literature is what correct answers look like). **UNCHANGED:** four terminal
@@ -1008,7 +1008,7 @@ invariants above). The whole project is the **case study**; its first built vers
       reproducible); crash acceptance (SIGKILL @ 50% → restart → totality restored, 0 re-execution) ran 3×,
       non-flaky; no shrunk counterexamples (clean). Choices reported: run-scoping = composite `(run_id, voice_id)`
       + one-writer-per-run (not the lock); behavior g stamped in code as spec-drafting invention; ledger =
-      `node:sqlite` (eval-tier needs Node ≥22.5; server/engine still ≥20). No asterisks; PROPOSED_BEHAVIORS
+      `node:sqlite` (eval-side needs Node ≥22.5; server/engine still ≥20). No asterisks; PROPOSED_BEHAVIORS
       empty (no new behavior found). **FAKE-EMPTY DROP — HIGHEST-SIGNAL FINDING — a first-class MECHANISM-ADOPTION PREREQUISITE
       (do not lose):** the production `AnthropicLlmProvider` **discards `stop_reason`** (collapses refusal →
       `{text:''}`, returns only `{text}`). So G-1 / finish-reason gating is **unenforceable on the REAL path**
@@ -1091,6 +1091,34 @@ invariants above). The whole project is the **case study**; its first built vers
         `FinishReason` type is still non-Anthropic-native (`'stop'/'length'/'content_filter'`) — align it, and fold
         the eval bridge's usage-capture onto the production seam, when the orchestrator lands. Next build tasks:
         fan-out orchestrator + (run_id, voice_id) ledger + P1–P9 + cross-voice audit.
+      - *BUILD — production fan-out orchestrator + ledger LANDED 2026-07-12 (machinery only; promote-and-harden,
+        not re-derived).* The V-1 shapes graduated onto the production path. **`seams/run-ledger.ts`** — the ledger
+        sits BEHIND A SEAM (`RunLedger` + `SqliteRunLedger`), so the engine depends on an abstraction, never a
+        database (the one structural decision beyond a literal port; consistent with identity/authz/repository/LLM
+        seams, and lets the platform layer swap the store without touching call sites). `node:sqlite`/WAL, keyed
+        **(run_id, voice_id)**, one writer per run, `recordTerminal` atomic (ledger row + findings in one txn),
+        findings persist **iff** answered-with-findings (G-1). **`engine/completeness/voice-orchestrator.ts`** —
+        LENS-AGNOSTIC fan-out: takes voice ids + a `VoiceOperation`, never sees a prompt/unit/finding-shape
+        (`TerminalObservation<TFinding>` generic), so the next task hands it Listening/Human Meaning unchanged;
+        bounded worker-pool concurrency (default 4), four-state routing via the landed `routeLlmResponse()`,
+        model-layer retry / infra-layer backoff (injectable; prod 250ms·2ⁿ capped 4s) / bounded termination (P9) /
+        resume (P8) / adapter totality. **`VoiceOperation.parse` owns provenance** (knows the finding shape, closes
+        over the run's voice set → P3); foreign/unknown findings quarantine, all-foreign → delivered-but-unusable,
+        never answered-empty. **One property registry:** `properties.ts` promoted to `engine/completeness/`; the
+        eval suite and the production suite both cite it (not a parallel set). PROVEN against production code:
+        P1/P2/P3/P4/P6/P9 over 1,500 seeded runs (seed 5903001), P5/P8 resume 400 (5903002), adapter totality
+        2,000 (5903003), targeted P7/P9/A7 + run-scoping; production crash acceptance (real child process, durable
+        file ledger, SIGKILL @50% → restart → totality restored, no re-execution, no lost findings). Seeds pinned.
+        **Eval-vocabulary alignment DONE** (that carry-forward closes): the validator's `FinishReason` is now the
+        seam's Anthropic-native `LlmStopReason`, and the eval adapter delegates finish-gating to the production
+        `routeLlmResponse()` — one routing rule, both sides. **Usage fold:** `LlmResponse.usage` added and populated
+        by `AnthropicLlmProvider` (cost/cache instrumentation now reads the same seam the lenses do). *Reason-code
+        collapse accepted:* production uses the adopted set (`refused | malformed`, `retries-exhausted`); the richer
+        V-1 distinctions (parse-exception / truncated / out-of-protocol / provenance-violation) stay eval-side and
+        in quarantine records — correct per the routing principle (codes exist to route; same-routing detail is
+        diagnostics). NEW CARRY-FORWARD: fold the eval F2 bridge off its own usage-capture onto the seam's `usage`
+        — deferred to when F2 next runs. NEXT BUILD TASK: wire the real Listening / Human Meaning lenses onto the
+        orchestrator (the cross-voice cited-or-residual audit and batch-API transport remain untouched/out of scope).
 - Learning loop mechanism (S5-2): human-authored prompt edits; prompts as
   versioned, engagement-aware artifacts. Auto-vs-manual unresolved.
 - Scope of a learned edit: engagement-scoped vs graduates to baseline

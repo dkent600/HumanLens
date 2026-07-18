@@ -8,7 +8,7 @@ import {
 import { routeLlmResponse } from '../../src/seams/llm-provider.js';
 import {
   AnthropicVoiceModel,
-  mapStopReason,
+  finishReasonOf,
 } from '../../src/eval/completeness/real/anthropic-voice-model.js';
 import { contrastPaths } from '../../src/eval/completeness/real/two-path-contrast.js';
 import { observeVoiceCall } from '../../src/eval/completeness/voice-call-adapter.js';
@@ -43,16 +43,15 @@ function stubReturning(message: Anthropic.Message): AnthropicMessagesClient {
   return { messages: { create: () => Promise.resolve(message) } };
 }
 
-describe('mapStopReason — Anthropic stop_reason -> adapter FinishReason', () => {
-  it('maps natural, truncation, refusal, and unexpected reasons correctly', () => {
-    expect(mapStopReason('end_turn')).toBe('end_turn');
-    expect(mapStopReason('stop_sequence')).toBe('stop');
-    expect(mapStopReason('max_tokens')).toBe('length'); // truncation → non-natural
-    expect(mapStopReason('refusal')).toBe('refusal');
-    // Unexpected reasons route to a non-natural bucket so the adapter treats them as unusable.
-    expect(mapStopReason('tool_use')).toBe('content_filter');
-    expect(mapStopReason('pause_turn')).toBe('content_filter');
-    expect(mapStopReason(null)).toBe('content_filter');
+describe('finishReasonOf — Anthropic stop_reason passes through (vocabulary aligned)', () => {
+  it('passes the raw stop_reason through unchanged (the eval FinishReason IS the seam vocabulary)', () => {
+    for (const r of ['end_turn', 'stop_sequence', 'max_tokens', 'refusal', 'tool_use', 'pause_turn'] as const) {
+      expect(finishReasonOf(r)).toBe(r);
+    }
+  });
+
+  it('throws on a null stop_reason (an uncertifiable finish is never routed as natural)', () => {
+    expect(() => finishReasonOf(null)).toThrow(/stop_reason/);
   });
 });
 

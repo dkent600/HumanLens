@@ -1,13 +1,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// The V-1 completeness validator — CANONICAL property & behavior registry.
+// The completeness accounting — CANONICAL property & behavior registry.
 //
-// WHAT THIS IS (read build_context.md → "VALIDATION PLAN"). This module is
-// eval-tier SCAFFOLDING that tests a guarantee — that every voice handed to an LLM
-// call is provably accounted for, never silently dropped. It is NOT the adopted
-// mechanism: a green run here does not promote the per-voice fan-out skeleton to
-// "the chosen mechanism". That decision is Doug's, after V-1/V-2/V-3, and is still
-// open (u9 stays open). The production engine (buildContainer, server, the real
-// lens↔model seam) is deliberately UNTOUCHED by everything under this folder.
+// WHAT THIS IS. The acceptance contract of the ADOPTED completeness design
+// (build_implementation.md → "Completeness — orchestration (adopted)"): every voice
+// handed to an LLM call is provably accounted for, never silently dropped. The
+// properties were validated by the V-1 adversarial simulation (src/eval/completeness,
+// which remains as that validation record) and now govern the PRODUCTION machinery
+// (engine/completeness + the run-ledger seam). Both the eval-side and production-side suites cite these
+// ids; neither restates them.
 //
 // GOVERNANCE (build_context.md, "BUILD-PHASE GOVERNANCE"):
 //   1. The property list here is the ACCEPTANCE CONTRACT and the single source of
@@ -164,7 +164,7 @@ export const BEHAVIORS: Readonly<Record<string, string>> = {
   h: 'transport failure / timeout',
   i: 'partial-then-truncated (finish_reason = length)',
   j: 'process crash / kill mid-run (harness-level, not a per-call behavior)',
-  k: 'schema-valid empty payload with a NON-natural finish (length / content_filter)',
+  k: 'schema-valid empty payload with a NON-natural finish (max_tokens / pause_turn / tool_use)',
   l: 'perpetual poison — c/d/h recur indefinitely for one voice',
 };
 

@@ -3,7 +3,7 @@ import { AnthropicLlmProvider, type AnthropicMessagesClient } from '../../../sea
 import { observeVoiceCall } from '../voice-call-adapter.js';
 import type { TerminalObservation } from '../terminal-state.js';
 import type { RawSdkOutcome } from '../model-call.js';
-import { mapStopReason, PER_VOICE_SYSTEM, buildUserPrompt } from './anthropic-voice-model.js';
+import { finishReasonOf, PER_VOICE_SYSTEM, buildUserPrompt } from './anthropic-voice-model.js';
 
 // The PURE core of F1-b (the ★ demonstration) — no top-level side effects, so the offline
 // test can drive it with a synthetic truncated Message and no network / no key. The CLI
@@ -53,7 +53,7 @@ export async function contrastPaths(
   });
   // A signal-blind consumer must assume natural completion:
   const path1ProductionSeam = await observeVoiceCall(voiceId, knownVoiceIds, () =>
-    Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason: 'stop', body: productionSeamText }),
+    Promise.resolve<RawSdkOutcome>({ kind: 'responded', finishReason: 'end_turn', body: productionSeamText }),
   );
 
   // PATH 2 — the total adapter, with the REAL stop_reason.
@@ -61,7 +61,7 @@ export async function contrastPaths(
   const path2TotalAdapter = await observeVoiceCall(voiceId, knownVoiceIds, () =>
     Promise.resolve<RawSdkOutcome>({
       kind: 'responded',
-      finishReason: mapStopReason(message.stop_reason),
+      finishReason: finishReasonOf(message.stop_reason),
       body: bodyText,
     }),
   );

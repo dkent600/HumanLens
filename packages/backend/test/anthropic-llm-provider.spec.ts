@@ -12,9 +12,15 @@ import {
 // `new Anthropic()` is never constructed because every test supplies a stub).
 
 function stub(content: unknown[], stopReason: string | null) {
+  const usage = {
+    input_tokens: 100,
+    output_tokens: 5,
+    cache_read_input_tokens: null,
+    cache_creation_input_tokens: null,
+  };
   const create = vi.fn(
     async (_body: Anthropic.MessageCreateParamsNonStreaming) =>
-      ({ content, stop_reason: stopReason }) as unknown as Anthropic.Message,
+      ({ content, stop_reason: stopReason, usage }) as unknown as Anthropic.Message,
   );
   return { create, client: { messages: { create } } as AnthropicMessagesClient };
 }
@@ -32,6 +38,8 @@ describe('AnthropicLlmProvider — request shape and response mapping (text + st
     const response = await new AnthropicLlmProvider(client).complete({ prompt: 'p' });
     expect(response.text).toBe('Hello world');
     expect(response.stopReason).toBe('end_turn');
+    // Usage is folded onto the seam (provider-agnostic field names); null cache fields are omitted.
+    expect(response.usage).toEqual({ inputTokens: 100, outputTokens: 5 });
   });
 
   it('passes a refusal THROUGH — stopReason "refusal", text unmodified (the fake-empty-drop fix)', async () => {

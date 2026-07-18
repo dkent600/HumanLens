@@ -7,8 +7,8 @@ import {
   type TerminalObservation,
   type VoiceFinding,
 } from './terminal-state.js';
+import { routeLlmResponse } from '../../seams/llm-provider.js';
 import {
-  isNaturalFinish,
   StreamError,
   TeardownError,
   TransportError,
@@ -81,11 +81,13 @@ function route(
 
   // G-1(a): a non-natural finish is unusable REGARDLESS of body — do not even look at
   // the body's parseability. This is what stops a truncated/filtered empty payload (i/k)
-  // from masquerading as chosen silence.
-  if (!isNaturalFinish(outcome.finishReason)) {
+  // from masquerading as chosen silence. The gating itself is DELEGATED to the
+  // production routeLlmResponse (one routing rule, eval-side + production-side); only the richer eval
+  // reason codes are derived here.
+  if (routeLlmResponse({ stopReason: outcome.finishReason }).kind === 'unusable') {
     if (outcome.finishReason === 'refusal') return deliveredButUnusable('refusal');
-    if (outcome.finishReason === 'content_filter') return deliveredButUnusable('content-filtered');
-    return deliveredButUnusable('truncated'); // length
+    if (outcome.finishReason === 'max_tokens') return deliveredButUnusable('truncated');
+    return deliveredButUnusable('out-of-protocol'); // pause_turn / tool_use / unexpected stop_sequence
   }
 
   // Natural finish: now the body's shape decides.

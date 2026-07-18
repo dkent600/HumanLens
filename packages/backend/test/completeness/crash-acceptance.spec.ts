@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { Ledger } from '../../src/eval/completeness/ledger.js';
-import { PROPERTIES } from '../../src/eval/completeness/properties.js';
+import { PROPERTIES } from '../../src/engine/completeness/properties.js';
 
 // The CRASH ACCEPTANCE TEST (build_context.md acceptance: "SIGKILL at 50% → restart →
 // perfect resume"). It is an integration test — a real child process, a real durable

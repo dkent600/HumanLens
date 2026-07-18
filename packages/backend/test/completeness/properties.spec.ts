@@ -6,7 +6,7 @@ import { runFanOut, DEFAULT_CAPS } from '../../src/eval/completeness/fan-out.js'
 import { Ledger } from '../../src/eval/completeness/ledger.js';
 import { buildReport } from '../../src/eval/completeness/report.js';
 import { TERMINAL_STATES, type ReasonCode, type TerminalState } from '../../src/eval/completeness/terminal-state.js';
-import { PROPERTIES } from '../../src/eval/completeness/properties.js';
+import { PROPERTIES } from '../../src/engine/completeness/properties.js';
 
 // The seeded RUN-LEVEL property suite — the thousands-of-runs acceptance check with
 // shrinking. Every assertion cites a canonical property id from the registry. A failing
@@ -21,7 +21,7 @@ const ALLOWED_REASONS: Readonly<Record<TerminalState, readonly ReasonCode[]>> = 
     'parse-exception',
     'refusal',
     'truncated',
-    'content-filtered',
+    'out-of-protocol',
     'provenance-violation',
     'retries-exhausted',
   ],

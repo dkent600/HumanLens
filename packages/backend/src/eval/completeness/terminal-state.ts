@@ -41,9 +41,9 @@ export type ReasonCode =
   // delivered-but-unusable
   | 'malformed' // body present, not parseable/well-shaped as findings
   | 'parse-exception' // parsing the body threw (oversized, garbage, truncated JSON)
-  | 'refusal' // finish_reason = refusal
-  | 'truncated' // finish_reason = length (i) — non-natural, so unusable regardless of body (G-1)
-  | 'content-filtered' // finish_reason = content_filter (k)
+  | 'refusal' // finish signal = refusal
+  | 'truncated' // finish signal = max_tokens (i) — non-natural, so unusable regardless of body (G-1)
+  | 'out-of-protocol' // finish signal = pause_turn / tool_use / unexpected stop_sequence (k variants)
   | 'provenance-violation' // findings present but none attributable to this voice (e / g)
   // failed
   | 'transport' // network failure / timeout / 429 / 5xx
@@ -103,7 +103,7 @@ export function answeredEmpty(): TerminalObservation {
 export function deliveredButUnusable(
   reasonCode: Extract<
     ReasonCode,
-    'malformed' | 'parse-exception' | 'refusal' | 'truncated' | 'content-filtered' | 'provenance-violation'
+    'malformed' | 'parse-exception' | 'refusal' | 'truncated' | 'out-of-protocol' | 'provenance-violation'
   >,
   quarantined: readonly QuarantinedFinding[] = [],
 ): TerminalObservation {
