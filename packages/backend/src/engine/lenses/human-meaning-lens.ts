@@ -1,63 +1,40 @@
 import type { Unit } from '../../domain/types.js';
 import type { Finding } from '../../domain/finding.js';
 import { makeOrdinaryFinding } from '../../domain/finding.js';
-import {
-  routeLlmResponse,
-  type LensPromptPayload,
-  type LlmProvider,
-} from '../../seams/llm-provider.js';
+import type { LensPromptPayload, LlmProvider } from '../../seams/llm-provider.js';
 import type { Wave, Lens } from './lens.js';
 import { toPromptFinding } from './prompt-projection.js';
+import { runPerVoiceLens, type PerVoiceLens } from '../completeness/per-voice-lens.js';
+import type { ParsedVoiceBody, VoiceOperation } from '../completeness/voice-orchestrator.js';
+import type { QuarantinedFinding } from '../completeness/terminal-state.js';
 
-// The Human Meaning Lens — the single lens of the Meaning wave: "what might these
-// comments mean at the human level?" (unmet needs, fears, hopes, identity concerns,
-// belonging and trust signals, dignity concerns, moments of pain or aspiration).
+// The Human Meaning Lens — the single lens of the Meaning wave: "what might these comments
+// mean at the human level?" (unmet needs, fears, hopes, identity concerns, belonging/trust
+// signals, dignity concerns, moments of pain or aspiration).
 //
-// EVIDENCE FUNNEL (build_context.md, "Evidence-funnel decision"). Human Meaning does
-// NOT read the raw units as interpretive input — only Listening does. It reads the
-// PRIOR-wave snapshot, which for the Meaning wave is the Evidence wave = the Listening
-// findings. Reading a verbatim Listening finding ≈ reading the unit behind it, so the
-// funnel loses ~nothing while keeping one evidentiary base. Units stay in scope only as
-// ANCHOR TARGETS (every finding must trace to units), not as input it re-reads.
+// EVIDENCE FUNNEL + PER-VOICE FAN-OUT. Human Meaning reads the PRIOR-wave (Listening)
+// findings, not the raw units; a VOICE is one Listening finding. It runs through the
+// production orchestrator — ONE model call per prior voice, keyed by that finding's id,
+// four-state ledger, retry/termination. The lens no longer calls the model itself; it
+// supplies a VoiceOperation and the orchestrator does the fan-out.
 //
-// PER-VOICE, SINGLE-UNIT (granularity locked, build_context.md). It interprets each
-// voice — each Listening finding — on its OWN, and does NOT consolidate across voices
-// (that is Aggregate's job: Culture Pattern / Tension). A Human Meaning finding is bound
-// to exactly ONE voice, and STRUCTURALLY carries exactly ONE unit. The mechanism is that
-// the model does NOT emit a unit link at all: per noticing it names the `sourceFindingId`
-// of the single prior voice it interprets, and this lens INHERITS that voice's anchoring
-// unit. Because one voice = one Listening finding = one unit (build_approach.md), the
-// inherited anchor is a single unit; and because the model can only name ONE source per
-// noticing, it structurally cannot span voices or consolidate. A model that names a source
-// it cannot resolve (unknown/hallucinated id, or a source with no unit) is caught -> the
-// noticing is dropped (SILENCE), never slipped through on a trusted-but-wrong unit link.
-// It MAY emit MULTIPLE noticings for one voice — e.g. an unmet need AND a fear — each a
-// distinct finding (`meaning:0`, `meaning:1`, ...) anchored to that same one unit. This is
-// the first lens that emits more than one finding per lens.
+// SINGLE-UNIT ANCHOR (structural). Each call interprets ONE prior voice; the meaning inherits
+// that voice's single unit as its anchor — the model does not emit a unit link. So a meaning
+// finding provably carries exactly one unit and cannot span voices. PROVENANCE (P3): the model
+// names, in `sourceFindingId`, the voice it interprets; a name that is not THIS call's voice
+// (a different valid voice, or an unknown id) is quarantined, never attributed.
 //
-// MODEL B. Its findings are INTERPRETIVE: each carries a `noticing` (the model's
-// interpretation), with `verbatim` null. Same trust boundary as Listening, one wave on: a
-// tolerant parse means malformed/bad model output -> SILENCE (no findings, never
-// fabricated, never a crash), while a transport failure PROPAGATES from the provider.
-//
-// CONTEXTUAL ANSWERS (prompt rule, shape unchanged; build_approach.md "The Human Meaning
-// Lens" — "Where meaning can't be grounded in the words…"). When a response's potential
-// meaning cannot be grounded in the words themselves — any reading would have to be imported
-// from context the unit doesn't carry ("n/a", "idk", "No comment", "." are the clear cases, matched by
-// that condition, not the string) — the prompt directs the model NOT to supply a meaning,
-// not even a hedged one, but to emit a noticing that flags the answer as best understood in
-// context, worth exploring, and stop. Any actual exploration is a later lens's job. This is
-// still an ordinary noticing (per-voice, single-unit, verbatim null, held) — its CONTENT
-// flags-for-exploration rather than interprets; the lens needs no special handling.
-//
-// Disposition stays HELD: promotion to the client-safe layer is the Discernment lens /
-// human review's affirmative act, not a Meaning-wave concern.
+// COMPLETENESS INVARIANT (declared, enforced by the orchestrator): answered-empty is NEVER
+// legitimate for Human Meaning — every voice yields >=1 finding, because even an ungroundable
+// answer still gets the worth-exploring flag (build_approach.md, "Where meaning can't be
+// grounded…"). A voice that comes back empty is recorded as an invariant VIOLATION alongside
+// the truthful answered-empty state — never retried (P7), never rerouted.
 
 const INSTRUCTION =
   'Interpret each prior voice at the human level. Return findings; each must carry a noticing and name, in sourceFindingId, the single prior voice it interprets.';
 
-// The versioned system contract — the half a real model reads. Kept in the lens module
-// because each lens is a separately versioned prompt artifact (build_approach.md).
+// The versioned system contract — UNCHANGED by this task. Written for "a list of prior
+// findings"; a per-voice call passes a one-element list.
 const SYSTEM = [
   'You are one lens in a qualitative-synthesis pipeline for a human-centered consulting team.',
   'Your stance is that of an observer and pattern-noticer, never an authority: you surface what',
@@ -109,126 +86,145 @@ const SYSTEM = [
   '{"findings":[{"noticing":"...","sourceFindingId":"..."}]}',
 ].join('\n');
 
-/** One interpretation the model returns: the human meaning, plus the voice it interprets. */
-interface MeaningCandidate {
-  readonly noticing: string;
-  readonly sourceFindingId: string;
-}
-
-export class HumanMeaningLens implements Lens {
+export class HumanMeaningLens implements Lens, PerVoiceLens<Finding> {
   readonly id = 'meaning';
   readonly wave: Wave = 'meaning';
+
+  /** A voice is one prior (Listening) finding. */
+  voiceIds(_units: readonly Unit[], priorFindings: readonly Finding[]): readonly string[] {
+    return priorFindings.map((f) => f.findingId);
+  }
+
+  operation(
+    units: readonly Unit[],
+    priorFindings: readonly Finding[],
+    provider: LlmProvider,
+  ): VoiceOperation<Finding> {
+    const bySourceId = new Map(priorFindings.map((f) => [f.findingId, f]));
+    const voiceIndexById = new Map(priorFindings.map((f, i) => [f.findingId, i]));
+    const inScopeUnits = new Set(units.map((u) => u.unitId));
+
+    return {
+      call: (voiceId) => {
+        const source = bySourceId.get(voiceId);
+        if (source === undefined) throw new Error(`HumanMeaningLens: unknown voice ${voiceId}`);
+        // One prior voice per call — the prompt's "list of prior findings" is a one-element list.
+        const payload: LensPromptPayload = {
+          instruction: INSTRUCTION,
+          units: units.map((u) => ({ unitId: u.unitId, speakerToken: u.speakerToken, content: u.content })),
+          priorFindings: [toPromptFinding(source)],
+        };
+        return provider.complete({ system: SYSTEM, prompt: JSON.stringify(payload) });
+      },
+      parse: (text, voiceId) =>
+        parseVoice(text, voiceId, voiceIndexById.get(voiceId) ?? 0, bySourceId, inScopeUnits, units),
+      // Human Meaning never legitimately answers empty — every voice yields >=1 finding.
+      answeredEmptyLegitimate: () => false,
+    };
+  }
 
   async run(
     units: readonly Unit[],
     priorFindings: readonly Finding[],
     provider: LlmProvider,
   ): Promise<readonly Finding[]> {
-    // Meaning is synthesized FROM the prior (Listening) findings; with none to interpret,
-    // the lens stays silent rather than straining over the raw units. This also makes its
-    // dependence on the Evidence wave observable and deterministic.
-    if (priorFindings.length === 0) {
-      return [];
-    }
-
-    const payload: LensPromptPayload = {
-      instruction: INSTRUCTION,
-      units: units.map((u) => ({
-        unitId: u.unitId,
-        speakerToken: u.speakerToken,
-        content: u.content,
-      })),
-      priorFindings: priorFindings.map(toPromptFinding),
-    };
-
-    const response = await provider.complete({ system: SYSTEM, prompt: JSON.stringify(payload) });
-
-    // Non-natural finish (refusal / truncation / out-of-protocol) — do not parse.
-    // Findings-level silence as ever; the accounting layer records this call
-    // delivered-but-unusable, never answered-empty (G-1 routing; see listening-lens).
-    if (routeLlmResponse(response).kind === 'unusable') {
-      return [];
-    }
-
-    const candidates = parseCandidates(response.text);
-
-    // The anchor is INHERITED from the named source voice, never taken from a model unit
-    // link. A voice is a prior finding; its single unit is the finding's anchor. Looking it
-    // up here means: an unknown/unresolvable source is dropped (silence), and a meaning
-    // finding structurally carries exactly ONE unit — it cannot span voices.
-    const bySourceId = new Map(priorFindings.map((f) => [f.findingId, f]));
-    const inScope = new Set(units.map((u) => u.unitId));
-
-    const findings: Finding[] = [];
-    candidates.forEach((candidate, index) => {
-      const source = bySourceId.get(candidate.sourceFindingId);
-      // The one unit behind the interpreted voice (single by the one-voice-one-unit
-      // invariant; sliced to one so a Human Meaning finding structurally never spans).
-      const anchorUnit = source?.evidenceLinks[0];
-      if (anchorUnit === undefined || !inScope.has(anchorUnit)) {
-        // Source not resolvable, or its unit is not in this run's cleared set -> drop
-        // (silence), rather than assert a meaning on a unit we cannot vouch for.
-        return;
-      }
-      findings.push(
-        makeOrdinaryFinding({
-          findingId: `${this.id}:${index}`,
-          lens: 'meaning',
-          noticing: candidate.noticing,
-          evidenceLinks: [anchorUnit],
-          units,
-        }),
-      );
-    });
+    const { findings } = await runPerVoiceLens(this, units, priorFindings, provider);
     return findings;
   }
 }
 
+/** One interpretation the model returns: the human meaning, plus the voice it interprets. */
+interface MeaningCandidate {
+  readonly noticing: string;
+  readonly sourceFindingId: string;
+}
+
 /**
- * Tolerant parse of the model's text into the meaning-candidate shape. Provider output
- * is untrusted: any failure — empty text, a markdown fence, prose, non-object JSON, a
- * missing `findings` array, or a candidate whose fields are the wrong type — yields the
- * candidates that ARE well-formed (often none), never a thrown error. This is the
- * "model misbehaved -> silence" half of the safe failure mode; the source lookup in `run`
- * then enforces a real, in-scope anchor on whatever survives.
- *
- * Both `noticing` and `sourceFindingId` are required non-empty strings; a candidate that
- * lacks either is dropped.
+ * Parse ONE prior voice's response into meaning findings. A malformed body → `{ usable: false }`
+ * (delivered-but-unusable). A well-formed body: a candidate naming THIS voice is attributed,
+ * inheriting the source voice's single unit as its anchor; a candidate naming a DIFFERENT valid
+ * voice, or an unknown id, is quarantined, never attributed (P3). No attributable finding and
+ * nothing quarantined → usable empty (the orchestrator resolves answered-empty; Human Meaning
+ * declares that illegitimate, so it is recorded as a violation).
  */
-function parseCandidates(text: string): readonly MeaningCandidate[] {
+function parseVoice(
+  text: string,
+  voiceId: string,
+  voiceIndex: number,
+  bySourceId: ReadonlyMap<string, Finding>,
+  inScopeUnits: ReadonlySet<string>,
+  units: readonly Unit[],
+): ParsedVoiceBody<Finding> {
+  const envelope = parseEnvelope(text);
+  if (!envelope.ok) {
+    return { usable: false };
+  }
+
+  const attributed: Finding[] = [];
+  const quarantined: QuarantinedFinding[] = [];
+  for (const candidate of envelope.candidates) {
+    if (candidate.sourceFindingId === voiceId) {
+      const source = bySourceId.get(voiceId);
+      const anchorUnit = source?.evidenceLinks[0];
+      if (anchorUnit !== undefined && inScopeUnits.has(anchorUnit)) {
+        attributed.push(
+          makeOrdinaryFinding({
+            findingId: `meaning:${voiceIndex}-${attributed.length}`,
+            lens: 'meaning',
+            noticing: candidate.noticing,
+            evidenceLinks: [anchorUnit],
+            units,
+          }),
+        );
+      }
+      // An unresolvable source (or its unit out of scope) → drop (cannot vouch for an anchor).
+    } else if (bySourceId.has(candidate.sourceFindingId)) {
+      quarantined.push({ claimedVoiceId: candidate.sourceFindingId, reason: 'foreign-voice' });
+    } else {
+      quarantined.push({ claimedVoiceId: candidate.sourceFindingId, reason: 'unknown-voice' });
+    }
+  }
+  return { usable: true, findings: attributed, quarantined };
+}
+
+type Envelope =
+  | { readonly ok: false }
+  | { readonly ok: true; readonly candidates: readonly MeaningCandidate[] };
+
+/**
+ * Tolerant parse into the meaning-candidate envelope. An empty string or a well-formed
+ * `{"findings":[...]}` → `ok:true` (possibly empty); prose, non-object JSON, or a missing
+ * `findings` array → `ok:false`. Both `noticing` and `sourceFindingId` are required non-empty
+ * strings; a candidate lacking either is dropped.
+ */
+function parseEnvelope(text: string): Envelope {
   const body = stripFence(text.trim());
   if (body === '') {
-    return [];
+    return { ok: true, candidates: [] };
   }
   let parsed: unknown;
   try {
     parsed = JSON.parse(body);
   } catch {
-    return [];
+    return { ok: false };
   }
   if (typeof parsed !== 'object' || parsed === null) {
-    return [];
+    return { ok: false };
   }
   const findings = (parsed as { findings?: unknown }).findings;
   if (!Array.isArray(findings)) {
-    return [];
+    return { ok: false };
   }
   const candidates: MeaningCandidate[] = [];
   for (const raw of findings) {
-    if (typeof raw !== 'object' || raw === null) {
-      continue;
-    }
+    if (typeof raw !== 'object' || raw === null) continue;
     const noticing = (raw as { noticing?: unknown }).noticing;
     const sourceFindingId = (raw as { sourceFindingId?: unknown }).sourceFindingId;
-    if (typeof noticing !== 'string' || noticing.trim() === '') {
-      continue;
-    }
-    if (typeof sourceFindingId !== 'string' || sourceFindingId.trim() === '') {
-      continue;
-    }
+    if (typeof noticing !== 'string' || noticing.trim() === '') continue;
+    if (typeof sourceFindingId !== 'string' || sourceFindingId.trim() === '') continue;
     candidates.push({ noticing, sourceFindingId });
   }
-  return candidates;
+  return { ok: true, candidates };
 }
 
 /** Strip a single ```json ... ``` (or bare ``` ... ```) fence if the model wrapped its JSON in one. */

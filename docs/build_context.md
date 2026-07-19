@@ -1119,6 +1119,20 @@ invariants above). The whole project is the **case study**; its first built vers
         diagnostics). NEW CARRY-FORWARD: fold the eval F2 bridge off its own usage-capture onto the seam's `usage`
         — deferred to when F2 next runs. NEXT BUILD TASK: wire the real Listening / Human Meaning lenses onto the
         orchestrator (the cross-voice cited-or-residual audit and batch-API transport remain untouched/out of scope).
+      - *DECISION 2026-07-12 (Doug) — per-lens completeness invariants are ENFORCED, violations surfaced as
+        defects, never retried.* The invariants stated in `build_approach` (Listening: every authored voice → ≥1
+        finding; Human Meaning: every voice → ≥1, the flag counting) stop being documentation-only: a lens
+        **declares** whether `answered-empty` is legitimate for it (Listening: only for non-authored emptiness;
+        Human Meaning: never), and an illegitimate empty records an **invariant violation** on that
+        `(run_id, voice_id)`, surfaced for review. **The P7 collision, resolved deliberately:** the violation is
+        NOT retried and NOT rerouted to delivered-but-unusable — retrying an empty until something appears is
+        fabrication-under-pressure, the exact anti-pattern P7 exists to prevent, and routing violations into a
+        retryable state would silently invert the anti-fabrication rule for these two lenses. So the terminal
+        state stays truthful (`answered-empty` — the model did usably respond with nothing) and the violation is
+        the additional visible signal. A property must assert that a declared-illegitimate empty produces a
+        violation AND is not retried — the guard against a future change turning enforcement into retry pressure.
+        Relayed with the real-lens wiring task; interface shape (where the declaration lives, whether the
+        violation sits on the ledger record or beside it, how it surfaces) is Claude Code's to propose and report.
 - Learning loop mechanism (S5-2): human-authored prompt edits; prompts as
   versioned, engagement-aware artifacts. Auto-vs-manual unresolved.
 - Scope of a learned edit: engagement-scoped vs graduates to baseline

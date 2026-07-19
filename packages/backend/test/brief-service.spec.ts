@@ -32,14 +32,18 @@ describe('BriefService — brief-view read (self-protecting)', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.brief.engagementId).toBe(FIXTURE_ENGAGEMENT_ID);
-      // The engine holds 6 findings internally; the client sees only the promoted,
-      // non-sensitive subset — meaning:0 was promoted but flagged sensitive (held by
-      // the backstop), culture/objective/opening were never promoted. client-safe ⊊ internal.
-      expect(result.brief.findings.map((f) => f.findingId)).toEqual(['listening:0', 'tension:0']);
+      // The engine holds many findings internally (per-voice Listening + Meaning + batched
+      // Aggregate/Interpret/Openings); the client sees only the promoted, non-sensitive
+      // subset — meaning:0-0 was promoted but flagged sensitive (held by the backstop),
+      // everything else was never promoted. client-safe ⊊ internal.
+      expect(result.brief.findings.map((f) => f.findingId)).toEqual(['listening:0-0', 'tension:0']);
 
-      // Support is derived and honest: listening:0 cites all 5 units across 4 sources.
-      const listening = result.brief.findings.find((f) => f.findingId === 'listening:0');
-      expect(listening?.support).toEqual({ sourceCount: 4, unitCount: 5 });
+      // Support is derived and honest. Per-voice Listening cites ONE unit; the cross-source
+      // count now lives on the Aggregate finding — tension:0 cites all 5 units across 4 sources.
+      const listening = result.brief.findings.find((f) => f.findingId === 'listening:0-0');
+      expect(listening?.support).toEqual({ sourceCount: 1, unitCount: 1 });
+      const tension = result.brief.findings.find((f) => f.findingId === 'tension:0');
+      expect(tension?.support).toEqual({ sourceCount: 4, unitCount: 5 });
 
       // No internal-only gating field crosses the projection.
       expect(listening).not.toHaveProperty('clearedToClientSafe');

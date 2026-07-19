@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { SqliteRunLedger } from '../../src/seams/run-ledger.js';
+import { SqliteRunLedger } from '../../src/seams/sqlite-run-ledger.js';
 import { PROPERTIES } from '../../src/engine/completeness/properties.js';
 
 // The PRODUCTION crash acceptance test (P8): SIGKILL at 50% → restart → perfect resume,

@@ -45,17 +45,20 @@ describe('Listening lens — Evidence wave, reads units directly', () => {
     expect(out).toHaveLength(0);
   });
 
-  it('emits a finding anchored to the units it read, held by default', async () => {
+  it('emits one finding per voice (per-voice fan-out), each anchored to its unit, held by default', async () => {
     const out = await new ListeningLens().run(units, [], new FakeLlmProvider());
 
-    expect(out).toHaveLength(1);
-    const [listening] = out;
-    expect(listening.lens).toBe('listening');
-    expect(listening.findingId).toBe('listening:0');
-    expect(isEvidenceAnchored(listening)).toBe(true);
-    expect([...listening.evidenceLinks].sort()).toEqual(['u1', 'u2']);
-    expect(listening.supportSet).toEqual({ sourceCount: 2, unitCount: 2 }); // derived, honest
-    expect(listening.clearedToClientSafe).toBe(false); // held by default
+    // Per-voice: one Listening call per unit, one finding per unit — never one finding
+    // spanning both (cross-source support is the Aggregate lenses' job now).
+    expect(out.map((f) => f.findingId)).toEqual(['listening:0-0', 'listening:1-0']);
+    for (const f of out) {
+      expect(f.lens).toBe('listening');
+      expect(isEvidenceAnchored(f)).toBe(true);
+      expect(f.supportSet).toEqual({ sourceCount: 1, unitCount: 1 }); // derived, honest
+      expect(f.clearedToClientSafe).toBe(false); // held by default
+    }
+    expect([...out[0].evidenceLinks]).toEqual(['u1']);
+    expect([...out[1].evidenceLinks]).toEqual(['u2']);
   });
 
   it('drops a candidate whose only anchor is out of scope (anchoring enforced)', async () => {
@@ -83,7 +86,7 @@ describe('Listening lens — real-model output: tolerant parse + anchoring on th
     const out = await new ListeningLens().run(units, [], provider);
 
     expect(out).toHaveLength(1);
-    expect(out[0].findingId).toBe('listening:0');
+    expect(out[0].findingId).toBe('listening:0-0');
     expect(out[0].verbatim).toBe('the workload is heavy'); // the speaker's words, untouched
     expect(out[0].translation).toBeUndefined();
     expect(out[0].sourceLanguage).toBeUndefined();
@@ -130,9 +133,12 @@ describe('Listening lens — real-model output: tolerant parse + anchoring on th
     const provider = textProvider('```json\n{"findings":[{"verbatim":"theme","evidenceUnitIds":["u1","u2"]}]}\n```');
     const out = await new ListeningLens().run(units, [], provider);
 
-    expect(out).toHaveLength(1);
-    expect([...out[0].evidenceLinks].sort()).toEqual(['u1', 'u2']);
-    expect(out[0].supportSet).toEqual({ sourceCount: 2, unitCount: 2 });
+    // Per-voice: each unit's call attributes the finding to its OWN unit (the stray
+    // cross-unit cite is trimmed) — the fence is tolerated on each call.
+    expect(out.map((f) => f.findingId)).toEqual(['listening:0-0', 'listening:1-0']);
+    expect([...out[0].evidenceLinks]).toEqual(['u1']);
+    expect([...out[1].evidenceLinks]).toEqual(['u2']);
+    expect(out[0].supportSet).toEqual({ sourceCount: 1, unitCount: 1 });
   });
 
   it('returns no findings when the model answers in prose (silence, not a crash)', async () => {
@@ -194,5 +200,24 @@ describe('Listening lens — real-model output: tolerant parse + anchoring on th
     const provider = textProvider('{"findings":[{"verbatim":"ungrounded","evidenceUnitIds":["nope"]}]}');
     const out = await new ListeningLens().run(units, [], provider);
     expect(out).toHaveLength(0);
+  });
+
+  it('emits MULTIPLE findings for ONE voice when the speaker bound two unrelated things (the split rule, u6)', async () => {
+    // build_approach.md L577: two genuinely unrelated things in one comment -> two findings.
+    // Per-voice fan-out imposes NO one-finding cap: both candidates cite this voice's unit
+    // and both surface, id-suffixed past :0, each anchored to that same single unit.
+    const oneUnit = [clearedUnit('u1', 'spk-a')];
+    const provider = textProvider(
+      '{"findings":[{"verbatim":"the onboarding process is a real improvement","evidenceUnitIds":["u1"]},' +
+        '{"verbatim":"the third-floor kitchen has been out of order for weeks","evidenceUnitIds":["u1"]}]}',
+    );
+    const out = await new ListeningLens().run(oneUnit, [], provider);
+
+    expect(out.map((f) => f.findingId)).toEqual(['listening:0-0', 'listening:0-1']);
+    expect(out.map((f) => f.verbatim)).toEqual([
+      'the onboarding process is a real improvement',
+      'the third-floor kitchen has been out of order for weeks',
+    ]);
+    for (const f of out) expect([...f.evidenceLinks]).toEqual(['u1']); // each anchored to the one unit
   });
 });

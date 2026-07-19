@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
-import { SqliteRunLedger } from '../../src/seams/run-ledger.js';
+import { SqliteRunLedger } from '../../src/seams/sqlite-run-ledger.js';
 import {
   DEFAULT_CAPS,
   observeVoiceCall,

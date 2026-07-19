@@ -65,12 +65,30 @@ export interface QuarantinedFinding {
  * orchestrator and ledger never look inside a finding (lens-agnostic machinery).
  * `findings` is non-empty IFF `state === 'answered-with-findings'` (the G-1 persistence
  * half, enforced by `assertObservationInvariant` at the ledger boundary).
+ *
+ * `invariantViolation` is a PER-LENS COMPLETENESS-INVARIANT breach, recorded ALONGSIDE a
+ * truthful terminal state (never replacing it, never triggering a retry). A lens may
+ * declare that answered-empty is illegitimate for a voice (Human Meaning: always;
+ * Listening: for an authored voice). When such a voice resolves answered-empty, the state
+ * stays answered-empty (the model DID usably respond with nothing — truthful), and this
+ * field carries the visible defect for review. Critically it is NOT rerouted to
+ * delivered-but-unusable and NOT retried: re-asking a voice until it stops coming back
+ * empty is manufacturing findings under pressure — the exact failure P7 prevents.
  */
 export interface TerminalObservation<TFinding> {
   readonly state: TerminalState;
   readonly reasonCode: ReasonCode;
   readonly findings: readonly TFinding[];
   readonly quarantined: readonly QuarantinedFinding[];
+  readonly invariantViolation?: string;
+}
+
+/** Attach a completeness-invariant violation to a terminal observation (state unchanged). */
+export function withInvariantViolation<TFinding>(
+  obs: TerminalObservation<TFinding>,
+  violation: string,
+): TerminalObservation<TFinding> {
+  return { ...obs, invariantViolation: violation };
 }
 
 // ── Constructors — the only sanctioned way to build an observation ──────────────

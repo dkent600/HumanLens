@@ -74,7 +74,7 @@ describe('Human Meaning lens — Meaning wave, inherits its anchor from the sour
     expect(out).toHaveLength(1);
     const [meaning] = out;
     expect(meaning.lens).toBe('meaning');
-    expect(meaning.findingId).toBe('meaning:0');
+    expect(meaning.findingId).toBe('meaning:0-0');
     expect(meaning.verbatim).toBeNull(); // interpretive: it does not quote
     expect(meaning.noticing).not.toBeNull(); // ...its text is a noticing
     expect(isEvidenceAnchored(meaning)).toBe(true);
@@ -108,7 +108,7 @@ describe('Human Meaning lens — Meaning wave, inherits its anchor from the sour
 
     const out = await new HumanMeaningLens().run(units, prior, multi);
 
-    expect(out.map((f) => f.findingId)).toEqual(['meaning:0', 'meaning:1']); // suffixing past :0
+    expect(out.map((f) => f.findingId)).toEqual(['meaning:0-0', 'meaning:0-1']); // multi-finding per voice, suffixed
     expect(out.map((f) => f.noticing)).toEqual([
       'an unmet need for recognition',
       'a fear of speaking up',

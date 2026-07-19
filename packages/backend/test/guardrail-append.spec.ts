@@ -73,12 +73,16 @@ describe('lens pipeline — Guardrail stage emitting a fresh finding id', () => 
       new FreshIdGuardrailLens(),
     ]).synthesize(scope);
 
-    // The Evidence finding is untouched, and the fresh-id Guardrail finding is appended
-    // AFTER it (a visible append on the client-gating path, not a silent drop).
-    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0', 'guardrail-extra:0']);
+    // The Evidence findings (one per voice) are untouched, and the fresh-id Guardrail
+    // finding is appended AFTER them (a visible append on the client-gating path).
+    expect(brief.internal.map((f) => f.findingId)).toEqual([
+      'listening:0-0',
+      'listening:1-0',
+      'guardrail-extra:0',
+    ]);
 
-    const evidence = brief.internal.find((f) => f.findingId === 'listening:0');
-    expect([...(evidence?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']); // unchanged
+    const evidence = brief.internal.find((f) => f.findingId === 'listening:0-0');
+    expect([...(evidence?.evidenceLinks ?? [])]).toEqual(['u1']); // per-voice: one unit, unchanged
 
     const fresh = brief.internal.find((f) => f.findingId === 'guardrail-extra:0');
     expect(fresh?.evidenceLinks).toEqual(['u1']);

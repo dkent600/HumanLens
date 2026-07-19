@@ -24,7 +24,7 @@ describe('GET /engagements/:engagementId/brief', () => {
     expect(res.statusCode).toBe(200);
     const body = res.json() as { engagementId: string; findings: { findingId: string }[] };
     expect(body.engagementId).toBe(FIXTURE_ENGAGEMENT_ID);
-    expect(body.findings.map((f) => f.findingId)).toEqual(['listening:0', 'tension:0']);
+    expect(body.findings.map((f) => f.findingId)).toEqual(['listening:0-0', 'tension:0']);
     await app.close();
   }, 30000);
 

@@ -7,6 +7,7 @@ import {
   exhausted,
   failed,
   retryability,
+  withInvariantViolation,
   type QuarantinedFinding,
   type TerminalObservation,
 } from './terminal-state.js';
@@ -65,6 +66,16 @@ export type ParsedVoiceBody<TFinding> =
 export interface VoiceOperation<TFinding> {
   call(voiceId: string): Promise<LlmResponse>;
   parse(text: string, voiceId: string): ParsedVoiceBody<TFinding>;
+  /**
+   * The lens's PER-VOICE COMPLETENESS INVARIANT: is an answered-empty terminal LEGITIMATE
+   * for this voice? Absent → always legitimate (a lens with no such invariant). Returns
+   * false when the lens's own contract forbids a silent voice here — Listening: an
+   * authored voice must yield ≥1 finding (only non-authored emptiness may be empty);
+   * Human Meaning: every voice yields ≥1 finding (its worth-exploring flag guarantees it).
+   * When it returns false and the voice resolves answered-empty, the orchestrator records
+   * an invariant violation on that record — it does NOT retry (P7) and does NOT reroute.
+   */
+  answeredEmptyLegitimate?(voiceId: string): boolean;
 }
 
 export interface FanOutCaps {
@@ -121,7 +132,16 @@ export async function runVoiceFanOut<TFinding>(
       next += 1;
       if (index >= pending.length) return;
       const voiceId = pending[index];
-      const observation = await driveVoice(params, voiceId, caps, backoff);
+      const driven = await driveVoice(params, voiceId, caps, backoff);
+      // Per-lens completeness invariant: a legitimately-declared-illegitimate answered-empty
+      // is annotated with a violation — NOT retried (P7: never re-ask an empty), NOT
+      // rerouted (the state stays truthfully answered-empty). Lens-agnostic: the
+      // orchestrator only consults the operation's optional declaration.
+      const observation =
+        driven.state === 'answered-empty' &&
+        params.operation.answeredEmptyLegitimate?.(voiceId) === false
+          ? withInvariantViolation(driven, `answered-empty is illegitimate for this lens's completeness invariant`)
+          : driven;
       // The ONE atomic write: ledger row + findings together, findings iff
       // answered-with-findings (G-1 persistence half).
       await params.ledger.recordTerminal(params.runId, voiceId, observation);

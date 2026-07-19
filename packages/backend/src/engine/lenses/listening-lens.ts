@@ -1,44 +1,49 @@
 import type { Unit } from '../../domain/types.js';
 import type { Finding } from '../../domain/finding.js';
 import { makeOrdinaryFinding } from '../../domain/finding.js';
-import {
-  routeLlmResponse,
-  type LensPromptPayload,
-  type LensResponseCandidate,
-  type LlmProvider,
+import type {
+  LensPromptPayload,
+  LensResponseCandidate,
+  LlmProvider,
 } from '../../seams/llm-provider.js';
 import type { Wave, Lens } from './lens.js';
+import { runPerVoiceLens, type PerVoiceLens } from '../completeness/per-voice-lens.js';
+import type { ParsedVoiceBody, VoiceOperation } from '../completeness/voice-orchestrator.js';
+import type { QuarantinedFinding } from '../completeness/terminal-state.js';
 
-// The Listening Lens — the first Evidence-wave lens: "what are people actually
-// saying?" (repeated themes, direct concerns, representative quotes). It reads
-// the cleared units directly, and is the FIRST lens with a real model behind it.
+// The Listening Lens — the first Evidence-wave lens: "what are people actually saying?"
+// (repeated themes, direct concerns, representative quotes). It reads the cleared units and
+// is the first lens with a real model behind it.
 //
-// The prompt-and-parse contract is split to honor the provider seam
-// (`complete({system?, prompt}) -> {text, stopReason, httpStatus?}`):
-//   - the `system` prompt (SYSTEM below) carries the lens's versioned contract: its
-//     posture, its task, the evidence rule, and the exact JSON output shape the model
-//     must return. It is the half a real model needs and the deterministic fake
-//     ignores (the fake reads only `prompt`), so the same call drives both.
-//   - the `prompt` carries the units as JSON (the shared lens-prompt convention),
-//     UNCHANGED, so the fake is unaffected.
-// The response is parsed TOLERANTLY (parseCandidates): a model that returns bad JSON,
-// a fenced block, prose, or wrong-typed fields yields no findings rather than a crash
-// — "model misbehaved -> silence", the safe failure mode. (A transport failure is a
-// different thing: it propagates as an exception from the provider, never disguised as
-// silence.) Whatever survives the parse then goes through the SAME anchoring guard as
-// before: an id the model invented but that is not in this run's cleared set is dropped
-// — the net against a hallucinated anchor, on the real path as on the fake.
+// PER-VOICE FAN-OUT (build_implementation.md, "Completeness — orchestration"). Listening is
+// a per-voice lens: a VOICE is one unit, and it runs through the production orchestrator —
+// ONE model call per unit, keyed by unit id, four-state ledger, retry/termination. The lens
+// no longer calls the model or gates the finish signal itself; it supplies a VoiceOperation
+// (its prompt, its tolerant parse, its finding shape, its provenance check, its completeness
+// invariant) and the orchestrator does the rest. The prompt and finding shape are UNCHANGED
+// — only the call granularity moved from one batched call to one call per voice.
 //
-// Disposition is left at its default (HELD): an Evidence-wave lens does not
-// promote findings to the client-safe layer. That is an affirmative act for the
-// Discernment lens / human review (both deferred). Finding ids are deterministic
-// (`listening:0`, ...) to keep the slice reproducible.
+// PROVENANCE (P3, owned by the parse): each call sends exactly ONE unit, so the only
+// legitimate anchor is that unit. A candidate citing a DIFFERENT valid unit (cross-voice) or
+// an id never sent (hallucinated) is quarantined, never attributed — the anchoring guard,
+// now per-voice.
+//
+// COMPLETENESS INVARIANT (declared, enforced by the orchestrator): every AUTHORED voice must
+// yield >=1 finding; only non-authored (empty/whitespace) emptiness may resolve answered-empty
+// (build_approach.md, "Surface every voice"). An authored voice that comes back empty is
+// recorded as an invariant VIOLATION alongside the truthful answered-empty state — never
+// retried (P7), never rerouted.
+//
+// SILENCE VS EXCEPTION is now the orchestrator's four-state accounting: a malformed/prose
+// body on a natural finish is delivered-but-unusable (not a silent empty); a non-natural
+// finish (refusal/truncation) is delivered-but-unusable; a transport failure is failed.
+// Findings-level behavior is unchanged: a bad body yields no fabricated finding.
 
 const INSTRUCTION =
   'Surface what people are actually saying. Return findings; each must cite the unit ids that support it.';
 
-// The versioned system contract — the half a real model reads. Kept in the lens module
-// because each lens is a separately versioned prompt artifact (build_approach.md).
+// The versioned system contract — the half a real model reads. UNCHANGED by this task. It is
+// written for "a list of units"; a per-voice call simply passes a one-element list.
 const SYSTEM = [
   'You are one lens in a qualitative-synthesis pipeline for a human-centered consulting team.',
   'Your stance is that of an observer and pattern-noticer, never an authority: you surface what',
@@ -110,124 +115,148 @@ const SYSTEM = [
   '{"findings":[{"verbatim":"...","translation":"...","sourceLanguage":"...","evidenceUnitIds":["..."]}]}',
 ].join('\n');
 
-export class ListeningLens implements Lens {
+export class ListeningLens implements Lens, PerVoiceLens<Finding> {
   readonly id = 'listening';
   readonly wave: Wave = 'evidence';
 
-  // Evidence wave: reads the cleared units directly, so it ignores `priorFindings`
-  // (there are none above it anyway). The uniform signature lets the staged
-  // orchestrator treat every lens the same.
+  /** A voice is one unit. */
+  voiceIds(units: readonly Unit[]): readonly string[] {
+    return units.map((u) => u.unitId);
+  }
+
+  operation(units: readonly Unit[], _priorFindings: readonly Finding[], provider: LlmProvider): VoiceOperation<Finding> {
+    const unitById = new Map(units.map((u) => [u.unitId, u]));
+    const voiceIndexById = new Map(units.map((u, i) => [u.unitId, i]));
+    const knownVoiceIds = new Set(units.map((u) => u.unitId));
+
+    return {
+      call: (voiceId) => {
+        const unit = unitById.get(voiceId);
+        if (unit === undefined) throw new Error(`ListeningLens: unknown voice ${voiceId}`);
+        // One unit per call — the prompt's "list of units" is a one-element list here.
+        const payload: LensPromptPayload = {
+          instruction: INSTRUCTION,
+          units: [{ unitId: unit.unitId, speakerToken: unit.speakerToken, content: unit.content }],
+        };
+        return provider.complete({ system: SYSTEM, prompt: JSON.stringify(payload) });
+      },
+      parse: (text, voiceId) =>
+        parseVoice(text, voiceId, this.id, voiceIndexById.get(voiceId) ?? 0, knownVoiceIds, units),
+      answeredEmptyLegitimate: (voiceId) => {
+        const unit = unitById.get(voiceId);
+        // Legitimate ONLY for a genuinely non-authored unit (empty/whitespace). An authored
+        // voice must yield >=1 finding — an empty result there is a completeness violation.
+        return unit === undefined ? true : unit.content.trim() === '';
+      },
+    };
+  }
+
+  // The Lens-interface entry: fan out through the orchestrator with an ephemeral in-memory
+  // ledger (the fake/test path; records produced but not persisted) and return the findings.
+  // The eval / real path calls `runPerVoiceLens` directly with a durable ledger to inspect
+  // the (run_id, voice_id) records and invariant violations.
   async run(
     units: readonly Unit[],
     _priorFindings: readonly Finding[],
     provider: LlmProvider,
   ): Promise<readonly Finding[]> {
-    const payload: LensPromptPayload = {
-      instruction: INSTRUCTION,
-      units: units.map((u) => ({
-        unitId: u.unitId,
-        speakerToken: u.speakerToken,
-        content: u.content,
-      })),
-    };
-
-    const response = await provider.complete({ system: SYSTEM, prompt: JSON.stringify(payload) });
-
-    // Seam-boundary routing (the G-1 half): a NON-natural finish — refusal, truncation
-    // (max_tokens), or an out-of-protocol stop — means the model did not usably answer
-    // this call, however its body reads. Do not parse it. At the findings level this is
-    // the same safe silence as ever (nothing fabricated, no crash); the four-state
-    // accounting layer above (the fan-out orchestrator) is what records the call
-    // delivered-but-unusable rather than answered-empty — the distinction that closes
-    // the fake-empty drop (a refusal masquerading as chosen silence, never retried).
-    if (routeLlmResponse(response).kind === 'unusable') {
-      return [];
-    }
-
-    const candidates = parseCandidates(response.text);
-
-    // A lens only ever anchors to the cleared units it was given; ignore any unit
-    // id the model returned that is not in scope, so a hallucinated anchor cannot
-    // smuggle its way in.
-    const inScope = new Set(units.map((u) => u.unitId));
-
-    const findings: Finding[] = [];
-    candidates.forEach((candidate, index) => {
-      const evidenceLinks = candidate.evidenceUnitIds.filter((id) => inScope.has(id));
-      const verbatim = candidate.verbatim;
-      if (evidenceLinks.length === 0 || verbatim === undefined) {
-        // No valid anchor (or no verbatim) — a surfacing finding cannot exist without
-        // one. The Listening lens deals only in evidence, so it drops it rather than
-        // inventing an absence finding. (parseCandidates already guarantees a non-empty
-        // `verbatim`; the guard also narrows the wire type's optional field.)
-        return;
-      }
-      findings.push(
-        makeOrdinaryFinding({
-          findingId: `${this.id}:${index}`,
-          lens: 'listening',
-          verbatim,
-          ...(candidate.translation !== undefined
-            ? { translation: candidate.translation, sourceLanguage: candidate.sourceLanguage }
-            : {}),
-          evidenceLinks,
-          units,
-        }),
-      );
-    });
+    const { findings } = await runPerVoiceLens(this, units, [], provider);
     return findings;
   }
 }
 
 /**
- * Tolerant parse of the model's text into the lens-response convention. Provider output
- * is untrusted: any failure — empty text, a markdown fence, prose, non-object JSON, a
- * missing `findings` array, or a candidate whose fields are the wrong type — yields the
- * candidates that ARE well-formed (often none), never a thrown error. This is the
- * "model misbehaved -> silence" half of the safe failure mode; the anchoring guard in
- * `run` then enforces evidence on whatever survives. (Structural shape only — truth and
- * grounding are not its job: a schema-valid candidate can still cite a hallucinated id,
- * which the anchoring guard catches.)
- *
- * `verbatim` is required; `translation`/`sourceLanguage` are a PAIR — accepted only when
- * both are non-empty strings, and a lone one is ignored (the finding keeps its verbatim).
- * A non-English `verbatim` with no translation is kept, not dropped: a degraded-but-present
- * voice beats a suppressed one, and a missing translation is a model-quality issue the
- * seeded eval is meant to catch — not something to silently swallow a voice over.
+ * Parse ONE voice's response into Listening findings anchored to that voice's unit.
+ *   - A malformed / non-envelope body → `{ usable: false }` (delivered-but-unusable, P4).
+ *   - A well-formed body → attribute each candidate that cites THIS unit; a candidate citing a
+ *     different valid unit (cross-voice) or an unknown id is quarantined, never attributed (P3).
+ *   - A well-formed body with no attributable finding and nothing quarantined → usable empty
+ *     (the orchestrator resolves answered-empty; the lens's invariant declaration decides
+ *     whether that is legitimate for this voice).
  */
-function parseCandidates(text: string): readonly LensResponseCandidate[] {
+function parseVoice(
+  text: string,
+  unitId: string,
+  lensId: string,
+  voiceIndex: number,
+  knownVoiceIds: ReadonlySet<string>,
+  units: readonly Unit[],
+): ParsedVoiceBody<Finding> {
+  const envelope = parseEnvelope(text);
+  if (!envelope.ok) {
+    return { usable: false };
+  }
+
+  const attributed: Finding[] = [];
+  const quarantined: QuarantinedFinding[] = [];
+  for (const candidate of envelope.candidates) {
+    const anchorsThisVoice = candidate.evidenceUnitIds.includes(unitId);
+    if (anchorsThisVoice && candidate.verbatim !== undefined) {
+      attributed.push(
+        makeOrdinaryFinding({
+          findingId: `${lensId}:${voiceIndex}-${attributed.length}`,
+          lens: 'listening',
+          verbatim: candidate.verbatim,
+          ...(candidate.translation !== undefined
+            ? { translation: candidate.translation, sourceLanguage: candidate.sourceLanguage }
+            : {}),
+          evidenceLinks: [unitId],
+          units,
+        }),
+      );
+    } else {
+      // Not attributable to this voice — record the misattribution claim (P3), never attribute it.
+      const claimed = candidate.evidenceUnitIds.find((id) => id !== unitId);
+      if (claimed !== undefined) {
+        quarantined.push({
+          claimedVoiceId: claimed,
+          reason: knownVoiceIds.has(claimed) ? 'foreign-voice' : 'unknown-voice',
+        });
+      }
+      // A candidate with no anchor at all is simply dropped (no claim to record).
+    }
+  }
+  return { usable: true, findings: attributed, quarantined };
+}
+
+type Envelope =
+  | { readonly ok: false }
+  | { readonly ok: true; readonly candidates: readonly LensResponseCandidate[] };
+
+/**
+ * Tolerant parse of the model's text into the lens-response envelope. Distinguishes a
+ * well-formed (possibly EMPTY) findings envelope from a malformed body: an empty string, a
+ * ```json fence, or a well-formed `{"findings":[...]}` parse to `ok:true`; prose, non-object
+ * JSON, or a missing `findings` array parse to `ok:false` (delivered-but-unusable). Field
+ * validation of each candidate is unchanged from the prior batched parse.
+ */
+function parseEnvelope(text: string): Envelope {
   const body = stripFence(text.trim());
   if (body === '') {
-    return [];
+    return { ok: true, candidates: [] }; // a usable empty response (chosen silence)
   }
   let parsed: unknown;
   try {
     parsed = JSON.parse(body);
   } catch {
-    return [];
+    return { ok: false };
   }
   if (typeof parsed !== 'object' || parsed === null) {
-    return [];
+    return { ok: false };
   }
   const findings = (parsed as { findings?: unknown }).findings;
   if (!Array.isArray(findings)) {
-    return [];
+    return { ok: false };
   }
   const candidates: LensResponseCandidate[] = [];
   for (const raw of findings) {
-    if (typeof raw !== 'object' || raw === null) {
-      continue;
-    }
+    if (typeof raw !== 'object' || raw === null) continue;
     const verbatim = (raw as { verbatim?: unknown }).verbatim;
     const translation = (raw as { translation?: unknown }).translation;
     const sourceLanguage = (raw as { sourceLanguage?: unknown }).sourceLanguage;
     const ids = (raw as { evidenceUnitIds?: unknown }).evidenceUnitIds;
-    if (typeof verbatim !== 'string' || verbatim.trim() === '') {
-      continue;
-    }
-    if (!Array.isArray(ids) || !ids.every((id): id is string => typeof id === 'string')) {
-      continue;
-    }
+    if (typeof verbatim !== 'string' || verbatim.trim() === '') continue;
+    if (!Array.isArray(ids) || !ids.every((id): id is string => typeof id === 'string')) continue;
     if (
       typeof translation === 'string' &&
       translation.trim() !== '' &&
@@ -239,7 +268,7 @@ function parseCandidates(text: string): readonly LensResponseCandidate[] {
       candidates.push({ verbatim, evidenceUnitIds: ids });
     }
   }
-  return candidates;
+  return { ok: true, candidates };
 }
 
 /** Strip a single ```json ... ``` (or bare ``` ... ```) fence if the model wrapped its JSON in one. */

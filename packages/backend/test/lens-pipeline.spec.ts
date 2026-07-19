@@ -78,14 +78,16 @@ describe('lens pipeline — the spine, model stubbed', () => {
     const { gate } = await clearedScopeWithUnits();
     const brief = await pipeline(gate).synthesize(scope);
 
-    // One Evidence-wave finding, anchored to both cleared units across two sources.
-    expect(brief.internal).toHaveLength(1);
-    const [found] = brief.internal;
-    expect(found.findingId).toBe('listening:0');
-    expect(found.lens).toBe('listening');
-    expect(isEvidenceAnchored(found)).toBe(true);
-    expect([...found.evidenceLinks].sort()).toEqual(['u1', 'u2']);
-    expect(found.supportSet).toEqual({ sourceCount: 2, unitCount: 2 });
+    // Per-voice fan-out: one Evidence finding PER unit, each anchored to its single unit
+    // (cross-source support is now the Aggregate lenses' business, not Listening's).
+    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0-0', 'listening:1-0']);
+    for (const f of brief.internal) {
+      expect(f.lens).toBe('listening');
+      expect(isEvidenceAnchored(f)).toBe(true);
+      expect(f.supportSet).toEqual({ sourceCount: 1, unitCount: 1 });
+    }
+    expect([...brief.internal[0].evidenceLinks]).toEqual(['u1']);
+    expect([...brief.internal[1].evidenceLinks]).toEqual(['u2']);
 
     // Held by default: nothing reaches the client-safe layer without promotion.
     expect(brief.clientSafe).toHaveLength(0);
@@ -111,7 +113,7 @@ describe('lens pipeline — the spine, model stubbed', () => {
   it('completes the projection path once REAL Discernment affirmatively promotes a finding', async () => {
     const { gate } = await clearedScopeWithUnits();
     // Discernment (Guardrail) is the affirmative promoter now — not a test helper.
-    const provider = promotingProvider(['listening:0']);
+    const provider = promotingProvider(['listening:0-0']);
     const brief = await new LensPipeline(gate, provider, [
       new ListeningLens(),
       new DiscernmentLens(),
@@ -119,18 +121,19 @@ describe('lens pipeline — the spine, model stubbed', () => {
 
     expect(brief.clientSafe).toHaveLength(1);
     const [cs] = brief.clientSafe;
-    expect(cs.findingId).toBe('listening:0');
-    expect([...cs.evidenceLinks].sort()).toEqual(['u1', 'u2']); // traceability preserved
-    expect(cs.support).toEqual({ sourceCount: 2, unitCount: 2 });
+    expect(cs.findingId).toBe('listening:0-0');
+    expect([...cs.evidenceLinks]).toEqual(['u1']); // traceability preserved (per-voice: one unit)
+    expect(cs.support).toEqual({ sourceCount: 1, unitCount: 1 });
 
     // The projection carries no internal-only gating field.
     expect(cs).not.toHaveProperty('clearedToClientSafe');
     expect(cs).not.toHaveProperty('sensitivity');
 
     // client-safe ⊆ internal: the promoted finding is the same id, present internally
-    // and there marked cleared (revised in place — no duplicate appended).
-    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0']);
-    expect(brief.internal[0]?.clearedToClientSafe).toBe(true);
+    // and there marked cleared (revised in place); the other voice stays held.
+    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0-0', 'listening:1-0']);
+    expect(brief.internal.find((f) => f.findingId === 'listening:0-0')?.clearedToClientSafe).toBe(true);
+    expect(brief.internal.find((f) => f.findingId === 'listening:1-0')?.clearedToClientSafe).toBe(false);
   });
 });
 
@@ -143,17 +146,19 @@ describe('lens pipeline — staged: Evidence → Aggregate', () => {
     const { gate } = await clearedScopeWithUnits();
     const brief = await stagedPipeline(gate).synthesize(scope);
 
-    // Both stages produced findings; they accumulate, Evidence before Aggregate.
-    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0', 'tension:0']);
-    const [listening, tension] = brief.internal;
-    expect(listening.lens).toBe('listening');
-    expect(tension.lens).toBe('tension');
+    // Both stages produced findings; they accumulate, Evidence before Aggregate. Evidence
+    // is per-voice (one finding per unit); Aggregate (Tension) is batched — it reads the
+    // whole Evidence snapshot and emits one finding across both voices.
+    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0-0', 'listening:1-0', 'tension:0']);
+    const tension = brief.internal.find((f) => f.findingId === 'tension:0');
+    expect(brief.internal[0].lens).toBe('listening');
+    expect(tension?.lens).toBe('tension');
 
-    // The Aggregate lens read the Evidence finding and anchored its tension to the
-    // units behind it — interpretive output is still evidence-anchored.
-    expect(isEvidenceAnchored(tension)).toBe(true);
-    expect([...tension.evidenceLinks].sort()).toEqual(['u1', 'u2']);
-    expect(tension.supportSet).toEqual({ sourceCount: 2, unitCount: 2 });
+    // The Aggregate lens read the Evidence findings and anchored its tension to the
+    // units behind them — interpretive output is still evidence-anchored, across sources.
+    expect(isEvidenceAnchored(tension!)).toBe(true);
+    expect([...(tension?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
+    expect(tension?.supportSet).toEqual({ sourceCount: 2, unitCount: 2 });
 
     // Still held by default — promotion is not a lens concern at this stage.
     expect(brief.clientSafe).toHaveLength(0);
@@ -196,13 +201,21 @@ describe('lens pipeline — staged: Evidence → Aggregate', () => {
       new CulturePatternLens(),
     ]).synthesize(scope);
 
-    // Both Aggregate lenses ran, each over the SAME Evidence-only snapshot — neither
-    // saw the other's output (no 'tension:0' in culture's view, no 'culture:0' in
-    // tension's). The snapshot-per-wave semantics keep them independent.
-    expect(seenPriorIds).toEqual([['listening:0'], ['listening:0']]);
+    // Both Aggregate lenses ran (batched), each over the SAME Evidence-only snapshot (both
+    // per-voice Listening findings) — neither saw the other's output. Snapshot-per-wave
+    // semantics keep them independent.
+    expect(seenPriorIds).toEqual([
+      ['listening:0-0', 'listening:1-0'],
+      ['listening:0-0', 'listening:1-0'],
+    ]);
 
-    // Both produced an Aggregate finding anchored to the same Evidence units.
-    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0', 'tension:0', 'culture:0']);
+    // Both produced an Aggregate finding anchored to the same Evidence units (across sources).
+    expect(brief.internal.map((f) => f.findingId)).toEqual([
+      'listening:0-0',
+      'listening:1-0',
+      'tension:0',
+      'culture:0',
+    ]);
     const tension = brief.internal.find((f) => f.findingId === 'tension:0');
     const culture = brief.internal.find((f) => f.findingId === 'culture:0');
     expect([...(tension?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
@@ -226,23 +239,29 @@ describe('lens pipeline — staged: Evidence → Aggregate', () => {
       new HumanMeaningLens(),
     ]).synthesize(scope);
 
-    // Listening (Evidence) read the units — its prior-findings snapshot is empty.
-    // Human Meaning (Meaning, one wave later) read Listening's finding — the funnel: the
-    // interpretive lens works from the surfaced voices, not the raw units directly.
-    expect(seenPriorIds).toEqual([[], ['listening:0']]);
+    // Both lenses are per-voice. Listening (Evidence) reads the units — its prior-findings
+    // snapshot is empty on each of its two per-unit calls. Human Meaning (Meaning, one wave
+    // later) fans out over the two Listening findings — each call reads exactly one, the
+    // funnel: the interpretive lens works from the surfaced voices, not the raw units.
+    expect(seenPriorIds).toEqual([[], [], ['listening:0-0'], ['listening:1-0']]);
 
-    // Listening surfaced the voice (verbatim); Human Meaning interpreted it (noticing),
-    // INHERITING the single unit behind the Listening finding it named (not both units —
-    // a meaning finding structurally carries exactly one unit).
-    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0', 'meaning:0']);
-    const listening = brief.internal.find((f) => f.findingId === 'listening:0');
-    const meaning = brief.internal.find((f) => f.findingId === 'meaning:0');
+    // Listening surfaced each voice (verbatim); Human Meaning interpreted each (noticing),
+    // INHERITING the single unit behind the Listening finding it named — a meaning finding
+    // structurally carries exactly one unit.
+    expect(brief.internal.map((f) => f.findingId)).toEqual([
+      'listening:0-0',
+      'listening:1-0',
+      'meaning:0-0',
+      'meaning:1-0',
+    ]);
+    const listening = brief.internal.find((f) => f.findingId === 'listening:0-0');
+    const meaning = brief.internal.find((f) => f.findingId === 'meaning:0-0');
     expect(listening?.verbatim).not.toBeNull(); // surfacing
     expect(listening?.noticing).toBeNull();
     expect(meaning?.verbatim).toBeNull(); // interpretive
     expect(meaning?.noticing).not.toBeNull();
-    expect([...(listening?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
-    expect([...(meaning?.evidenceLinks ?? [])]).toEqual(['u1']); // inherited listening:0's single anchor
+    expect([...(listening?.evidenceLinks ?? [])]).toEqual(['u1']); // per-voice: one unit
+    expect([...(meaning?.evidenceLinks ?? [])]).toEqual(['u1']); // inherited listening:0-0's single anchor
   });
 });
 
@@ -260,7 +279,7 @@ describe('lens pipeline — staged with Guardrail (real Discernment disposition)
     // The default fake's disposition response is empty verdicts — silence.
     const brief = await fullPipeline(gate, new FakeLlmProvider()).synthesize(scope);
 
-    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0', 'tension:0']);
+    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0-0', 'listening:1-0', 'tension:0']);
     expect(brief.internal.every((f) => f.clearedToClientSafe === false)).toBe(true);
     expect(brief.clientSafe).toHaveLength(0);
   });
@@ -271,7 +290,7 @@ describe('lens pipeline — staged with Guardrail (real Discernment disposition)
     // Discernment can promote it proves it audited the accumulated Aggregate output.
     const brief = await fullPipeline(gate, promotingProvider(['tension:0'])).synthesize(scope);
 
-    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0', 'tension:0']); // revised in place
+    expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0-0', 'listening:1-0', 'tension:0']); // revised in place
     expect(brief.clientSafe.map((f) => f.findingId)).toEqual(['tension:0']);
 
     // client-safe ⊆ internal, end to end: every client-safe id is present internally.
@@ -281,11 +300,11 @@ describe('lens pipeline — staged with Guardrail (real Discernment disposition)
 
   it('keeps a promoted-but-sensitive finding out of the client-safe layer (backstop holds)', async () => {
     const { gate } = await clearedScopeWithUnits();
-    // Promote BOTH, but flag listening:0 sensitive — it must not cross over.
-    const provider = promotingProvider(['listening:0', 'tension:0'], ['listening:0']);
+    // Promote BOTH, but flag listening:0-0 sensitive — it must not cross over.
+    const provider = promotingProvider(['listening:0-0', 'tension:0'], ['listening:0-0']);
     const brief = await fullPipeline(gate, provider).synthesize(scope);
 
-    const sensitive = brief.internal.find((f) => f.findingId === 'listening:0');
+    const sensitive = brief.internal.find((f) => f.findingId === 'listening:0-0');
     expect(sensitive?.sensitivity).toBe('sensitive');
     expect(sensitive?.clearedToClientSafe).toBe(true); // promoted...
     expect(brief.clientSafe.map((f) => f.findingId)).toEqual(['tension:0']); // ...but held
@@ -313,9 +332,10 @@ describe('lens pipeline — Interpret wave (Inclusity Objective)', () => {
       new DiscernmentLens(),
     ]).synthesize(scope);
 
-    // Wave order in the accumulated set: Evidence, Aggregate, Interpret.
+    // Wave order in the accumulated set: Evidence (per-voice), Aggregate, Interpret.
     expect(brief.internal.map((f) => f.findingId)).toEqual([
-      'listening:0',
+      'listening:0-0',
+      'listening:1-0',
       'tension:0',
       'objective:0',
     ]);
@@ -356,7 +376,8 @@ describe('lens pipeline — Openings wave (Action Opening held internal-only)', 
 
     // Openings runs last — the Action Opening finding sits at the end of the set.
     expect(brief.internal.map((f) => f.findingId)).toEqual([
-      'listening:0',
+      'listening:0-0',
+      'listening:1-0',
       'tension:0',
       'objective:0',
       'opening:0',
@@ -364,7 +385,8 @@ describe('lens pipeline — Openings wave (Action Opening held internal-only)', 
 
     // Everything Discernment audited was promoted and reaches the client-safe layer...
     expect(brief.clientSafe.map((f) => f.findingId)).toEqual([
-      'listening:0',
+      'listening:0-0',
+      'listening:1-0',
       'tension:0',
       'objective:0',
     ]);

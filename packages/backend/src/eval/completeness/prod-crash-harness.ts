@@ -1,4 +1,4 @@
-import { SqliteRunLedger } from '../../seams/run-ledger.js';
+import { SqliteRunLedger } from '../../seams/sqlite-run-ledger.js';
 import { runVoiceFanOut, type VoiceOperation } from '../../engine/completeness/voice-orchestrator.js';
 
 // Child-process harness for the PRODUCTION crash acceptance test (P8). It drives a run of
