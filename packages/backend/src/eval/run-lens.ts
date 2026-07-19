@@ -5,7 +5,10 @@ import { ANTHROPIC_MODEL } from '../seams/anthropic-llm-provider.js';
 import { hasAnthropicKey, selectLlmProvider } from '../seams/select-llm-provider.js';
 import { ListeningLens } from '../engine/lenses/listening-lens.js';
 import { HumanMeaningLens } from '../engine/lenses/human-meaning-lens.js';
+import { CulturePatternLens } from '../engine/lenses/culture-pattern-lens.js';
 import { runPerVoiceLens } from '../engine/completeness/per-voice-lens.js';
+import { runCrossVoiceLens } from '../engine/completeness/cross-voice-lens.js';
+import { formatCitationAudit, type CitationAudit } from '../engine/completeness/cross-voice-audit.js';
 import { SqliteRunLedger } from '../seams/sqlite-run-ledger.js';
 import type { RunLedger } from '../seams/run-ledger.js';
 import { SAMPLE_UNITS } from './sample-units.js';
@@ -31,9 +34,15 @@ import { SAMPLE_UNITS } from './sample-units.js';
 
 interface LensRun {
   readonly findings: readonly Finding[];
-  /** The (run_id, voice_id) accounting these lenses produced, on the real path. */
-  readonly ledger: RunLedger;
-  readonly runIds: readonly string[];
+  /** Per-voice lenses: the (run_id, voice_id) ledger accounting they produced. */
+  readonly ledger?: RunLedger;
+  readonly runIds?: readonly string[];
+  /** Cross-voice lenses: the cited-or-residual audit + any uncited-pattern defect. */
+  readonly crossVoice?: {
+    readonly lensId: string;
+    readonly audit: CitationAudit;
+    readonly uncitedDefects: readonly string[];
+  };
 }
 type LensRunner = (units: readonly Unit[], provider: LlmProvider) => Promise<LensRun>;
 
@@ -68,6 +77,31 @@ const LENS_RUNNERS: Record<string, LensRunner> = {
     });
     return { findings, ledger, runIds: ['eval:listening', 'eval:meaning'] };
   },
+  // Culture Pattern is the first REAL cross-voice lens (Aggregate wave). Per the wave model it
+  // reads the whole accumulated PRIOR-WAVE pool — Evidence (Listening) AND Meaning (Human
+  // Meaning) — so the delivered set the audit measures matches what the lens actually sees
+  // (Human Meaning's noticings included, e.g. the u3/u15 recurrence). Build both prior waves for
+  // real, deliver their union, then synthesize + audit.
+  culture: async (units, provider) => {
+    const ledger = new SqliteRunLedger(':memory:');
+    const listening = await runPerVoiceLens(new ListeningLens(), units, [], provider, {
+      ledger,
+      runId: 'eval:listening',
+    });
+    const meaning = await runPerVoiceLens(new HumanMeaningLens(), units, listening.findings, provider, {
+      ledger,
+      runId: 'eval:meaning',
+    });
+    ledger.close();
+    const priorWavePool = [...listening.findings, ...meaning.findings];
+    const { findings, audit, uncitedDefects } = await runCrossVoiceLens(
+      new CulturePatternLens(),
+      units,
+      priorWavePool,
+      provider,
+    );
+    return { findings, crossVoice: { lensId: 'culture', audit, uncitedDefects } };
+  },
 };
 
 async function main(): Promise<void> {
@@ -88,7 +122,7 @@ async function main(): Promise<void> {
   }
   console.log('');
 
-  const { findings, ledger, runIds } = await runner(SAMPLE_UNITS, selectLlmProvider());
+  const { findings, ledger, runIds, crossVoice } = await runner(SAMPLE_UNITS, selectLlmProvider());
 
   console.log(`${findings.length} finding(s):\n`);
   for (const finding of findings) {
@@ -107,20 +141,32 @@ async function main(): Promise<void> {
     console.log(`  clientSafe: ${finding.clearedToClientSafe} (held by default)\n`);
   }
 
-  // The completeness accounting these lenses produced on the real path: every voice in one
-  // of the four terminal states, plus any per-lens completeness-invariant violation
-  // (recorded alongside a truthful answered-empty, never retried).
-  for (const runId of runIds) {
-    const rows = await ledger.allRows(runId);
-    const violations = await ledger.invariantViolations(runId);
-    console.log(`Ledger [${runId}] — ${rows.length} voice(s):`);
-    for (const row of rows) {
-      const flag = row.invariantViolation !== undefined ? `  ⚠ INVARIANT: ${row.invariantViolation}` : '';
-      console.log(`  ${row.voiceId.padEnd(16)} ${row.state} / ${row.reasonCode}${flag}`);
+  // PER-VOICE lenses: the completeness accounting — every voice in one of the four terminal
+  // states, plus any per-lens invariant violation (recorded beside a truthful answered-empty).
+  if (ledger !== undefined && runIds !== undefined) {
+    for (const runId of runIds) {
+      const rows = await ledger.allRows(runId);
+      const violations = await ledger.invariantViolations(runId);
+      console.log(`Ledger [${runId}] — ${rows.length} voice(s):`);
+      for (const row of rows) {
+        const flag = row.invariantViolation !== undefined ? `  ⚠ INVARIANT: ${row.invariantViolation}` : '';
+        console.log(`  ${row.voiceId.padEnd(16)} ${row.state} / ${row.reasonCode}${flag}`);
+      }
+      console.log(`  invariant violations: ${violations.length}\n`);
     }
-    console.log(`  invariant violations: ${violations.length}\n`);
+    ledger.close();
   }
-  ledger.close();
+
+  // CROSS-VOICE lenses: the cited-or-residual audit + the uncited-pattern defect (surfaced,
+  // never retried). A non-empty residual is expected — it is uncited findings made visible.
+  if (crossVoice !== undefined) {
+    console.log(formatCitationAudit(crossVoice.lensId, crossVoice.audit));
+    console.log(
+      `  uncited-pattern defects (cited zero existing findings): ${crossVoice.uncitedDefects.length}` +
+        (crossVoice.uncitedDefects.length > 0 ? ` — ${crossVoice.uncitedDefects.join(' | ')}` : ''),
+    );
+    console.log('');
+  }
 }
 
 await main();

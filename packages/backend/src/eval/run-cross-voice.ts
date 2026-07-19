@@ -57,13 +57,15 @@ function deliveredFindings(): { units: readonly Unit[]; findings: readonly Findi
 class DemoCrossVoiceLens implements CrossVoiceLens {
   readonly id = 'culture';
 
-  constructor(private readonly units: readonly Unit[]) {}
-
   deliveredFindingIds(priorFindings: readonly Finding[]): readonly string[] {
     return priorFindings.map((f) => f.findingId);
   }
 
-  async synthesize(priorFindings: readonly Finding[], provider: LlmProvider): Promise<CrossVoiceSynthesis> {
+  async synthesize(
+    units: readonly Unit[],
+    priorFindings: readonly Finding[],
+    provider: LlmProvider,
+  ): Promise<CrossVoiceSynthesis> {
     const payload: LensPromptPayload = {
       instruction: 'Surface patterns across the prior findings; each pattern cites the finding ids it draws on.',
       units: [],
@@ -87,11 +89,11 @@ class DemoCrossVoiceLens implements CrossVoiceLens {
           lens: 'culture',
           noticing: candidate.noticing,
           evidenceLinks: anchorUnits,
-          units: this.units,
+          units,
         }),
       );
     });
-    return { findings, cited: collectCitations(parsed.findings) };
+    return { findings, cited: collectCitations(parsed.findings), uncitedDefects: [] };
   }
 }
 
@@ -109,12 +111,12 @@ function demoProvider(): FakeLlmProvider {
 
 async function main(): Promise<void> {
   const { units, findings: delivered } = deliveredFindings();
-  const lens = new DemoCrossVoiceLens(units);
+  const lens = new DemoCrossVoiceLens();
 
   console.log('Cross-voice cited-or-residual audit — demonstration (fake provider, DEMO lens)\n');
   console.log(`Delivered set (${delivered.length} findings): ${delivered.map((f) => f.findingId).join(', ')}\n`);
 
-  const { findings, audit } = await runCrossVoiceLens(lens, delivered, demoProvider());
+  const { findings, audit } = await runCrossVoiceLens(lens, units, delivered, demoProvider());
 
   console.log(`${findings.length} pattern(s) emitted:`);
   for (const f of findings) {

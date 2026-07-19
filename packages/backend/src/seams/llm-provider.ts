@@ -294,14 +294,17 @@ export function defaultFakeResponse(payload: LensPromptPayload): FakeLensRespons
     if (unitIds.length === 0) {
       return { findings: [] };
     }
-    // `sourceFindingId` names the first prior finding — so the per-voice lens (Human
-    // Meaning) inherits that one voice's unit — while `evidenceUnitIds` still carries the
-    // union for the Aggregate+ lenses. One shape drives every interpretive lens.
+    // One response shape drives every interpretive lens: `sourceFindingId` (singular) names
+    // the first prior finding, so the per-voice lens (Human Meaning) inherits that one
+    // voice's unit; `sourceFindingIds` (plural) names ALL of them, so a cross-voice lens
+    // (Culture Pattern) cites the whole set it drew on; `evidenceUnitIds` carries the unit
+    // union for the still-batched Aggregate lens (Tension). Each lens reads only its field.
     return {
       findings: [
         {
           noticing: 'A pattern runs across the surfaced findings.',
           sourceFindingId: priorFindings[0].findingId,
+          sourceFindingIds: priorFindings.map((f) => f.findingId),
           evidenceUnitIds: unitIds,
         },
       ],

@@ -842,7 +842,16 @@ invariants above). The whole project is the **case study**; its first built vers
         they're exempt"): citation status TRACKS legitimacy rather than being orthogonal to it — comparative
         absence cites the findings it contrasts against; frame-referenced cites the frame; only free-floating cites
         nothing, and that is exactly the kind that should not exist. Not blocking (no cross-voice lens is real
-        yet), but **settle before one is** — it shapes the Culture Pattern prompt. OPEN.
+        yet), but **settle before one is** — it shapes the Culture Pattern prompt. **GATE (Doug, 2026-07-12):
+        Culture Pattern v1 ships ORDINARY FINDINGS ONLY (no absence findings) — but the lens is NOT to be called
+        done until free-floating absence *or presence* is figured out.** Doug's "(or presence)" adds the
+        counterpart, and the asymmetry is the shape of the question: **free-floating PRESENCE** — a pattern no
+        declared frame anticipated — is **anchored** (it cites the findings it is built from), so a reviewer can
+        check it, and surfacing what nobody thought to ask about is arguably the point of qualitative synthesis;
+        probably already legitimate. **Free-floating ABSENCE** has nothing to anchor to, which is precisely why it
+        is unfalsifiable. So resolving this likely means: permit free-floating presence, and either find a
+        legitimate grounding for absence or accept that absence must always be comparative or frame-referenced.
+        OPEN — and now a named gate on the Culture Pattern increment.
       - **O-4 RESIDUAL DISPLAY** (flagged earlier, recording now to be safe): per-lens residual views vs. one
         consolidated review view — a product/implementation choice, unmade.
       All seven OPEN; no answers proposed; not in canon; do not touch the mechanism decision.

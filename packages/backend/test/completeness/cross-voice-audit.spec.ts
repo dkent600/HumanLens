@@ -129,12 +129,13 @@ describe('runCrossVoiceLens — one call over the whole set, then the audit', ()
           makeOrdinaryFinding({ findingId: 'tension:0', lens: 'tension', noticing: 'a tension', evidenceLinks: ['u0'], units }),
         ],
         cited: ['listening:0-0', 'listening:1-0', 'listening:404-0'],
+        uncitedDefects: [],
       }),
   };
 
   it('audits the citations: cited/residual partition + quarantine, findings returned intact', async () => {
     const provider: LlmProvider = { complete: () => Promise.resolve({ text: '{}', stopReason: 'end_turn' }) };
-    const { findings, audit } = await runCrossVoiceLens(stubLens, delivered, provider);
+    const { findings, audit } = await runCrossVoiceLens(stubLens, units, delivered, provider);
 
     expect(findings.map((f) => f.findingId)).toEqual(['tension:0']); // emitted patterns kept as-is
     expect(audit.delivered).toEqual(['listening:0-0', 'listening:1-0', 'listening:2-0']);
