@@ -781,9 +781,47 @@ invariants above). The whole project is the **case study**; its first built vers
       - **O-3 FIXTURE CAPTURE.** When a reviewer finds significant-but-uncited findings (esp. clustered), how
         does that become a recorded test case (the u9 pattern: real miss → named fixture → lens fixed → fixture
         proves it stays fixed) rather than evaporating after the engagement? No capture path exists today.
+      - **O-5 FLAG CONSUMPTION** (surfaced 2026-07-12 by the u4 review — Doug's question: who reads the flag and
+        follows up?). Human Meaning's "worth exploring contextually" flag has **no specified consumer**.
+        `build_approach` says exploration is "left to later lenses" but never names which, and none are built.
+        Candidates, each doing something different: **Culture Pattern** (a *pattern* of hedged/flagged answers is
+        itself signal — one "fine, I guess" means little, six across a team is a finding about candor; the only
+        thing a cross-voice lens can do that a per-voice one can't); **Facilitator Discernment** (its stated job —
+        "what needs human judgment, what is uncertain" — a flagged answer is definitionally that; the natural
+        router); **Action Opening** ("possible follow-up inquiries" — the flag converts cleanly into a question to
+        ask in the room). **The constraint underneath all three:** no downstream lens can RESOLVE a flag — every
+        later lens reads findings, not the room, so it has no more context than Human Meaning did. Lenses can
+        aggregate / route / convert; only a **human** can resolve, because only the facilitator was there. Same
+        shape as the cross-voice residual: the machine makes it visible, a person supplies the judgment — so the
+        flag is a routing-to-human signal, and the architecture should say so rather than gesturing at "later
+        lenses." Also (per the u4 refinement): the flag **carries a reason to follow up, and the reason varies** —
+        a hedged voice gives the follow-up a lead ("they qualified their own affirmative; find out what about"),
+        an "n/a" gives only the fact that nothing was said. Answerable when the Aggregate and Guardrail waves go
+        real. OPEN.
+      - **O-6 LEADS — bounded answers that point at unsaid territory** (surfaced 2026-07-12 by the u7 review;
+        sits beside O-5). Distinct from the flag, and currently unnamed in the architecture: **flag** = the words
+        don't settle *what was said* (u4's self-undercutting hedge; u10/u17's withholding) → unresolved MEANING.
+        **Lead** = the words DO settle what was said, but the speaker *bounded* it, pointing at territory they
+        didn't say → unresolved SCOPE. Exemplar u7: "**my own** manager has been great about flexibility — **that
+        part** works well for me." The contrast markers are AUTHORED, so reading them as pointing at unnamed other
+        parts is reading the words, not importing context (the last eval caught it: "the framing … hints this
+        positive may stand in contrast to other areas that feel less supportive"). It begs a real facilitator
+        question — *"what parts don't work well for you?"* — which is exactly the kind of thing worth surfacing.
+        **Doug's follow-on question: could a lens go FIND the answer in the input?** Two cases, very different:
+        *within-speaker* = legitimate and bounded (same `speaker_token`'s other units — their own context; the
+        architecture already tracks speaker identity for this; usually nothing to find in single-comment survey
+        data, often something in interviews); *cross-speaker* = DANGEROUS — matching one speaker's unnamed "other
+        parts" to another's grievance is inference by association, fabricating a connection the speaker never made
+        and misattributing one person's experience to another; breaks anchoring in a way that is hard to see in
+        output. Structurally **Human Meaning cannot do either** (per-voice by design, cross-voice reading
+        prohibited) → this belongs to the Aggregate / Guardrail / Openings waves, overlapping O-5, Action
+        Opening's "possible follow-up inquiries," and Discernment's "questions to ask." **Deliberately NOT acted
+        on now:** one unvalidated prompt change (the flag/stopping fix) is already pending an eval; stacking a
+        second ("also surface what's implied but unsaid") risks reopening the over-reach just closed, and the
+        model already does this well unprompted. OPEN.
       - **O-4 RESIDUAL DISPLAY** (flagged earlier, recording now to be safe): per-lens residual views vs. one
         consolidated review view — a product/implementation choice, unmade.
-      All four OPEN; no answers proposed; not in canon; do not touch the mechanism decision.
+      All six OPEN; no answers proposed; not in canon; do not touch the mechanism decision.
     - *Item 5 — Mechanism — ADOPTED 2026-07-12 (was the TOP-PRIORITY open decision).* The adopted mechanism:
       the voice is the unit of work AND of accounting for the per-voice lenses; both
       per-voice lenses on the same mechanism; first embodiment = synchronous parallel fan-out (one call per
@@ -799,10 +837,11 @@ invariants above). The whole project is the **case study**; its first built vers
       per-voice semantics; output tokens identical under both options and dominate cost, while prompt caching
       cuts the overhead batching would save; Aggregate reads compact findings → chunking is scale-contingent and
       reuses none of voice-batch reconciliation, so consistency doesn't tip the choice.
-    - *Item 6 — u9: RESOLVED per the adoption (2026-07-12).* Decision half CLOSED — mechanism adopted (fan-out).
-      Defect half → **fix-decided / implementation-pending**: the fake-empty-drop seam fix is the committed first
-      task; F1-a (Falsifier 1) PASSED 50/50 on the real model (u9 answered every run under fan-out), so the
-      structural-impossibility claim held empirically. The defect fully closes when the seam fix lands and ships.
+    - *Item 6 — u9: CLOSED 2026-07-12 (both halves).* Decision half closed at adoption (fan-out). **Defect half
+      CLOSED on ship:** the fake-empty-drop seam fix, the production orchestrator + ledger, and the real-lens
+      wiring all landed and were committed; F1-a passed 50/50 on the real model (u9 answered every run under
+      fan-out). The voice that started this work — silently dropped from a batched Human Meaning call — now
+      carries a `(run_id, voice_id)` terminal record on every run, and a drop can no longer be silent.
     - *Item 7 — Falsifiers (epistemics of the proposal).* (a) two-chat convergence = weak evidence (above).
       (b) Falsifier 1: once per-voice calls exist, repeated u9 re-runs must show the silent drop is STRUCTURALLY
       IMPOSSIBLE, not merely rarer — any unaccounted voice under fan-out falsifies the analysis. (c) Falsifier 2:
@@ -1133,6 +1172,107 @@ invariants above). The whole project is the **case study**; its first built vers
         violation AND is not retried — the guard against a future change turning enforcement into retry pressure.
         Relayed with the real-lens wiring task; interface shape (where the declaration lives, whether the
         violation sits on the ledger record or beside it, how it surfaces) is Claude Code's to propose and report.
+      - *BUILD — real Listening / Human Meaning WIRED onto the orchestrator, COMMITTED 2026-07-12. The adopted
+        completeness design now runs on the real path.* Both per-voice lenses stopped calling the model directly:
+        one call per voice through the production fan-out, four-state `(run_id, voice_id)` ledger, retry/
+        termination, provenance enforcement; the orchestrator stayed lens-agnostic. **Invariant declaration:**
+        optional `answeredEmptyLegitimate?(voiceId): boolean` on `VoiceOperation` — absent → always legitimate;
+        Listening returns `unit.content.trim() === ''` (legitimate only for non-authored emptiness); Human Meaning
+        returns `false` (never). Consulted generically — no lens-specific branch. **Violation lives ON the ledger
+        record** (`TerminalObservation.invariantViolation?` → nullable `invariant_violation` column) beside the
+        truthful `answered-empty` state; surfaced via `ledger.invariantViolations(runId)` and printed by the eval
+        harness (per-voice state/reason, a flag on violated records, per-run count). Property (500 seeded runs):
+        declared-illegitimate empty → answered-empty + violation + **exactly one call**; valid voices unaffected —
+        the guard that enforcement never becomes retry pressure. **Structural changes (reported, accepted):**
+        ledger module SPLIT — `seams/run-ledger.ts` interface only (sqlite-free), `seams/sqlite-run-ledger.ts`
+        durable, `engine/completeness/in-memory-run-ledger.ts` the engine default — keeps `node:sqlite` out of the
+        engine's import graph (engine depends on no database); finding-id format `listening:0` → `listening:0-0`
+        (`${lens}:${voiceIndex}-${localIndex}`) for globally-unique ids assigned outside any batched response;
+        malformed/prose on a natural finish now → delivered-but-unusable (truthful accounting) rather than a silent
+        `[]`; `Lens.run()` uses an ephemeral in-memory ledger, the eval/real path passes a durable Sqlite one.
+        **Cardinality CONFIRMED — no cap** (owner-chat held the commit to check): multiple findings per unit
+        (Listening's splitting rule, `build_approach` L577, the u6 case) and multiple noticings per voice (Human
+        Meaning) both still supported; the `localIndex` suffix carries them. Human Meaning's documented cap remains
+        one *unit anchor per finding*, not one finding per voice — not conflated. Cross-source support correctly
+        moved to the Aggregate wave (Listening is per-voice now; recurrence was always Culture Pattern's job).
+        Cross-voice lenses stay batched pending the audit task. Real-model run not yet done (fake-path eval: 25
+        voices all accounted, u9 present, 0 violations) — a real eval is Doug's to run.
+      - *EVAL — Listening on the PRODUCTION path, real model (`claude-opus-4-8`), 2026-07-12: CLEAN.* First
+        real-model run of a lens through the fan-out orchestrator + ledger. **Ledger: 25/25 voices
+        answered-with-findings, 0 invariant violations** — totality on the real production path, not just in the
+        property suite. **26 findings for 25 voices — the cardinality question settled behaviorally:**
+        `listening:6-0` ("The new onboarding process is a real improvement") and `listening:6-1` ("the third-floor
+        kitchen has been out of order for weeks") both anchor eval-u6, so the structural splitting rule
+        (`build_approach` L577) survived the per-voice rewiring, with spans correctly trimmed (the ", and"
+        connective dropped, casing untouched) per "the surfaced *span*, not necessarily the whole unit." The
+        commit was held on exactly this question; now demonstrated, not asserted. **Discipline, not just
+        capability:** only the genuinely-unrelated pair split — u15 (three sentences, one bound causal arc), u24
+        (one narrative), u11 (semicolon, one theme), u2 (causally bound) all correctly stayed single, so the model
+        is splitting on the structural rule, not on punctuation/sentence count. **Fidelity intact across the
+        rewiring:** u16's run-on preserved with no connective or casing repair; u10 "No comment." and u17 "n/a"
+        surfaced as authored utterances, unclassified; u4 surfaced thinly; u20/u21 surfaced without editorializing;
+        translations correct on u5, u8 and the mixed u13 (verbatim keeps the mixed original, translation renders
+        the whole, source language named). **Expected consequence now visible:** every finding shows
+        `1 units / 1 sources` — cross-source support has moved to the Aggregate wave under per-voice fan-out.
+        Listening = validated on the production path. Companion run still to do: `eval -- meaning` (the lens where
+        u9 originally vanished, and the one declaring answered-empty never legitimate — its violation count is the
+        more interesting number).
+      - *EVAL — Human Meaning on the PRODUCTION path, real model, 2026-07-12: totality clean, ONE calibration
+        regression (blocker).* **Ledgers: Listening 25/25, Human Meaning 26/26 answered-with-findings, 0 invariant
+        violations on either.** The 26 is correct — Meaning's unit of work is the *Listening finding*, so u6's
+        split propagated (`listening:6-0`/`6-1` → `meaning:6-0` onboarding, `meaning:7-0` kitchen, both anchoring
+        eval-u6): the Evidence funnel working end-to-end on the production path. **Multi-noticing CONFIRMED on the
+        real model** (previously only reported): u2 → three noticings (`2-0/2-1/2-2`), u16 → three, pairs on
+        u3/u8/u9/u11/u12/u22 — 36 findings from 26 calls, no cap. **u9 closed in output, not inference:**
+        `meaning:10-0` ("a fear that being honest about a health condition carried a hidden cost… a dignity
+        concern about being sidelined without explanation") + `10-1` (trust erosion). Restraint controls held on
+        u20 (flagged, "not carried by the words themselves"), u10/u17 (exact flag phrasing), u21 (low-stakes
+        satisfaction, no manufactured concern). *Legibility note:* Meaning ids now index the Listening finding,
+        so `meaning:10-0` is u9 — ids no longer track unit numbers (expected under the funnel).
+        **u4 restraint slippage — BLOCKER, since RESOLVED (see the post-fix eval below).** "Things are fine, I
+        guess." across three evals: (1) pre-flag-rule → "not feeling safe or moved to say more" (judged
+        over-reach); (2) post-rule → "muted, qualified reassurance whose fuller meaning is not carried by the words
+        alone — worth exploring in context" (correct restraint; recorded as evidence the rule changed behavior);
+        (3) NOW → "tempered, hedged quality… suggests something less than genuine ease — a guarded or
+        non-committal stance that may hold back a fuller picture, possibly reflecting **reservation or a
+        reluctance to fully engage with the question**." Split fairly: naming the hedge is GROUNDED ("I guess" is
+        authored, so reading it is reading the words), but *"reluctance to fully engage with the question"* imputes
+        a stance toward the SURVEY that is nowhere in the words — the imputation the flag rule exists to prevent,
+        and `build_approach` forbids characterizing the answer. Partial slippage, not full reversal. **Probable
+        cause:** per-voice isolation gave the model far more room — noticings across this run are markedly longer
+        and more elaborated than eval 2's, which bought real depth (u9, u15, u24 richer and still faithful) AND
+        this over-extension. Calibration trade to resolve, not a mechanism defect.
+      - *EVAL — Human Meaning post-fix, real model, 2026-07-12: BLOCKER CLEARED, no cost.* The prompt fix (widened
+        flag trigger + ground-the-flag + stopping discipline) validated on the real model. **u4 FIXED —** "The
+        speaker offers a reassurance about things being fine but attaches a qualifier to it, which unsettles the
+        plain reading — the hedge is the notable part here… best understood in context, with that qualifier as the
+        lead for a follow-up." Names the grounded observation, defers only the unresolved part, hands the
+        facilitator the hedge as the lead; no motive, no survey-stance, no "non-committal." Matches Doug's reading
+        that "I guess" is meaningful content pointing at something context would resolve. **u7's LEAD SURVIVED —
+        the top risk, resolved:** `meaning:8-1` "The framing 'my own manager' and 'that part' quietly marks a
+        boundary — praise held to one specific relationship or aspect, which may leave open that other parts do
+        not work as well." The stopping discipline did NOT suppress it; the noticing now cites the authored
+        contrast markers as its grounding, so the discipline worked *for* it (O-6 exemplar intact). **No
+        over-flagging:** u18 and u14 read normally (u14 notes what's unspecified without flagging — lead
+        behavior, correct); u10/u17 in the withheld form; u20 flagged with no manufactured disengagement; u21
+        benign. **Depth retained:** 33 findings vs. 36 pre-fix — the drop is unfounded clauses, not substance;
+        u15 gained a strong second noticing ("who they 'used to' be… a diminished sense of self at work," grounded
+        in "used to"), u24 gained a belonging note, u9 consolidated into one comprehensive reading, u2 went 3→1
+        covering the same ground more coherently. **Ledgers 25/25 and 26/26, 0 violations.** ⚠ MINOR WATCH (not a
+        blocker): the withheld-form flag now opens "Nothing was said here…" — for "No comment." something *was*
+        said (Listening surfaces it as authored), and the doc forbids characterizing the answer. The qualifier "in
+        a way that settles its own meaning" rescues it as scoped rather than dismissive, but it is a half-step
+        toward the forbidden characterization — watch next run, or close with a one-word tweak ("The words here
+        don't settle a meaning…"). **RESOLVED 2026-07-12** by a one-clause prompt tweak (bullet 2's withheld path
+        reframed from "there is only the fact that nothing was said" to what the words afford) + verifying real
+        eval: u10 "The words here give nothing to ground a reading on; this is an answer whose meaning is best
+        understood in context, worth exploring further, but not readable on its own"; u17 likewise. No
+        characterization of the answer. Nothing regressed — u4 still correct and crisper ("the hedge unsettles the
+        very claim it attaches to… the thread worth following up"), u7's lead survived (folded into one noticing:
+        "'my own manager' and 'that part' may quietly signal that this good experience is localized"), u20/u21/
+        u18/u14 unchanged, ledgers 25/25 + 26/26, 0 violations. (Noticing counts vary run to run — 35/33/36 across
+        three runs, u5 1→3, u3 2→1 — stochastic distribution, not behavior change.) **Method note:** caught by eye → prompt fix → verified by real eval — the
+        standing lens-validation method working end to end, second time on this lens.
 - Learning loop mechanism (S5-2): human-authored prompt edits; prompts as
   versioned, engagement-aware artifacts. Auto-vs-manual unresolved.
 - Scope of a learned edit: engagement-scoped vs graduates to baseline

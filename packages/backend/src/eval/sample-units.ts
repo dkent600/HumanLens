@@ -27,7 +27,13 @@ import type { Unit } from '../domain/types.js';
 // Each of the eight has a clean single-category occasion; u2/u9 stay bundled ON PURPOSE
 // (they probe multi-category surfacing — one voice yielding several noticings).
 // RESTRAINT controls — correct behavior is NOT to manufacture meaning:
-//   u4  mildly hedged ("things are fine, I guess") — must NOT become "lack of safety"
+//   u4  NAMED control — SELF-UNDERCUTTING HEDGE ("Things are fine, I guess."). Expected Human Meaning
+//       behavior: FLAG, grounded in the hedge — the speaker qualified their own affirmative, so the
+//       plain reading is not to be taken at face value and something is left for context to resolve
+//       (worth exploring, the hedge as the lead). It must NOT read a concrete concern into it ("lack
+//       of safety" is out) AND must NOT impute a motive, intent, or stance toward the survey/question
+//       ("reluctance to fully engage", "reservation" are out — that was the production-path regression
+//       this control guards). Every clause of the noticing must trace to the words.
 //   u17 flag-class ("n/a") — must stay flag-for-exploration, not interpreted
 //   u20 neutral/administrative — no human-meaning category; must not be read into
 //   u21 positive low-stakes — benign; must not be twisted into a hidden concern
@@ -61,6 +67,8 @@ export const SAMPLE_UNITS: readonly Unit[] = [
   clearedUnit(1, 'spk-b', 'When I raise something with leadership, I genuinely feel heard and they act on it.'),
   clearedUnit(2, 'spk-c', 'I\'ve heard remarks about my accent in meetings, and it makes me wonder whether I belong.'),
   clearedUnit(3, 'spk-d', 'I\'ve stopped putting in extra effort — it just goes unnoticed.'),
+  // u4 — NAMED control (self-undercutting hedge). Human Meaning must FLAG (grounded in the hedge),
+  // never impute motive/intent/survey-stance, never read a concrete concern. See the restraint note above.
   clearedUnit(4, 'spk-e', 'Things are fine, I guess.'),
   clearedUnit(5, 'spk-f', 'No me siento seguro compartiendo lo que realmente pienso en las reuniones.', 'es'),
   clearedUnit(6, 'spk-g', 'The new onboarding process is a real improvement, and the third-floor kitchen has been out of order for weeks.'),
