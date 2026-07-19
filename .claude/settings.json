@@ -1,12 +1,25 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(grep -vE \"^$|^>|npm notice\")",
+      "Bash(sed -i \"s|Both tiers' test suites cite these|Both the eval-side and production-side suites cite these|\" packages/backend/src/engine/completeness/properties.ts)",
+      "Bash(sed -i \"s|before adoption; the eval-tier copy|before adoption; the eval-side copy|\" packages/backend/src/engine/completeness/terminal-state.ts)",
+      "Bash(sed -i \"s|one routing rule, two tiers\\\\.|one routing rule, eval-side and production-side.|\" packages/backend/src/eval/completeness/model-call.ts)",
+      "Bash(sed -i \"s|The REAL per-voice model bridge \\(eval-tier\\)|The REAL per-voice model bridge \\(eval-side\\)|\" packages/backend/src/eval/completeness/real/anthropic-voice-model.ts)",
+      "Bash(sed -i \"s|production routeLlmResponse \\(one routing rule, two tiers\\); only the richer eval|production routeLlmResponse \\(one routing rule, eval-side + production-side\\); only the richer eval|\" packages/backend/src/eval/completeness/voice-call-adapter.ts)",
+      "Bash(node dist/eval/run-lens.js meaning)",
+      "Bash(echo \"lint exit $?\")"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {
         "hooks": [
           {
             "type": "command",
-            "statusMessage": "Checking memory pointer...",
-            "command": "node -e \"const fs=require('fs'),path=require('path');const p='.claude/settings.local.json';const eq=(a,b)=>{a=path.resolve(a);b=path.resolve(b);return process.platform==='win32'?a.toLowerCase()===b.toLowerCase():a===b;};let msg='';try{const s=JSON.parse(fs.readFileSync(p,'utf8'));const d=s.autoMemoryDirectory;if(!d)msg='autoMemoryDirectory is not set';else if(!eq(d,'memory'))msg='autoMemoryDirectory ('+d+') does not point to the in-repo memory/ folder ('+path.resolve('memory')+')';else if(!fs.existsSync(d))msg='autoMemoryDirectory folder is missing: '+d;}catch(e){msg='cannot read '+p+' ('+e.message+')';}if(msg)console.log(JSON.stringify({systemMessage:'⚠ Memory pointer check FAILED: '+msg+'. Re-add the autoMemoryDirectory line to .claude/settings.local.json so memory writes into the in-repo memory/ folder.',hookSpecificOutput:{hookEventName:'SessionStart',additionalContext:'Memory pointer check failed: '+msg+' The agent should offer to restore the autoMemoryDirectory pointer in .claude/settings.local.json.'}}));\""
+            "command": "node -e \"const fs=require('fs'),path=require('path');const p='.claude/settings.local.json';const eq=(a,b)=>{a=path.resolve(a);b=path.resolve(b);return process.platform==='win32'?a.toLowerCase()===b.toLowerCase():a===b;};let msg='';try{const s=JSON.parse(fs.readFileSync(p,'utf8'));const d=s.autoMemoryDirectory;if(!d)msg='autoMemoryDirectory is not set';else if(!eq(d,'memory'))msg='autoMemoryDirectory ('+d+') does not point to the in-repo memory/ folder ('+path.resolve('memory')+')';else if(!fs.existsSync(d))msg='autoMemoryDirectory folder is missing: '+d;}catch(e){msg='cannot read '+p+' ('+e.message+')';}if(msg)console.log(JSON.stringify({systemMessage:'⚠ Memory pointer check FAILED: '+msg+'. Re-add the autoMemoryDirectory line to .claude/settings.local.json so memory writes into the in-repo memory/ folder.',hookSpecificOutput:{hookEventName:'SessionStart',additionalContext:'Memory pointer check failed: '+msg+' The agent should offer to restore the autoMemoryDirectory pointer in .claude/settings.local.json.'}}));\"",
+            "statusMessage": "Checking memory pointer..."
           }
         ]
       }
