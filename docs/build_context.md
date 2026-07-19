@@ -819,9 +819,33 @@ invariants above). The whole project is the **case study**; its first built vers
         on now:** one unvalidated prompt change (the flag/stopping fix) is already pending an eval; stacking a
         second ("also surface what's implied but unsaid") risks reopening the over-reach just closed, and the
         model already does this well unprompted. OPEN.
+      - **O-7 ABSENCE FINDINGS — where does the expectation come from?** (surfaced 2026-07-12 by Doug's question:
+        *"'no one mentioned psychological safety' is a finding of the lens? The lens was looking for someone to
+        mention it and didn't find one?"*). `build_approach` names absence findings, exempts them from the
+        anchoring rule ("the dog that did not bark"), gives two examples — and says **nothing about where the
+        expectation originates**. **Why it matters:** anchoring is the guard that makes interpretation checkable;
+        absence findings are exempt from it *by nature*, so if the expectation behind one is also ungrounded the
+        finding is **unfalsifiable** — nothing to check it against, and no way for a reviewer to distinguish a real
+        silence from the model's own notion of what a healthy workplace conversation contains. That is the
+        fluent-guess-indistinguishable-from-evidence failure the design rejects everywhere else, with the one check
+        removed. **Three kinds, and the doc's two examples are not the same kind:** (1) **comparative absence** —
+        "leaders spoke of trust while front-line voices did not": grounded in what IS present, cites the leader
+        findings, compares across a segment attribute; fully checkable. (2) **frame-referenced absence** — "no one
+        mentioned psychological safety": meaningful only against a DECLARED frame, and the architecture already has
+        such frames (Inclusity's survey domains + ADKAR, named as Objective-lens calibration targets); checkable —
+        "these were the frame; this one doesn't appear." (3) **free-floating absence** — the model decides on its
+        own that something *should* have been mentioned: unanchored, undeclared, unfalsifiable. **The principle the
+        answer follows** is Listening's own: legitimate context enters the system *declared by humans*, never
+        silently inferred — so an absence finding is legitimate when grounded in a comparison with what's present
+        or measured against a declared frame; free-floating is inference without an anchor. **Correction to the
+        cross-voice audit's treatment** (supersedes the owner-chat's earlier "absence findings cite nothing, so
+        they're exempt"): citation status TRACKS legitimacy rather than being orthogonal to it — comparative
+        absence cites the findings it contrasts against; frame-referenced cites the frame; only free-floating cites
+        nothing, and that is exactly the kind that should not exist. Not blocking (no cross-voice lens is real
+        yet), but **settle before one is** — it shapes the Culture Pattern prompt. OPEN.
       - **O-4 RESIDUAL DISPLAY** (flagged earlier, recording now to be safe): per-lens residual views vs. one
         consolidated review view — a product/implementation choice, unmade.
-      All six OPEN; no answers proposed; not in canon; do not touch the mechanism decision.
+      All seven OPEN; no answers proposed; not in canon; do not touch the mechanism decision.
     - *Item 5 — Mechanism — ADOPTED 2026-07-12 (was the TOP-PRIORITY open decision).* The adopted mechanism:
       the voice is the unit of work AND of accounting for the per-voice lenses; both
       per-voice lenses on the same mechanism; first embodiment = synchronous parallel fan-out (one call per
@@ -1242,6 +1266,37 @@ invariants above). The whole project is the **case study**; its first built vers
         cause:** per-voice isolation gave the model far more room — noticings across this run are markedly longer
         and more elaborated than eval 2's, which bought real depth (u9, u15, u24 richer and still faithful) AND
         this over-extension. Calibration trade to resolve, not a mechanism defect.
+      - *BUILD — cross-voice cited-or-residual AUDIT (machinery) LANDED 2026-07-12. The last unimplemented piece
+        of the adopted completeness design.* Shape change: **`LensResponseCandidate.sourceFindingIds?`** (plural)
+        added for the cross-voice path — a pattern draws on many findings; Human Meaning's **singular**
+        `sourceFindingId` and its structural single-unit slice are untouched (a lens uses one field or the other,
+        never both). `engine/completeness/cross-voice-audit.ts`: `computeCitationAudit(delivered, cited)` →
+        `{delivered, cited, residual, quarantined, coverageRatio}` — pure and total; `residual = delivered − cited`
+        exactly; a cited id not in delivered is **quarantined** (hallucinated, covers nothing — P3 discipline, one
+        path over); `cross-voice-lens.ts` holds the union step + `CrossVoiceLens` + `runCrossVoiceLens`.
+        Surfacing deliberately minimal — `npm run cross-voice` prints residual + ratio the way `run-lens` prints
+        the ledger, **deferring O-4** (per-lens vs. consolidated review view). Tests: partition property over 2,000
+        seeded runs (every delivered id in exactly one of cited/residual, never neither/both; hallucinated ids
+        quarantined and never counted; ratio = cited/delivered) + targeted quarantine/empty-set/dedupe/integration/
+        formatter. **Both load-bearing rules honored:** a non-empty residual is expected (nothing treats it as
+        failure/error/retry — the audit returns diagnostics and decides nothing), and the audit is never a model
+        target (the demo prompt says "cite the finding ids it draws on," never "exhaustively" or any coverage
+        goal). **Edge accepted as designed: quarantine the CITATION, not the finding** — a pattern citing a mix of
+        valid + hallucinated ids is kept (dropping a real pattern to punish one stray id would lose signal).
+        **NAMED (owner-chat, this session): C1 — cross-voice coverage partition.** The partition property is the
+        cross-voice counterpart to P1's per-voice totality and was previously tested-but-uncitable (Claude Code
+        rightly declined to invent a registry id): *every delivered finding ends in exactly one of cited or
+        residual — never neither, never both; hallucinated citations are quarantined and cover nothing.* P1–P9 stay
+        per-voice; C1 is the cross-voice half, so the registry now carries both halves of the adopted design.
+        **FOLLOW-UP for when a real cross-voice lens lands (not built now — nothing to enforce against):** the
+        "pattern that cites nothing" edge has a principled answer from the existing `finding_kind` distinction —
+        an **ordinary** cross-voice finding citing zero upstream findings is a **defect** (a pattern is by
+        definition built across findings; one naming none has no traceable basis) and should be recorded and
+        surfaced, never retried — the cross-voice analogue of the per-voice invariant violation; an **absence**
+        finding is the exempt case, *subject to O-7* (which narrows the exemption: comparative and
+        frame-referenced absences do cite; only free-floating ones cite nothing, and those shouldn't exist). This
+        also closes a vacuity risk: a lens that simply never emits citations would show 0% coverage with
+        everything in residual, and the audit would *look* like it was working while catching nothing.
       - *EVAL — Human Meaning post-fix, real model, 2026-07-12: BLOCKER CLEARED, no cost.* The prompt fix (widened
         flag trigger + ground-the-flag + stopping discipline) validated on the real model. **u4 FIXED —** "The
         speaker offers a reassurance about things being fine but attaches a qualifier to it, which unsettles the

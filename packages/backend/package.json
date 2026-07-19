@@ -11,6 +11,7 @@
     "test": "vitest run",
     "eval": "tsc -b && node --env-file-if-exists=.env dist/eval/run-lens.js",
     "completeness": "tsc -b && node dist/eval/completeness/run-completeness.js",
+    "cross-voice": "tsc -b && node dist/eval/run-cross-voice.js",
     "f1a": "tsc -b && node --env-file-if-exists=.env dist/eval/completeness/real/f1a-silent-drop.js",
     "f1b": "tsc -b && node --env-file-if-exists=.env dist/eval/completeness/real/f1b-star.js",
     "f2": "tsc -b && node --env-file-if-exists=.env dist/eval/completeness/real/f2-cache.js",

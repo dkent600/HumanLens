@@ -200,6 +200,16 @@ export interface LensResponseCandidate {
    * `evidenceUnitIds`); each lens ignores the field it does not use.
    */
   readonly sourceFindingId?: string;
+  /**
+   * The findingIds a CROSS-VOICE pattern (Culture Pattern, Tension, …) is built on — PLURAL,
+   * because a pattern draws on MANY prior findings at once. This is the citation the
+   * cited-or-residual audit reads: orchestration code unions these across a lens's emitted
+   * findings, subtracts from the delivered set, and surfaces whatever was never cited as a
+   * residual (build_implementation.md, "Cross-voice lenses — cited-or-residual audit").
+   * Distinct from the singular `sourceFindingId` (Human Meaning's structural single anchor),
+   * which is deliberately left untouched. A lens uses one field or the other, never both.
+   */
+  readonly sourceFindingIds?: readonly string[];
   readonly evidenceUnitIds: readonly string[];
 }
 
