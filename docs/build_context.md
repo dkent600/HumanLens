@@ -852,8 +852,64 @@ invariants above). The whole project is the **case study**; its first built vers
         is unfalsifiable. So resolving this likely means: permit free-floating presence, and either find a
         legitimate grounding for absence or accept that absence must always be comparative or frame-referenced.
         OPEN — and now a named gate on the Culture Pattern increment.
-      - **O-4 RESIDUAL DISPLAY** (flagged earlier, recording now to be safe): per-lens residual views vs. one
-        consolidated review view — a product/implementation choice, unmade.
+        **RESOLVED 2026-07-12 (design reasoning, no build/eval).** Terminology settled first: a **frame** is a
+        *declared list of things the lens was checking for* — Objective's ten survey domains + five ADKAR
+        dimensions are the architecture's one existing frame (human-chosen, written down, same every run). With a
+        frame, "this didn't come up" is checkable by anyone; without one, "no one mentioned X" is the model
+        picking X from infinite possibilities and nobody can tell why X. **The deficiency in unprompted absence is
+        ARBITRARY SELECTION, not unverifiability** — "X was never mentioned" *is* checkable against the corpus;
+        what can't be checked is why X was the thing looked for. Two acts hide in one claim: *noticing a silence*
+        (a fact about the corpus, mechanically checkable) and *judging it significant* (interpretive, where the
+        expectation problem lives).
+        **THE RESOLUTION — permission tracks the GROUNDING, not the wave:**
+        (a) **Free-floating PRESENCE: permitted.** Selection isn't arbitrary — the data selected it; the citations
+        are both the evidence and the justification for why *this* pattern and not another. Surfacing what nobody
+        thought to ask about is arguably the point of qualitative synthesis. Presence carries its own selection
+        rationale; absence can't.
+        (b) **Absence GROUNDED by a declared frame** (→ Objective, which has one) **or by corpus comparison**
+        ("leaders spoke of trust while front-line voices did not" — the corpus supplies the expectation): permitted
+        where the lens has the grounding. **Culture Pattern has only the second**, so comparative absence remains
+        available to it; it has no frame, so frame-referenced absence is Objective's.
+        (c) **UNPROMPTED absence (neither frame nor comparison): DEFERRED to a possible final, alone-in-its-wave
+        lens** (Doug's proposal — better than the owner-chat's initial "prohibit"). Rationale, and the isolation is
+        structural rather than organizational: an unprompted absence is a claim about the WHOLE corpus ("nowhere in
+        any of this"), and only a lens that has seen everything is entitled to make it — every existing lens sees a
+        slice. A terminal position also makes the negative check strong (confirm no finding *substantively* covers
+        X — against the COMPLETE set incl. Objective's domain mappings, which guards the false-by-construction case:
+        declaring "psychological safety" absent when u5 is precisely about not feeling safe to speak), and it
+        quarantines contamination (a terminal finding seeds nothing downstream; no pattern compounds from it, blast
+        radius is one item on a facilitator's page). **Caveats for when it's considered:** this lens would be the
+        one place emitting findings with no anchoring and no declared frame — outside the guarantee everything else
+        rests on — so it should be NARROW (this and little else, keeping the exemption visibly scoped rather than
+        becoming a general "model observations" channel); it interacts with O-1 (provenance must not lie), these
+        being the least-evidence-anchored findings in the system; and the earlier proposed safeguards stand as
+        candidates — mark the grounding kind, require the negative check, cap the count per run, never client-safe
+        by default. Not built; wave order today ends at Openings and no terminal wave exists.
+        **Why the owner-chat's initial "prohibit" was wrong:** it proved arbitrariness and then slid to exclusion
+        without justifying the step — arbitrary selection is a reason for LOW CONFIDENCE, not exclusion, and the
+        system's posture is "AI surfaces, humans decide" (the residual makes exactly this trade). Also, a declared
+        list can only find what Inclusity already thought to ask about; the absence no human anticipated is the
+        highest-value case if it lands. The three real failure modes that justified *structure* rather than
+        prohibition: false-by-construction absences, absence as smuggled prescription (the model's frame quietly
+        becoming the facilitator's agenda), and volume dilution.
+        **GATE CLEARED: Culture Pattern v1's ordinary-findings-only scope is CORRECT AS PERMANENT DESIGN**, not a
+        temporary limitation — comparative absence may be added to it later; unprompted absence never belongs to it.
+      - **O-4 RESIDUAL DISPLAY** — per-lens residual views vs. one consolidated review view; product/implementation
+        choice, unmade. **Now has real content from the first Culture Pattern run (2026-07-12):** finding-granular
+        residual produces a poor artifact — 34 items of which ~26 were redundant (Meaning findings on voices
+        already covered via their Listening finding). **Answer-shape: three bands, not a binary** — (1) voice
+        fully uncovered (the real outliers — u16, u19, u14, u4…), shown first; (2) voice partly covered with
+        distinct unabsorbed content (u6's kitchen half, cited onboarding half — note pure voice-granularity would
+        wrongly call u6 "covered" and hide this); (3) redundant finding on a covered voice, folded away. ~34 → ~8
+        in the reviewer's default view, nothing discarded. Coverage ratio likely voice-based too. Also unresolved:
+        the docs currently specify finding-granular residual ("every upstream finding is either cited or in the
+        residual"), so adopting bands means amending the spec, not just the display. **PLUS (from the citation-
+        asymmetry resolution, same date): SCOPE, not just granularity.** Per-lens residual measures against the
+        wrong expectation — Meaning findings are largely *for* Objective/Discernment, so counting them as
+        "uncovered by Culture Pattern" overstates the miss. The meaningful question is pipeline-level — *was this
+        finding ever used, by any lens?* — favouring a **consolidated end-of-pipeline residual** as the truthful
+        artifact, with per-lens audits as diagnostics beneath it. So O-4 now has two axes to settle: **scope**
+        (per-lens vs. consolidated) and **granularity** (finding / voice / three-band).
       All seven OPEN; no answers proposed; not in canon; do not touch the mechanism decision.
     - *Item 5 — Mechanism — ADOPTED 2026-07-12 (was the TOP-PRIORITY open decision).* The adopted mechanism:
       the voice is the unit of work AND of accounting for the per-voice lenses; both
@@ -1306,6 +1362,123 @@ invariants above). The whole project is the **case study**; its first built vers
         frame-referenced absences do cite; only free-floating ones cite nothing, and those shouldn't exist). This
         also closes a vacuity risk: a lens that simply never emits citations would show 0% coverage with
         everything in residual, and the audit would *look* like it was working while catching nothing.
+      - *BUILD — CULTURE PATTERN v1, the first REAL cross-voice lens, 2026-07-12 (ordinary findings only).* Third
+        real lens after Listening and Human Meaning, and the first to read the whole finding set and exercise the
+        cited-or-residual audit on genuine output. **Read scope CONFIRMED (owner-chat held the commit to ask):**
+        the Listening-only delivered set in the first report was an **eval-harness shortcut only** — production
+        already delivers the full prior-wave pool, and the `culture` runner now does too (**50 delivered =
+        Listening + Human Meaning**), matching the wave model (Aggregate reads all earlier waves from the shared
+        pool, resolved `noticing ?? translation ?? verbatim`). This also keeps the audit honest: the delivered set
+        defines what the audit measures, so Meaning findings must be in it or they'd be neither cited nor residual
+        — outside the accounting entirely. **Prompt constraints (all correctly negative):** cite in
+        `sourceFindingIds` only the findings a pattern genuinely draws on — "do NOT try to cite everything, do NOT
+        treat coverage as a goal"; patterns must be genuinely across voices ("two or more distinct prior findings;
+        restating a single voice is not a pattern"); comparative outputs cite BOTH sides (no asserting something is
+        missing with nothing to cite — no absence findings in v1); support derived, never asserted. Findings are
+        ordinary interpretive (`noticing`, `verbatim: null`), ids `culture:0…` sequential (one call, not fan-out),
+        anchor inherited from the union of units behind the cited findings. **Zero-citation defect —
+        surfaced, NOT emitted:** a pattern citing no *existing* prior finding (empty `sourceFindingIds`, or all
+        hallucinated, or cited findings carrying no in-scope unit) never becomes a finding — it can't be anchored,
+        and an unanchored interpretive finding would break the anchoring rule — but it isn't silently discarded:
+        it goes to `uncitedDefects`, which the eval harness prints. Correctly DIFFERENT from the per-voice
+        invariant violation (there the finding stays truthful and the violation rides alongside; here the thing
+        can't be emitted at all). A valid pattern with one stray hallucinated id is kept, only the bad id
+        quarantined. Together these close the vacuity risk: a never-citing lens surfaces as defects, not as a
+        healthy-looking 0%-coverage residual. **CARRY-FORWARD (recorded so the wrong version isn't built later):**
+        the "two or more" constraint is **prompt guidance only**, not code-enforced. If it is ever enforced, count
+        **≥2 distinct VOICES** (via the speaker behind the anchored units), **not ≥2 findings** — Human Meaning
+        emits multiple findings per voice (`meaning:2-0`, `2-1` both from u2), so a two-finding citation can be one
+        voice twice, which is exactly the "restating a single voice" the constraint exists to prevent. Deviations
+        reported and accepted: `synthesize`/`runCrossVoiceLens` gained a `units` param (a real cross-voice lens
+        needs units to anchor and derive support) and `uncitedDefects` on the result; `computeCitationAudit`
+        untouched. Eval path `npm run eval -- culture` prints findings + audit + defect count. *Note:*
+        `defaultFakeResponse` cites all priors, so the fake shows 100% coverage / 0 residual and never exercises
+        the residual path — the first genuine look at a real residual is Doug's real-model run. **GATE STANDING
+        (O-7): Culture Pattern is NOT done until free-floating absence/presence is figured out.**
+      - *EVAL — CULTURE PATTERN, first real cross-voice run (real model), 2026-07-12. Patterns good; the AUDIT
+        surfaced a spec gap.* **6 patterns, 0 uncited-pattern defects, all built across multiple distinct voices.**
+        `culture:0` sustained over-capacity (u0/u8/u11); `culture:1` effort → unrecognized → withdrawal (u3/u15);
+        **`culture:2` a genuine CONTRADICTION** — u1 feels heard with follow-through vs. u12/u13 "nothing changes"
+        ("the same act of speaking up is experienced as effective by one and futile by others") — one of the lens's
+        stated outputs, found cleanly; `culture:4` bright spots alongside concerns (incl. u21, better placed here
+        than in residual as predicted); `culture:5` voice/participation. Findings supporting multiple patterns
+        (u24 in both `culture:3` and `:5`) is fine. **WATCH — `culture:3` may be over-broad:** it bundles accent
+        remarks (u2), cultural-origin assignment (u22), health-disclosure consequence (u9), being talked over
+        (u24) and outsiderness (u23) into one "threats to belonging tied to who they are" — at least three distinct
+        dynamics in one bucket; defensible but the kind of consolidation that flattens signals a facilitator would
+        want held apart. Watch across runs; candidate rubric item.
+        **FINDING (spec gap, needs follow-up) — the residual is measured at the wrong granularity.** Audit
+        reported **62 delivered, 28 cited, 34 residual, 45% coverage** — but 26 of those 34 are Human Meaning
+        findings whose *voice* is already represented in a pattern via its Listening finding (u2 is in `culture:3`
+        while `meaning:2-0`/`2-1` sit in residual). **Genuinely uncovered voices: 7** (u4 hedge, u10 "No comment",
+        u14 reorg, u16 training-rushed, u17 "n/a", u19 mentoring, u20 bus) + u6's kitchen half (its onboarding half
+        IS cited). **Coverage by voice = 18/25 = 72%**, not 45%. So the residual concept WORKS — u16 and u19 are
+        real substantive voices no pattern absorbed, exactly the reviewable outliers promised — but they are buried
+        under ~26 redundant items. The docs say "every upstream finding is either cited or in the residual"
+        (finding-granular, which is what was built), so **this is a gap in the spec, not a bug in the build.**
+        **Answer-shape for O-4 (record, don't build yet): THREE BANDS, not a binary** — (1) *voice fully
+        uncovered* (no finding from this voice cited by any pattern) = the real outliers, shown first; (2) *voice
+        partly covered with distinct unabsorbed content* (u6's kitchen — real but weaker signal; note voice-level
+        granularity alone would wrongly call u6 "covered" and hide it); (3) *redundant Meaning finding on a
+        covered voice* = mostly noise, folded away. Takes the reviewer's list from 34 items to ~8 without
+        discarding anything. The coverage RATIO should likely be voice-based too — 45% understates coverage by
+        counting redundant Meaning findings as misses.
+        **SECOND FINDING (open question) — citation asymmetry:** the lens cited **18/26 Listening findings (69%)**
+        but only **10/36 Human Meaning findings (28%)**. It is preferentially grounding patterns in *what people
+        said* over *what a prior model inferred* — arguably the right instinct (avoids compounding interpretation)
+        — but it raises a real question: **if Culture Pattern mostly ignores Human Meaning's output, what consumes
+        it?** Later waves (Objective, Discernment)? The brief directly? Worth establishing rather than assuming.
+        **RESOLVED 2026-07-12 (docs review, no build/eval needed): the asymmetry is EXPECTED and Culture Pattern's
+        preference is probably CORRECT behavior.** (1) *No wiring gap* — the finding pool is shared and cumulative
+        ("every later wave reads the findings of earlier waves"), so Meaning's findings ARE delivered to five
+        downstream lenses (Culture Pattern, Tension, Objective, Discernment, Action Opening). The 28% is Culture
+        Pattern *choosing* its substrate, not plumbing. (2) *Two natural heavy consumers of Meaning specifically* —
+        **Discernment** "reviews everything found so far for overreach, thin evidence": its job is auditing
+        interpretation, and `noticing`s are the most interpretive things in the pool, so a noticing that reaches
+        past its evidence is exactly what it exists to catch (arguably Meaning's primary consumer); **Objective**
+        maps findings onto survey domains (well-being, belonging, harassment, climate…) and ADKAR, which are
+        *human-meaning categories* — mapping `meaning:2-0`'s belonging noticing is near-direct, while mapping u2's
+        raw verbatim would require redoing the interpretation. (3) *Why Culture Pattern's preference is right* —
+        its job is recurrence and contradiction across voices, and the most defensible ground for "these two voices
+        are saying the same thing" is what they actually said; building patterns primarily on prior model
+        inferences would compound interpretation (Meaning guesses → Culture finds a pattern in the guesses →
+        compounding invisible downstream). The lens reaching for verbatim is the anti-compounding instinct working.
+        **CAVEAT:** this reasons from lens *definitions* — Objective and Discernment aren't built, so "they'll
+        consume Meaning heavily" is a PREDICTION. Verify when either goes real; don't treat as established.
+        **CONSEQUENCE for O-4 (sharper than the three-band shape):** if Meaning findings are largely *for*
+        Objective and Discernment, then their presence in **Culture Pattern's residual** isn't noise about Meaning
+        being ignored — the per-lens audit is measuring against the wrong expectation, since Culture Pattern was
+        never the intended consumer of most of them. So per-lens residual **overstates the miss**. The meaningful
+        question is pipeline-level — *was this finding ever used, by any lens?* — which points toward a
+        **consolidated, end-of-pipeline residual** (O-4's "one consolidated review view") as the truthful artifact,
+        with per-lens audits as diagnostics beneath it. A Meaning finding uncited by Culture Pattern but cited by
+        Objective found its consumer and is not residual in any meaningful sense.
+      - *FIXTURE INSUFFICIENCY for cross-voice lenses — recorded 2026-07-12 (Doug's question: "is the test data
+        sufficient?"). Answer: NO — it was built for a different lens and is now the weak link.* The 25 voices were
+        authored to exercise **Human Meaning**: one clear occasion per interpretive output + restraint controls —
+        a *per-voice* fixture. Culture Pattern's outputs are different (recurrence, contradiction, values-vs-lived
+        gaps, repeated leadership signals, cross-group difference) and the fixture was never designed for them.
+        **Covered, somewhat accidentally:** recurrence (workload u0/u8/u11; effort-unrecognized u3/u15 — both
+        found) and contradiction (`culture:2`, u1 vs u12/u13) — but that is ONE contradiction, of the easiest kind
+        (direct opposites on the same topic). **NOT covered — three of the lens's five stated outputs:**
+        (1) **cross-group difference** is *structurally untestable* — it needs segment/group attributes on units
+        and the fixture has speaker tokens but no segments; per capability-matching the lens should be OMITTING
+        this output, and we currently cannot tell whether it is correctly omitting or simply has nothing to work
+        with; (2) **gaps between stated values and lived experience** needs *stated values* in the corpus
+        (leadership language, policy statements, "we're committed to X") — every voice is an individual experience
+        report, so the gap cannot exist; (3) **repeated leadership/culture signals** is present but thin (u1, u12,
+        u13). **Two fixture properties that distort the audit:** 25 single-comment voices, one speaker each — real
+        engagements have interview passages with many units per speaker, which is exactly where support-counting
+        honesty matters ("twelve comments across three teams," never "twelve people"), and the fixture can't
+        exercise it; and **no planted isolates** — the residual currently holds whatever the model happened not to
+        use, where a pattern-lens fixture would include *deliberate* isolates so we could check the residual
+        catches the right things rather than eyeballing it. **Read:** the fixture was adequate to prove Culture
+        Pattern *works*, and is insufficient to *calibrate* it — the same lesson as the Human Meaning
+        coverage/false-positive exercise (a fixture that only lets a lens succeed doesn't test it). **FIX — a
+        cross-voice fixture increment, to come BEFORE further Culture Pattern calibration** (otherwise we tune
+        against data that can't show the lens's weak spots): add segment attributes to units; add a small
+        stated-values cluster; add multi-unit speakers; plant deliberate isolates. **Bears on O-4:** planted
+        isolates are exactly what would let us judge whether the residual carries signal.
       - *EVAL — Human Meaning post-fix, real model, 2026-07-12: BLOCKER CLEARED, no cost.* The prompt fix (widened
         flag trigger + ground-the-flag + stopping discipline) validated on the real model. **u4 FIXED —** "The
         speaker offers a reassurance about things being fine but attaches a qualifier to it, which unsettles the
