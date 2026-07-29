@@ -894,6 +894,25 @@ invariants above). The whole project is the **case study**; its first built vers
         becoming the facilitator's agenda), and volume dilution.
         **GATE CLEARED: Culture Pattern v1's ordinary-findings-only scope is CORRECT AS PERMANENT DESIGN**, not a
         temporary limitation — comparative absence may be added to it later; unprompted absence never belongs to it.
+      - **O-8 SEGMENTS / UNIT TYPE-SPECIFIC EXTENSIONS — deferred, but tracked (Doug, 2026-07-12: "ok to defer
+        segments for now, as long as we track the need to implement them at some appropriate point").** A
+        **segment** is a group label on a unit — department, team, location, level, tenure band. Units today carry
+        the common interface only (incl. `speaker_token`); the segment dimension "arrives with the type-specific
+        extensions" (`build_approach`, The Unit + The Finding), which are **not built**. **What this blocks:**
+        (1) Culture Pattern's stated output *"places where experience differs across groups"* — structurally
+        untestable and unusable without segments; (2) the segment half of `support_set` — support strength is
+        currently derived from distinct sources (`speaker_token`) and unit count only, so the brief's "appears in
+        twelve comments across three teams" phrasing has no team dimension to draw on; (3) the cross-voice
+        fixture's cross-group probes (deliberately out of scope in the fixture increment — adding segment
+        attributes there would be a shape change smuggled into an authoring task). **Why deferring is safe:**
+        capability-matching already handles the absence correctly — a lens runs only over units providing what it
+        needs, so on segment-less material Culture Pattern "still finds recurring dynamics and contradictions but
+        omits the cross-group comparison rather than inventing one," and the first real run was consistent with
+        that (no cross-group claims). **The untested behaviour to check when segments land:** whether the lens is
+        *correctly omitting* or merely has nothing to work with and would misbehave once segments exist — Claude
+        Code has been asked to report if it ever sees a cross-group claim invented on segment-less material.
+        **Appropriate point to implement:** when real engagement data with group attributes is in view, or when
+        cross-group difference becomes a needed output — whichever comes first. OPEN.
       - **O-4 RESIDUAL DISPLAY** — per-lens residual views vs. one consolidated review view; product/implementation
         choice, unmade. **Now has real content from the first Culture Pattern run (2026-07-12):** finding-granular
         residual produces a poor artifact — 34 items of which ~26 were redundant (Meaning findings on voices
@@ -910,7 +929,7 @@ invariants above). The whole project is the **case study**; its first built vers
         finding ever used, by any lens?* — favouring a **consolidated end-of-pipeline residual** as the truthful
         artifact, with per-lens audits as diagnostics beneath it. So O-4 now has two axes to settle: **scope**
         (per-lens vs. consolidated) and **granularity** (finding / voice / three-band).
-      All seven OPEN; no answers proposed; not in canon; do not touch the mechanism decision.
+      All eight OPEN; no answers proposed; not in canon; do not touch the mechanism decision.
     - *Item 5 — Mechanism — ADOPTED 2026-07-12 (was the TOP-PRIORITY open decision).* The adopted mechanism:
       the voice is the unit of work AND of accounting for the per-voice lenses; both
       per-voice lenses on the same mechanism; first embodiment = synchronous parallel fan-out (one call per
