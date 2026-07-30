@@ -1498,6 +1498,154 @@ invariants above). The whole project is the **case study**; its first built vers
         against data that can't show the lens's weak spots): add segment attributes to units; add a small
         stated-values cluster; add multi-unit speakers; plant deliberate isolates. **Bears on O-4:** planted
         isolates are exactly what would let us judge whether the residual carries signal.
+      - *EVAL — CULTURE PATTERN on the EXTENDED fixture (35 units, real model), 2026-07-12. Fixture works; two real
+        calibration findings.* **The fixture increment did its job (u25–u34, purely additive, no existing voice
+        changed):** (1) **values-vs-lived gap now EXISTS and produced the lens's best finding yet** — `culture:2`
+        cites u25 (leadership: "the door is always open") together with BOTH sides of the lived experience: u26
+        (raised it, went nowhere), u27 (pushed back, plan changed), plus u1/u12/u13/u5 — seven voices, the stated
+        value held against contradicting *and* aligning experience. Structurally impossible before the
+        stated-values cluster. (2) **Multi-unit speaker works** — spk-int1's u29/u30/u31 landed in different
+        patterns (u29 workload, u31 withdrawal) and support counts read units-across-sources correctly, counting
+        one speaker once. First fixture material the honest-counting rule could bite on. (3) **Harder
+        contradictions landed** — u26 vs u27 (same stated invitation, opposite outcomes) is not a direct
+        opposition. (4) **`culture:3` NARROWED** — u9 moved out of the belonging bucket into `culture:4`, so last
+        run's over-broad watch item resolved itself once better data existed. (5) **Real emergent find:**
+        `culture:4` pairs u9 (work dried up after health disclosure) with u28 (dropped off the radar under remote)
+        as "quietly losing access or visibility without it being named" — neither voice says that.
+        **FINDING 1 — planted isolates ALL ABSORBED; the residual test tested nothing.** u32 (expense system) →
+        `culture:6`; u33 (volunteer day) → `culture:5`; u34 (scheduling) → `culture:7`. Zero planted isolates
+        reached the residual. Two readings, and it is a mix: the isolates rhyme faintly with existing material
+        (u32 with u16's rushed training; u33 is a bright spot), AND — the more concerning half — **the lens
+        over-consolidates: it will find a home for anything if the bucket is broad enough** (`culture:5`
+        "appreciation and hope", `culture:6` "changes that leave people worse off" are wide). **Diagnosis:** the
+        prompt has a *floor* ("two or more distinct prior findings") but **no ceiling on breadth** — nothing tells
+        the lens a pattern should be tight, or that a voice belonging to NO pattern is an expected and acceptable
+        outcome. The fixture now proves this matters; it couldn't before. **Consequence: the residual concept is
+        still untested on real data.**
+        **FINDING 2 — `culture:7` invented a cross-group comparison on segment-less material** (exactly what Claude
+        Code's own fixture note asked to be reported). u34 was planted as a *scheduling isolate*; the lens produced
+        "experience of the same arrangements differs across groups… the East Coast team checked out" — Culture
+        Pattern's cross-group output. **The precise boundary:** naming "East Coast team" is fine (the speaker
+        authored it — reading the words). What is not fine is that `culture:7` **compares across groups** by
+        pairing u34 with u7 and u28, which carry no group markers at all — treating individual experiences as
+        though they represented groups. That is the invention capability-matching forbids: not the mention of a
+        named group, but a comparison built on voices that have none. Not egregious (the underlying observation —
+        arrangements suiting some and sidelining others — is true and useful), but the boundary was crossed.
+        **Strengthens O-8:** the lens *will* reach for cross-group claims when content hints at groups, so when
+        segments land we must check it distinguishes real segment attributes from content-inferred ones.
+        **Audit numbers worsened as expected: 79 delivered, 28 cited, 51 residual, 35% coverage** — the fixture
+        grew and nearly every Meaning finding is uncited; the granularity/scope problem from the prior run, now
+        more pronounced. Reinforces O-4's direction.
+      - *EVAL — CULTURE PATTERN after the tightness/non-membership/cross-group prompt fix (real model),
+        2026-07-12. Targets FIXED; OVERCORRECTED. Commit held.* **What the fix achieved:** (1) **all three planted
+        isolates now reach the residual** (`listening:32-0` expense, `:33-0` volunteer day, `:34-0` scheduling) —
+        the residual test finally tests something, and the tightness rule is what did it; (2) **no cross-group
+        claim** — the gate held, u34 was not turned into a groups comparison (it landed in residual, acceptable
+        since it was planted as an isolate); (3) **`culture:0` and `culture:2` survived intact** — the two feared
+        fragile ones. `culture:2` (7 voices) actually IMPROVED: it swapped u5 (not-safe-to-speak) for u30 (staffing
+        gap met with a frozen budget) — a better fit, since u30 is a raised-concern-going-nowhere while u5 is about
+        safety to speak, adjacent but different. Tightness sharpened the lens's best finding rather than shattering
+        it. (4) `culture:3` narrowed correctly to u2+u22 (cultural background made a marker).
+        **THE OVERCORRECTION — and NOT the failure mode predicted.** The owner-chat predicted *fragmentation*
+        (more, narrower patterns). Instead: **fewer patterns — 5, down from 8 — with real signal dropped.**
+        Casualties now uncited entirely: **u9** (work dried up after a health disclosure — *the voice this whole
+        project started from*) and **u24** (talked over, credit taken), both of which were in patterns last run.
+        The **dignity/credit theme vanished** — last run's emergent `culture:4` ("quietly losing access or
+        visibility without it being named", u9+u28) is gone, replaced by a thinner u23+u28 pairing. The
+        **bright-spots pattern vanished** — u6, u7, u18, u21, u33 all uncited; last run's `culture:5` (appreciation
+        and hope) *was* too broad, but the right fix is a TIGHTER positive pattern, not none — a brief with zero
+        positive findings misrepresents a corpus that contains real bright spots. Coverage fell 35% → **22%**
+        (18 cited of 81).
+        **DIAGNOSIS — prompt balance, not a rule error.** The tightness rule plus "non-membership is expected" gave
+        a *ceiling with no counterweight*: the lens now **drops a voice rather than find the tighter pattern it
+        genuinely belongs to**. u9+u24 share something specific (consequences that arrive unnamed); u6+u18+u33
+        share something specific (things that landed well). The lens stopped looking once broad buckets were
+        forbidden. **Missing instruction, roughly:** prefer a tighter pattern over a broad one — but prefer a tight
+        pattern over NONE; if voices share something specific, name it. **Commit HELD; the isolate and cross-group
+        fixes are to be preserved as-is (they landed) while the balance is corrected, then re-run.**
+      - *CULTURE PATTERN CALIBRATION — rounds 3–5, the DRIFT, and the decision to stop tuning (2026-07-12).*
+        **Round 3 (counterweight: "tight over none, do the work"; non-membership reworked from "EXPECTED outcome"
+        to "LEGITIMATE when true… only AFTER looking, never INSTEAD of looking").** Result: 8 tight patterns;
+        **u24 recovered** (`culture:7` with u5 — "contribution does not land in meetings", a good tight pair);
+        isolates u33/u34 stayed in residual; no cross-group claim; `culture:0`/`culture:2` intact. But **u9 still
+        uncited** and **still no positive pattern** (u6/u18/u33/u21 all uncited).
+        **Round 4 (scope fix, not a knob): "things that are working — recurring positive experience" added as a
+        SIXTH stated output**, to `build_approach` canon AND the prompt. Diagnosis behind it: all five original
+        outputs were friction-framed, so the lens leaving positives uncited was arguably *correct against its own
+        scope*, and the earlier "appreciation and hope" bucket had been the lens improvising an output it was never
+        given — while the brief and V0's output list both promise bright spots and no lens was tasked with finding
+        them. Result: **no movement at all — still zero positive patterns.** First change in the sequence to
+        produce nothing on its target. AND a **regression**: the cross-group gate leaked — `culture:5` paired u28
+        (no group attribute) with u34 as "a default arrangement that works for the majority while sidelining part
+        of the group," i.e. the prohibited population comparison, reworded to avoid the phrase "across groups". It
+        also displaced the correct handling (u7+u28 as ordinary differing-experience).
+        **Round 5 (defect fix): the gate re-bound to SUBSTANCE, not phrasing** — "do NOT compare how different sets
+        of people experience something… it counts however it is phrased ('the majority', 'part of the group', 'some
+        vs. others'); do not reword it through"; "an INDIVIDUAL voice is NEVER a stand-in for a group". Result:
+        **gate holds — no population comparison anywhere**, u34 in residual. But it **over-suppressed**: u7+u28
+        did NOT return (u7 now in residual), so the gate suppressed rather than routed. And an unanticipated
+        regression: **`culture:2` shrank 7 voices → 4 and split** into `culture:2` (speaking-up experienced
+        oppositely) + `culture:3` (stated-openness vs. lived response) — the lens's single best finding across
+        every round, now two thinner ones. u5 and u24's meetings pattern vanished entirely.
+        **THE DRIFT — the real finding.** Five rounds, each fixing its target and moving something else; coverage
+        monotonically down **35% → 22% → 28% → 23% → 21%**; patterns 8 → 5 → 8 → 7 → 6. Every rule is individually
+        justified; their *interaction* now produces steadily narrower output. **Hypothesis (unconfirmed) worth
+        carrying:** the tightness rule may have pushed toward *lexical* rather than *conceptual* tightness — what
+        the lens finds well is surface-similar pairing (workload/workload, effort-withdrawn/effort-withdrawn,
+        accent/origin), while the persistent misses all require holding two things that aren't surface-similar and
+        seeing the shared structure (u9's "consequence arriving unnamed" with u28; u6+u18 as "changes that landed
+        well"). That would explain u9, the positives, and why "try harder" partially worked while a scope addition
+        did nothing.
+        **DECISION (Doug + owner-chat, independently reached): STOP TUNING. The prompt needs a CONSOLIDATION PASS**
+        — reading all accumulated rules together and rewriting them as a coherent whole, rather than a sixth
+        targeted patch on a stack of patches. Same lesson as the traceability pass: accumulated edits need a
+        whole-artifact review. **Committed as-is** (fixture increment + all five calibration rounds bundled) — the
+        lens is genuinely useful now (`culture:0`, `culture:1`, `culture:3`, `culture:5` are real, tight, useful
+        findings) — just narrower than it was three rounds ago. **Carried to the consolidation pass:** u9 uncited
+        across four consecutive runs; the sixth output producing no positive pattern; the gate over-suppressing
+        (u7+u28 lost); `culture:2`'s seven-voice consolidated form lost to a split; the lexical-vs-conceptual
+        tightness hypothesis.
+      - *FIXTURE EXTENDED (u25–u34, 25→35 units, purely additive) + EVAL — CULTURE PATTERN on the extended fixture,
+        real model, 2026-07-12.* Fixture additions: **u25** stated value ("the door is always open" at town halls —
+        the anchor the corpus lacked), **u26** contradicting lived experience, **u27** aligning lived experience,
+        **u28** harder contradiction (same flexibility arrangement, opposite experience to u7, no counter-claim),
+        **u29/u30/u31** one interview speaker `spk-int1` (multi-unit), **u32/u33/u34** planted isolates (tooling /
+        positive one-off / scheduling). Probe map in the fixture header; no existing voice changed; segments
+        correctly NOT added (O-8).
+        **WHAT THE FIXTURE UNLOCKED — it worked:** (1) **`culture:2` is the best finding the lens has produced** —
+        it cites u25 (the stated value) together with BOTH sides of lived experience (u26 went nowhere, u27 plan
+        changed, plus u1/u12/u13/u5): seven voices, the values-vs-lived-gap output that was *structurally
+        impossible* before. (2) **Honest counting bit for the first time** — `spk-int1`'s three units landed in
+        different patterns (u29 workload, u31 withdrawal) and support read units-vs-sources correctly rather than
+        inflating one speaker into several. (3) **The harder contradiction landed** — u26 vs u27 is two people
+        acting on the *same stated invitation* with opposite outcomes, not a direct opposition. (4) **`culture:4` is
+        a genuine emergent find** — u9 (work dried up after health disclosure) + u28 (dropped off the radar under
+        remote) as "quietly losing access or visibility without it being named"; neither voice says that. (5)
+        **`culture:3` NARROWED** — u9 moved out of the belonging bucket into `culture:4`, so last run's
+        over-broad concern resolved itself with better data.
+        **⚠ FINDING 1 — ALL THREE PLANTED ISOLATES WERE ABSORBED; the residual test tested nothing.** u32 →
+        `culture:6` (paired with u16 as "rolled-out changes that leave people worse off"), u33 → `culture:5`
+        (bright spots), u34 → `culture:7`. Nothing planted reached the residual. Two readings, both partly true:
+        the isolates weren't isolated *enough* (u32 does rhyme with u16; u33 *is* a bright spot), AND — the more
+        concerning half — **the lens over-consolidates: it will find a home for anything if the bucket is broad
+        enough** (`culture:5` "appreciation and hope" and `culture:6` "changes that leave people worse off" are
+        wide). Diagnosis: the prompt has a "two or more distinct findings" FLOOR but **no ceiling on breadth** —
+        nothing tells the lens a pattern should be *tight*, or that a voice belonging to no pattern is an expected
+        and acceptable outcome. The fixture now proves this matters, which it could not before. **Consequence: the
+        residual concept remains UNTESTED on real data.**
+        **⚠ FINDING 2 — `culture:7` invented a cross-group comparison on segment-less material** (exactly what
+        Claude Code's own fixture note asked to be reported). u34 was planted as a *scheduling* isolate; the lens
+        produced "experience of the same arrangements differs across groups… the East Coast team checked out" —
+        Culture Pattern's cross-group output. The subtlety: naming "East Coast team" is legitimate (the speaker
+        authored it), **but the finding pairs u34 with u7 and u28 — individual experiences carrying no group
+        markers at all — and treats them as representing groups.** That comparison is the invention
+        capability-matching forbids, not the mention of a named group. Not egregious (the material invites it; the
+        underlying observation is true and useful), but it is the boundary being crossed. **Strengthens O-8:** the
+        lens *will* reach for cross-group claims when content merely hints at groups, so when segments land we must
+        check it distinguishes real segment attributes from content-inferred ones.
+        **Both findings are the same underlying behaviour: aggressive consolidation.** Audit numbers also worsened
+        with fixture growth — 79 delivered, 28 cited, **51 residual, 35% coverage** — reinforcing O-4's direction
+        (scope + granularity), since nearly every Meaning finding is uncited.
       - *EVAL — Human Meaning post-fix, real model, 2026-07-12: BLOCKER CLEARED, no cost.* The prompt fix (widened
         flag trigger + ground-the-flag + stopping discipline) validated on the real model. **u4 FIXED —** "The
         speaker offers a reassurance about things being fine but attaches a qualifier to it, which unsettles the

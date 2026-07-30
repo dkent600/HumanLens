@@ -621,6 +621,7 @@ Because even an ungroundable answer still yields the worth-exploring flag, Human
 - gaps between stated values and lived experience
 - repeated leadership/culture signals
 - places where experience differs across groups
+- things that are working — recurring positive experience
 
 This is organizational sensemaking.
 

@@ -5,7 +5,11 @@ import type { Unit } from '../domain/types.js';
 // Extracted here so both the lens eval harness (run-lens.ts) and the real-model falsifier
 // harnesses (eval/completeness/real/*) draw from ONE fixture, u9 included.
 //
-// 25 de-identified units, all with distinct speaker tokens.
+// 35 de-identified units. Most carry a distinct speaker token; the INTERVIEW passages
+// u29-u31 deliberately SHARE one (spk-int1), so honest source-counting ("N units across M
+// sources, never N people") has something to bite on. u0-u24 are the original per-voice
+// (Human Meaning) fixture, UNCHANGED; u25-u34 were added to exercise the cross-voice
+// (Culture Pattern) lens — see the CULTURE PATTERN probe map below.
 //
 // LISTENING contract (build_approach.md §1) — bilingual + mixed units (u5/u8/u13),
 // recurrence across separate voices (workload: u0/u11; effort going unnoticed: u3/u15),
@@ -41,6 +45,40 @@ import type { Unit } from '../domain/types.js';
 // u9 ("After I disclosed a health condition…") is the diagnosed silent-drop voice: in the
 // batched Human Meaning call the model intermittently emitted nothing for it. It is the
 // primary probe for F1 (silent-drop-impossibility under per-voice fan-out).
+//
+// CULTURE PATTERN probes (build_approach.md §3 — the five cross-voice outputs). u25-u34 were
+// added so a cross-voice lens has genuine patterns to find AND a testable residual. The five
+// outputs, and where each has an occasion:
+//   recurring dynamics       workload (u0, u8, u11, u29, u30); effort-unrecognized / pulling
+//                            back (u3, u15, u31); leadership-says-not-does (u12, u13, u26, u30)
+//   contradictions           EASY/direct (existing): u1 "feel heard, they act" vs u12/u13
+//                            "nothing changes". HARDER — the SAME condition experienced
+//                            oppositely: u7 (flexibility works for me) vs u28 (flexibility left
+//                            me off the radar); u27 (speaking up landed) vs u26 (speaking up went
+//                            nowhere). Harder because it is not a counter-statement on one claim.
+//   values-vs-lived gaps     STATED value present: u25 quotes the "door is always open / every
+//                            voice matters" leadership language; lived experience CONTRADICTS it
+//                            (u26 went nowhere; u12, u13) AND is CONSISTENT with it (u27, u1) — the
+//                            gap on one side, alignment on the other. (The original corpus had no
+//                            unit that STATES a value, so this gap could not exist before.)
+//   repeated leadership /    u25 (town-hall "open door" language) is a stated culture signal;
+//     culture signals        echoed by u12 ("leadership says the right things"), u13 (promising
+//                            change) — a repeated leadership-language signal across voices.
+//   experience differs       OUT OF SCOPE — no segment dimension yet (the type-specific extension
+//     across groups          hasn't landed; V1 counts sources by speaker_token only). Culture
+//                            Pattern should OMIT cross-group comparison on this segment-less
+//                            material, per capability-matching — NOT invent one. If a real-model
+//                            run invents a cross-group difference here, that is a finding to report.
+//
+// MULTI-UNIT SPEAKER (honest counting): spk-int1 = u29, u30, u31 (interview passages, one person).
+// A pattern citing two of them counts ONE source, not two — e.g. workload across u0/u11/u29/u30 is
+// "4 units across 3 sources", never "4 people".
+//
+// PLANTED ISOLATES (the testable residual): u32 (expense-system friction), u33 (a well-run
+// volunteer day), u34 (all-hands scheduled at a bad timezone). Each is substantive and real but
+// thematically ALONE — no other voice shares its subject — so it legitimately belongs to no
+// pattern and should land in the cited-or-residual RESIDUAL. Documenting them is what lets a
+// caught isolate be told apart from an arbitrary omission.
 
 export function clearedUnit(
   position: number,
@@ -90,4 +128,28 @@ export const SAMPLE_UNITS: readonly Unit[] = [
   clearedUnit(22, 'spk-w', 'There\'s an assumption I\'ll naturally handle anything tied to my culture — like where I\'m from decides what I get put on.'),
   clearedUnit(23, 'spk-x', 'Everyone else already seems to have their people here; I still feel like I\'m on the outside looking in.'),
   clearedUnit(24, 'spk-y', 'I\'ll make a point in a meeting and get talked right over — then a minute later someone says the same thing and everyone nods.'),
+
+  // ── CROSS-VOICE (Culture Pattern) voices — see the CULTURE PATTERN probe map above ──
+  // u25 — STATED VALUE (leadership/culture language): the anchor for a values-vs-lived gap and a
+  // repeated leadership signal. A real human voice REPORTING the stated commitment (not a policy doc).
+  clearedUnit(25, 'spk-z', 'At every town hall, leadership tells us the door is always open and that no concern is too small to raise.'),
+  // u26 — LIVED, CONTRADICTS the stated open-door value (a stated intent contradicted by a described
+  // CONSEQUENCE, not a counter-statement — the harder shape of contradiction).
+  clearedUnit(26, 'spk-aa', 'I took that literally and raised a real problem with my skip-level — it went nowhere and was never mentioned again.'),
+  // u27 — LIVED, CONSISTENT with the same open-door value. With u26 this is the SAME commitment
+  // experienced oppositely by two people (alignment on one side, gap on the other).
+  clearedUnit(27, 'spk-ab', 'When I pushed back in a review, my director actually changed the plan — so where I sit, speaking up does land.'),
+  // u28 — HARDER contradiction: the SAME condition (the flexible/remote setup) experienced as good by
+  // u7 and as a problem here — no counter-claim, just the same thing landing differently.
+  clearedUnit(28, 'spk-ac', 'The flexible remote setup is great for some people, but for me it\'s meant I\'ve quietly dropped off everyone\'s radar.'),
+  // u29-u31 — INTERVIEW passages, ONE speaker (spk-int1): multi-unit source for honest counting.
+  // They reinforce existing recurrences (workload / leadership-inaction / pulling-back) but as ONE person.
+  clearedUnit(29, 'spk-int1', 'Honestly the pace this year has been relentless — we\'ve been two people short since spring and just absorbed it.'),
+  clearedUnit(30, 'spk-int1', 'I\'ve raised the staffing gap with my lead more than once; the answer is always that the budget\'s frozen.'),
+  clearedUnit(31, 'spk-int1', 'I still care about the work, but I\'ve started protecting my evenings in a way I never used to.'),
+  // u32-u34 — PLANTED ISOLATES: substantive and real, but each thematically ALONE (no sibling voice),
+  // so they belong to no pattern and should land in the RESIDUAL.
+  clearedUnit(32, 'spk-ad', 'The new expense-reporting system takes three times as long as the old one — I dread submitting anything now.'),
+  clearedUnit(33, 'spk-ae', 'The volunteer day the company organized last month was genuinely well run and meant a lot to me.'),
+  clearedUnit(34, 'spk-af', 'The all-hands keeps getting set for 8am Pacific, so half the East Coast team is checked out before it even starts.'),
 ];
