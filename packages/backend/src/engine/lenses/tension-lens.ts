@@ -10,10 +10,13 @@ import {
 import type { Wave, Lens } from './lens.js';
 import { toPromptFinding } from './prompt-projection.js';
 
-// The Tension Lens — an Aggregate-wave lens: "what tensions should a facilitator
-// notice?" It is the first lens that reads PRIOR findings rather than units alone:
-// it works from the findings the Evidence wave produced and surfaces a tension
-// between them.
+// The Tension Lens — an INTERPRET-wave lens (with the Inclusity Objective Lens): "what
+// tensions should a facilitator notice?" It is a FRAME-matcher — it names findings against a
+// declared vocabulary (the tensions a facilitator should notice), the same kind of work
+// Objective does with the survey domains / ADKAR. As an Interpret lens it reads the whole
+// accumulated pool (Evidence + Meaning + the Aggregate wave's Culture Pattern findings) and
+// surfaces a tension across them. (Canon moved it out of Aggregate: "find contradiction" as an
+// open-ended operation is Culture Pattern's job; Tension's distinct contribution is naming.)
 //
 // Crucially it still anchors to UNITS, not to findings. It follows each prior
 // finding back to the units behind it and links its tension to those units, so the
@@ -31,7 +34,7 @@ const INSTRUCTION =
 
 export class TensionLens implements Lens {
   readonly id = 'tension';
-  readonly wave: Wave = 'aggregate';
+  readonly wave: Wave = 'interpret';
 
   async run(
     units: readonly Unit[],

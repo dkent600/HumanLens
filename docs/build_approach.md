@@ -832,8 +832,8 @@ Read in that light, the seven lenses sort into waves:
 
 - **Evidence** — the Listening Lens, which reads the units directly and surfaces each voice verbatim.
 - **Meaning** — the Human Meaning Lens, which reads the Listening findings (not the units) and asks what each voice means at the human level.
-- **Aggregate** — the Culture Pattern Lens and the Tension Lens, which work across the whole set of findings rather than one at a time.
-- **Interpret** — the Inclusity Objective Lens, which maps what has been found onto the survey domains and the PROSCI/ADKAR change vocabulary.
+- **Aggregate** — the Culture Pattern Lens, which works across the whole set of findings rather than one at a time, finding what recurs, conflicts, and differs.
+- **Interpret** — the Tension Lens and the Inclusity Objective Lens, which name what has been found against declared vocabularies: Tension against the tensions a facilitator should notice, Objective against the survey domains and the PROSCI/ADKAR change vocabulary.
 - **Guardrail** — the Facilitator Discernment Lens, which reviews everything found so far for overreach, thin evidence, and what should be handled with care.
 - **Openings** — the Action Opening Lens, which points toward possible next steps.
 
@@ -842,7 +842,7 @@ Only the first wave — Evidence, the Listening Lens — reads the units; every 
 The staged pipeline keeps each lens a separate, individually versioned prompt — which matters for both evaluation and the later learning loop, since a single lens can be revised without disturbing the others — while letting later lenses build on earlier ones. Two further properties follow:
 
 - The **Discernment Lens runs late**, so it can actually audit the accumulated findings. Its flags are not advisory notes; they drive what happens at Assemble, deciding which findings may appear in the client-safe brief and which are held to the internal one. It does this by *revising* the findings it audits rather than emitting a separate side channel: Discernment sets a finding's `cleared_to_client_safe` and `sensitivity` by re-emitting that finding under its original `finding_id`, rebuilt through the same sanctioned factory the lenses use — so support stays derived and anchoring re-enforced, disposition is never hand-set, and it lives on the finding itself (one source of truth, leaving Assemble unchanged). The orchestrator lets only this late Guardrail stage supersede a finding by id; every other wave appends, so revising another lens's finding is the auditor's privilege alone, and a stray id collision in any other wave stays a visible append rather than a silent drop on the path that gates client exposure.
-- Within a wave, lenses that do not depend on each other can run in parallel. This matters because a staged pipeline is inherently slower than a single call, and the Culture Pattern and Tension lenses need not wait on each other.
+- Within a wave, lenses that do not depend on each other can run in parallel. This matters because a staged pipeline is inherently slower than a single call, and the Tension and Objective lenses need not wait on each other — they name the same accumulated findings against different vocabularies.
 
 One more property holds at the lens↔model edge itself, and it is a trust boundary. When the model returns something a lens cannot use — malformed output, off-format, or a refusal — the lens **fails safe to silence**: it emits no findings, never a fabricated one, and never crashes the run. When the *infrastructure* fails instead — the call cannot complete — that failure **propagates** as an error rather than being disguised as silence. The distinction is load-bearing: an empty result must never be silently mistaken for a broken call — so *nothing to surface* and *the call failed* can never be confused; and, as the accounting below establishes, an empty body does not by itself certify a *chosen* silence either. (The wiring — parse tolerance, refusal handling, transport retries — lives in `build_implementation.md`.)
 
@@ -879,13 +879,14 @@ flowchart TD
         HM["Human Meaning Lens"]
     end
 
-    subgraph L2["Aggregate — work across the whole set"]
+    L2["Aggregate — Culture Pattern Lens<br/>works across the whole set · what recurs, conflicts, differs"]
+
+    subgraph L3["Interpret — name findings against declared vocabularies"]
         direction LR
-        CP["Culture Pattern Lens"]
-        TEN["Tension Lens"]
+        TEN["Tension Lens<br/>tensions a facilitator should notice"]
+        OBJ["Inclusity Objective Lens<br/>survey domains + ADKAR"]
     end
 
-    L3["Interpret — Inclusity Objective Lens<br/>maps findings to survey domains + ADKAR"]
     L4["Guardrail — Facilitator Discernment Lens<br/>runs late · audits all prior findings"]
     L5["Openings — Action Opening Lens<br/>points toward possible next steps"]
 

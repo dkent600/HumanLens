@@ -11,7 +11,7 @@ import type { Unit } from '../src/domain/types.js';
 // The Inclusity Objective Lens is the first lens in the Interpret wave. Beyond the
 // established "reads prior findings, anchors to units" pattern, it proves the deeper
 // dependency: its real input is the AGGREGATE wave's output, so its findings depend
-// on an Aggregate (tension/culture) finding being present and anchor to the units
+// on an Aggregate (Culture Pattern) finding being present and anchor to the units
 // behind it — the analog of the test that proved Discernment saw Aggregate output.
 
 function clearedUnit(unitId: string, speakerToken: string): Unit {
@@ -35,7 +35,7 @@ const units: readonly Unit[] = [
   clearedUnit('u3', 'spk-c'),
 ];
 
-function finding(lens: 'listening' | 'tension', findingId: string, links: readonly string[]): Finding {
+function finding(lens: 'listening' | 'culture', findingId: string, links: readonly string[]): Finding {
   return makeOrdinaryFinding({ findingId, lens, verbatim: `a ${lens} finding`, evidenceLinks: links, units });
 }
 
@@ -45,17 +45,17 @@ describe('Inclusity Objective lens — Interpret wave, reads Aggregate output', 
     expect(out).toHaveLength(0);
   });
 
-  it('reads the Aggregate output: its finding depends on the tension finding and anchors to the units behind it', async () => {
-    // The Evidence finding anchors u1; the Aggregate (tension) finding anchors u2,u3.
+  it('reads the Aggregate output: its finding depends on the Culture Pattern finding and anchors to the units behind it', async () => {
+    // The Evidence finding anchors u1; the Aggregate (Culture Pattern) finding anchors u2,u3.
     const evidence = finding('listening', 'listening:0', ['u1']);
-    const aggregate = finding('tension', 'tension:0', ['u2', 'u3']);
+    const aggregate = finding('culture', 'culture:0', ['u2', 'u3']);
 
     // With Evidence alone, the interpretation reaches only u1.
     const evidenceOnly = await new ObjectiveLens().run(units, [evidence], new FakeLlmProvider());
     expect([...evidenceOnly[0]!.evidenceLinks].sort()).toEqual(['u1']);
 
     // Add the Aggregate finding: the interpretation now reaches u2,u3 too. The added
-    // anchors come solely from the tension finding — so the output provably depends
+    // anchors come solely from the Culture Pattern finding — so the output provably depends
     // on the Aggregate-level output, anchored back to the units behind it.
     const withAggregate = await new ObjectiveLens().run(units, [evidence, aggregate], new FakeLlmProvider());
     const objective = withAggregate[0]!;
@@ -73,12 +73,12 @@ describe('Inclusity Objective lens — Interpret wave, reads Aggregate output', 
       seen = payload;
       return { findings: [] };
     });
-    await new ObjectiveLens().run(units, [finding('tension', 'tension:0', ['u1'])], spy);
+    await new ObjectiveLens().run(units, [finding('culture', 'culture:0', ['u1'])], spy);
 
     // The Interpret wave carries the (placeholder) objective frame structurally...
     expect(seen?.objectiveFrame).toEqual({ surveyDomains: [], adkarDimensions: [] });
     // ...and the prior findings it interprets.
-    expect(seen?.priorFindings?.map((f) => f.findingId)).toEqual(['tension:0']);
+    expect(seen?.priorFindings?.map((f) => f.findingId)).toEqual(['culture:0']);
   });
 
   it('enforces anchoring on interpretive output — drops an interpretation with no in-scope anchor', async () => {
@@ -87,12 +87,12 @@ describe('Inclusity Objective lens — Interpret wave, reads Aggregate output', 
         findings: [{ noticing: 'an ungrounded implication', evidenceUnitIds: ['not-in-scope'] }],
       }),
     );
-    const out = await new ObjectiveLens().run(units, [finding('tension', 'tension:0', ['u1'])], rogue);
+    const out = await new ObjectiveLens().run(units, [finding('culture', 'culture:0', ['u1'])], rogue);
     expect(out).toHaveLength(0);
   });
 
   it('is deterministic — same prior findings yield the same output', async () => {
-    const prior = [finding('tension', 'tension:0', ['u1', 'u2'])];
+    const prior = [finding('culture', 'culture:0', ['u1', 'u2'])];
     const a = await new ObjectiveLens().run(units, prior, new FakeLlmProvider());
     const b = await new ObjectiveLens().run(units, prior, new FakeLlmProvider());
     expect(a).toEqual(b);

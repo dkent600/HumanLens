@@ -137,7 +137,7 @@ describe('lens pipeline — the spine, model stubbed', () => {
   });
 });
 
-describe('lens pipeline — staged: Evidence → Aggregate', () => {
+describe('lens pipeline — staged waves: accumulation + snapshot-per-wave independence', () => {
   function stagedPipeline(gate: DeidGate): LensPipeline {
     return new LensPipeline(gate, new FakeLlmProvider(), [new ListeningLens(), new TensionLens()]);
   }
@@ -146,15 +146,15 @@ describe('lens pipeline — staged: Evidence → Aggregate', () => {
     const { gate } = await clearedScopeWithUnits();
     const brief = await stagedPipeline(gate).synthesize(scope);
 
-    // Both stages produced findings; they accumulate, Evidence before Aggregate. Evidence
-    // is per-voice (one finding per unit); Aggregate (Tension) is batched — it reads the
-    // whole Evidence snapshot and emits one finding across both voices.
+    // Both stages produced findings; they accumulate, Evidence before Interpret. Evidence
+    // is per-voice (one finding per unit); Tension (Interpret) is batched — it reads the
+    // whole prior snapshot and emits one finding across both voices.
     expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0-0', 'listening:1-0', 'tension:0']);
     const tension = brief.internal.find((f) => f.findingId === 'tension:0');
     expect(brief.internal[0].lens).toBe('listening');
     expect(tension?.lens).toBe('tension');
 
-    // The Aggregate lens read the Evidence findings and anchored its tension to the
+    // The Interpret lens read the Evidence findings and anchored its tension to the
     // units behind them — interpretive output is still evidence-anchored, across sources.
     expect(isEvidenceAnchored(tension!)).toBe(true);
     expect([...(tension?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
@@ -172,8 +172,8 @@ describe('lens pipeline — staged: Evidence → Aggregate', () => {
     expect(briefA.internal).toEqual(briefB.internal);
   });
 
-  it('produces no Aggregate findings when the Evidence wave found nothing to build on', async () => {
-    // No cleared units -> no Evidence findings -> the Aggregate lens has no prior
+  it('produces no later-wave findings when the Evidence wave found nothing to build on', async () => {
+    // No cleared units -> no Evidence findings -> the Interpret lens has no prior
     // findings to synthesize from, so the stage stays silent rather than straining.
     const repo = new InMemoryUnitRepository();
     await repo.saveUnit(scope, pendingUnit('u1', 'spk-a', 'a comment')); // left pending
@@ -183,10 +183,10 @@ describe('lens pipeline — staged: Evidence → Aggregate', () => {
     expect(brief.internal).toHaveLength(0);
   });
 
-  it('runs the two Aggregate siblings against the same Evidence snapshot — neither sees the other', async () => {
+  it('runs the two Interpret siblings (Tension + Objective) against the same snapshot — neither sees the other', async () => {
     const { gate } = await clearedScopeWithUnits();
 
-    // Record the prior-finding ids each Aggregate emit call was handed.
+    // Record the prior-finding ids each emit call was handed.
     const seenPriorIds: string[][] = [];
     const spy = new FakeLlmProvider((payload) => {
       if (payload.task !== 'disposition' && (payload.priorFindings?.length ?? 0) > 0) {
@@ -195,31 +195,35 @@ describe('lens pipeline — staged: Evidence → Aggregate', () => {
       return defaultFakeResponse(payload);
     });
 
+    // Culture Pattern is now the SOLE Aggregate lens; Tension and Objective are the Interpret
+    // pair (frame-matchers). Wave order: Evidence -> Aggregate (Culture) -> Interpret (Tension,
+    // Objective). So Culture sees only the Listening findings; the two Interpret siblings each see
+    // the SAME snapshot (Listening + Culture) and NEITHER sees the other's output.
     const brief = await new LensPipeline(gate, spy, [
       new ListeningLens(),
-      new TensionLens(),
       new CulturePatternLens(),
+      new TensionLens(),
+      new ObjectiveLens(),
     ]).synthesize(scope);
 
-    // Both Aggregate lenses ran (batched), each over the SAME Evidence-only snapshot (both
-    // per-voice Listening findings) — neither saw the other's output. Snapshot-per-wave
-    // semantics keep them independent.
     expect(seenPriorIds).toEqual([
-      ['listening:0-0', 'listening:1-0'],
-      ['listening:0-0', 'listening:1-0'],
+      ['listening:0-0', 'listening:1-0'], // Culture (Aggregate) — Evidence only
+      ['listening:0-0', 'listening:1-0', 'culture:0'], // Tension (Interpret) — reads Aggregate, not its sibling
+      ['listening:0-0', 'listening:1-0', 'culture:0'], // Objective (Interpret) — same snapshot, not its sibling
     ]);
 
-    // Both produced an Aggregate finding anchored to the same Evidence units (across sources).
+    // Accumulated set in wave order; the two Interpret findings anchor to the Evidence units.
     expect(brief.internal.map((f) => f.findingId)).toEqual([
       'listening:0-0',
       'listening:1-0',
-      'tension:0',
       'culture:0',
+      'tension:0',
+      'objective:0',
     ]);
     const tension = brief.internal.find((f) => f.findingId === 'tension:0');
-    const culture = brief.internal.find((f) => f.findingId === 'culture:0');
+    const objective = brief.internal.find((f) => f.findingId === 'objective:0');
     expect([...(tension?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
-    expect([...(culture?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
+    expect([...(objective?.evidenceLinks ?? [])].sort()).toEqual(['u1', 'u2']);
   });
 
   it('funnels Evidence -> Meaning: Human Meaning reads the Listening findings, not the units', async () => {
@@ -284,10 +288,10 @@ describe('lens pipeline — staged with Guardrail (real Discernment disposition)
     expect(brief.clientSafe).toHaveLength(0);
   });
 
-  it('Discernment runs after Evidence and Aggregate and sees their findings', async () => {
+  it('Discernment runs after Evidence and Interpret and sees their findings', async () => {
     const { gate } = await clearedScopeWithUnits();
-    // tension:0 exists only because the Aggregate lens ran before Guardrail; that
-    // Discernment can promote it proves it audited the accumulated Aggregate output.
+    // tension:0 exists only because the Interpret lens (Tension) ran before Guardrail; that
+    // Discernment can promote it proves it audited the accumulated Interpret output.
     const brief = await fullPipeline(gate, promotingProvider(['tension:0'])).synthesize(scope);
 
     expect(brief.internal.map((f) => f.findingId)).toEqual(['listening:0-0', 'listening:1-0', 'tension:0']); // revised in place
@@ -320,10 +324,10 @@ describe('lens pipeline — staged with Guardrail (real Discernment disposition)
 });
 
 describe('lens pipeline — Interpret wave (Inclusity Objective)', () => {
-  it('runs Objective after Aggregate and before Guardrail, and Discernment audits it automatically', async () => {
+  it('runs Objective in the Interpret wave (alongside Tension) before Guardrail, and Discernment audits it', async () => {
     const { gate } = await clearedScopeWithUnits();
-    // Promote the Interpret finding — only possible if Objective ran (after Aggregate)
-    // and Discernment then audited its output, with nothing extra wired for that.
+    // Promote the Interpret finding — only possible if Objective ran (Interpret wave) and
+    // Discernment then audited its output, with nothing extra wired for that.
     const provider = promotingProvider(['objective:0']);
     const brief = await new LensPipeline(gate, provider, [
       new ListeningLens(),
@@ -332,7 +336,8 @@ describe('lens pipeline — Interpret wave (Inclusity Objective)', () => {
       new DiscernmentLens(),
     ]).synthesize(scope);
 
-    // Wave order in the accumulated set: Evidence (per-voice), Aggregate, Interpret.
+    // Wave order in the accumulated set: Evidence (per-voice), then the Interpret pair
+    // (Tension registered before Objective, so tension:0 then objective:0).
     expect(brief.internal.map((f) => f.findingId)).toEqual([
       'listening:0-0',
       'listening:1-0',
@@ -351,8 +356,8 @@ describe('lens pipeline — Openings wave (Action Opening held internal-only)', 
   it('holds Action Opening even when Discernment promotes everything it audits', async () => {
     const { gate } = await clearedScopeWithUnits();
 
-    // A Discernment that promotes EVERY finding it audits. It audits the waves above
-    // the Guardrail (Evidence, Aggregate, Interpret); Openings runs after it, so
+    // A Discernment that promotes EVERY finding it audits. It audits the waves before the
+    // Guardrail (here Evidence + Interpret — Tension, Objective); Openings runs after it, so
     // opening:0 is never in its view and can never be auto-promoted.
     const promoteAllAudited = new FakeLlmProvider((payload) => {
       if (payload.task === 'disposition') {

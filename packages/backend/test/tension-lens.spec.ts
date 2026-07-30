@@ -45,7 +45,7 @@ function evidenceFinding(findingId: string, evidenceLinks: readonly string[]): F
   });
 }
 
-describe('Tension lens — Aggregate wave, reads prior findings', () => {
+describe('Tension lens — Interpret wave, reads prior findings', () => {
   it('stays silent when there are no prior findings to synthesize from', async () => {
     const out = await new TensionLens().run(units, [], new FakeLlmProvider());
     expect(out).toHaveLength(0);

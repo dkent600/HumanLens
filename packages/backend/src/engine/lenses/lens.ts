@@ -21,8 +21,9 @@ export type Wave = 'evidence' | 'meaning' | 'aggregate' | 'interpret' | 'guardra
 export const WAVE_ORDER: readonly Wave[] = [
   'evidence', // Listening — reads the units directly, surfaces each voice verbatim
   'meaning', // Human Meaning — reads Listening findings, interprets each voice on its own
-  'aggregate', // Culture Pattern, Tension — work across the whole set of prior findings
-  'interpret', // Inclusity Objective — maps findings to survey domains + ADKAR
+  'aggregate', // Culture Pattern (alone) — open-ended finding across the whole set of prior findings
+  'interpret', // Tension + Inclusity Objective — name findings against declared vocabularies
+  //             (Tension: the tensions a facilitator should notice; Objective: survey domains + ADKAR)
   'guardrail', // Facilitator Discernment — audits all prior findings, runs late
   'openings', // Action Opening — points toward possible next steps
 ];
