@@ -618,12 +618,16 @@ Because even an ungroundable answer still yields the worth-exploring flag, Human
 **Output:**
 - recurring dynamics
 - contradictions
-- gaps between stated values and lived experience
 - repeated leadership/culture signals
 - places where experience differs across groups
 - things that are working — recurring positive experience
 
-This is organizational sensemaking.
+This is organizational sensemaking: open-ended finding of what recurs, what conflicts,
+and what differs across the set of voices. It works without a prescribed list of what to
+look for — naming findings against a declared vocabulary is the work of the Tension and
+Inclusity Objective lenses that follow. (A stated value contradicted by lived experience
+is found here as a contradiction; giving that contradiction its canonical name belongs to
+those later lenses.)
 
 ---
 

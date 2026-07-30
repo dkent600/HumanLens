@@ -894,6 +894,13 @@ invariants above). The whole project is the **case study**; its first built vers
         becoming the facilitator's agenda), and volume dilution.
         **GATE CLEARED: Culture Pattern v1's ordinary-findings-only scope is CORRECT AS PERMANENT DESIGN**, not a
         temporary limitation — comparative absence may be added to it later; unprompted absence never belongs to it.
+      - **O-9 DO WAVES EARN THEIR KEEP? — deferred by decision (Doug, 2026-07-12: "defer until we have implemented
+        all of the lenses; then we'll know better").** `build_approach` defines a wave as a set of lenses "sharing
+        a particular role," running in parallel and reading earlier waves' findings. After the Culture
+        Pattern/Tension restructure (below), **only one wave would contain more than one lens** — so "wave" starts
+        to look like it means "one lens" in most cases, i.e. an ordered sequence with occasional parallelism rather
+        than a grouping concept. Not urgent and deliberately NOT settled now: the honest test is what the structure
+        looks like once all seven lenses are real. **Revisit trigger: all lenses implemented.** OPEN.
       - **O-8 SEGMENTS / UNIT TYPE-SPECIFIC EXTENSIONS — deferred, but tracked (Doug, 2026-07-12: "ok to defer
         segments for now, as long as we track the need to implement them at some appropriate point").** A
         **segment** is a group label on a unit — department, team, location, level, tenure band. Units today carry
@@ -929,7 +936,7 @@ invariants above). The whole project is the **case study**; its first built vers
         finding ever used, by any lens?* — favouring a **consolidated end-of-pipeline residual** as the truthful
         artifact, with per-lens audits as diagnostics beneath it. So O-4 now has two axes to settle: **scope**
         (per-lens vs. consolidated) and **granularity** (finding / voice / three-band).
-      All eight OPEN; no answers proposed; not in canon; do not touch the mechanism decision.
+      All nine OPEN; no answers proposed; not in canon; do not touch the mechanism decision.
     - *Item 5 — Mechanism — ADOPTED 2026-07-12 (was the TOP-PRIORITY open decision).* The adopted mechanism:
       the voice is the unit of work AND of accounting for the per-voice lenses; both
       per-voice lenses on the same mechanism; first embodiment = synchronous parallel fan-out (one call per
@@ -1605,6 +1612,49 @@ invariants above). The whole project is the **case study**; its first built vers
         across four consecutive runs; the sixth output producing no positive pattern; the gate over-suppressing
         (u7+u28 lost); `culture:2`'s seven-voice consolidated form lost to a split; the lexical-vs-conceptual
         tightness hypothesis.
+      - *DOWNSTREAM LENS-SET REVIEW (2026-07-12) — prompted by Doug: "are the ensuing lenses, as a whole, well
+        conceived?" Answer: four of five yes; the problem is concentrated at the Culture Pattern / Tension
+        boundary.* Reasoning over the lens definitions — no builds, no evals.
+        **A structural distinction the doc never named — THREE KINDS of downstream lens:** **operations** (Culture
+        Pattern — open-ended: find recurrence, contradiction, difference, positives; no prescribed list);
+        **frames** (Tension — six named tensions; Objective — ten survey domains + five ADKAR dimensions: both
+        match against a *declared vocabulary*); **postures** (Discernment — audits everything found so far; Action
+        Opening — points forward from it: neither looks for content, both act *on* what was found). Culture Pattern
+        is the ONLY open-ended finder in the pipeline. Load-bearing, and nowhere in the doc; the relevant half is
+        now stated in `build_approach` §3 (canon).
+        **PROBLEM 1 — Culture Pattern and Tension overlap, and it is Culture Pattern doing Tension's work.** "Find
+        contradiction" as an *operation* PRODUCES tensions. Concretely from the runs: `culture:2`/`culture:3`
+        (stated openness vs. concerns going nowhere) IS Tension's "inclusion language vs. lived exclusion" and
+        "leadership optimism vs. employee skepticism"; the u5+u24 meetings pattern IS "safety vs. accountability".
+        So Tension's distinct contribution is not *finding* — it is **naming against a canonical vocabulary**,
+        exactly what Objective does with survey domains. **Tension belongs with Objective in kind, not with
+        Culture Pattern as a co-finder.**
+        **PROBLEM 2 — Culture Pattern's output list mixed operations with frame work. ADDRESSED in canon (Edit 1,
+        Option A):** "gaps between stated values and lived experience" removed (a named tension type; it survives
+        under "contradictions" — a stated value contradicted by lived experience IS a contradiction across voices,
+        and the new parenthetical says so); "repeated leadership/culture signals" KEPT, because Tension's six do
+        not include it and removing it without repositioning Tension would leave nothing looking for it. *The
+        owner-chat's first draft removed both — Doug's "if that is safe and we don't lose anything" caught that
+        Edits 1 and 2 are coupled; Edit 1 alone with both removals would have silently dropped leadership signals.*
+        Also added: a closing paragraph stating the operations-vs-frame distinction. **First change to this lens in
+        six rounds that REDUCES what it is asked to do rather than adding a constraint** — relevant to the drift.
+        **PROBLEM 3 — u9's home is probably Tension, and THE RESIDUAL WAS RIGHT ALL ALONG.** u9 ("work quietly
+        dried up after a health disclosure") is not a *recurrence* — it happened once. Its shape is **intent vs.
+        impact**: a consequence arriving unnamed. That is Tension's, not Culture Pattern's. So four rounds of
+        trying to make Culture Pattern place u9 were asking the wrong lens, and the residual was flagging it
+        correctly throughout. **Reframes the residual:** it surfaces voices with no home *in this lens* — which may
+        be a miss, or a voice whose home is downstream. The residual working better than we credited; bears
+        directly on O-4 (per-lens residual overstates the miss; the pipeline-level question is the meaningful one).
+        **WELL CONCEIVED, no changes indicated:** Objective (clean declared frame, explicitly calibrated);
+        Discernment and Action Opening (clean postures, late by design — the doc already reasons carefully about
+        their ordering, e.g. Discernment never audits action openings because they are produced after it runs).
+        **PROPOSED, NOT YET DRAFTED (Edits 2 + 3, deliberately deferred):** move **Tension out of Aggregate into
+        its own position after it**, reading the accumulated pool (Listening + Human Meaning + Culture Pattern) —
+        so it names canonical tensions in what was surfaced *and* still sees one-off tensions like u9 directly from
+        the earlier findings; nothing lost by sequencing, something gained. Leaves **Culture Pattern alone in
+        Aggregate**; pipeline becomes Evidence → Meaning → Aggregate (Culture Pattern) → Tension → Interpret
+        (Objective) → Guardrail → Openings. Requires updating the wave list and the pipeline diagram (Edit 3). Take
+        up as one deliberate piece; **feeds O-9** (with this change only one wave would hold more than one lens).
       - *FIXTURE EXTENDED (u25–u34, 25→35 units, purely additive) + EVAL — CULTURE PATTERN on the extended fixture,
         real model, 2026-07-12.* Fixture additions: **u25** stated value ("the door is always open" at town halls —
         the anchor the corpus lacked), **u26** contradicting lived experience, **u27** aligning lived experience,

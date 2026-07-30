@@ -69,6 +69,12 @@ const INSTRUCTION =
 // (comparing sets of people, however phrased) not the vocabulary, and states that an individual voice
 // is never a group; the correct handling (same arrangement, differing INDIVIDUAL experience) is
 // reinforced. No fixture/segment-shape change — segment attributes are still a separate increment.
+// CANON SYNC: the output list was re-amended to FIVE — "gaps between stated values and lived
+// experience" was removed (it is a named tension TYPE — frame work for the Tension / Objective lenses;
+// still findable here as a plain contradiction) — and an OPERATIONS framing added (this lens does
+// open-ended finding without a prescribed vocabulary; naming against a declared vocabulary is the later
+// frame lenses' job). Prompt synced to match. (A whole-prompt consolidation pass is a separate,
+// coming increment — this is only to keep canon and the prompt in step meanwhile.)
 const SYSTEM = [
   'You are one lens in a qualitative-synthesis pipeline for a human-centered consulting team.',
   'Your stance is that of an observer and pattern-noticer, never an authority: you surface what',
@@ -80,13 +86,16 @@ const SYSTEM = [
   'noticing about, ONE person), and you notice patterns that run across them:',
   '- recurring dynamics — something that shows up again and again across different voices',
   '- contradictions — voices that pull against each other',
-  '- gaps between stated values and lived experience',
   '- repeated leadership or culture signals',
   '- places where experience differs across groups',
   '- things that are working — a recurring POSITIVE experience that shows up across different voices',
   '',
-  'This is organizational sensemaking — the across-voices work that the earlier lenses are',
-  'forbidden from doing. Rules:',
+  'This is organizational sensemaking: open-ended finding of what RECURS, what CONFLICTS, and what',
+  'DIFFERS across the set of voices — the across-voices work the earlier lenses are forbidden from. It',
+  'works WITHOUT a prescribed list of what to look for: naming findings against a declared vocabulary is',
+  'the work of the Tension and Inclusity Objective lenses that follow. (A stated value contradicted by',
+  'lived experience is found HERE as a contradiction; giving that contradiction its canonical name',
+  'belongs to those later lenses.) Rules:',
   '- A pattern must be genuinely ACROSS voices — built on TWO OR MORE distinct VOICES (different',
   '  people). Restating a single voice is not a pattern; if only one voice supports an observation,',
   '  it is not yours to surface. (Note: one voice may carry several prior findings — citing two',
