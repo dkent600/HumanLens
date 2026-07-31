@@ -19,9 +19,14 @@ import type { LlmProvider, LlmRequest, LlmResponse } from './llm-provider.js';
 
 /**
  * The model the lenses run on — a single named constant, verified against the Claude
- * API reference at build time: `claude-opus-4-8`, the current default Opus-tier model.
+ * API reference at build time: `claude-opus-5`, the current default Opus-tier model.
+ *
+ * Changing this constant changes what every eval measures, so a baseline taken on one
+ * model is NOT comparable to a run on another — re-baseline after a model change.
+ * (Superseded `claude-opus-4-8` on 2026-07-31; prior real-run records in build_context.md
+ * name the model they ran on and stand as history.)
  */
-export const ANTHROPIC_MODEL = 'claude-opus-4-8';
+export const ANTHROPIC_MODEL = 'claude-opus-5';
 
 /**
  * Output ceiling per call. A lens emits a handful of findings — comfortably within the

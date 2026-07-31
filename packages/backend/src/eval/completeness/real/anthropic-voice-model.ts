@@ -3,7 +3,7 @@ import { ANTHROPIC_MODEL, type AnthropicMessagesClient } from '../../../seams/an
 import { TransportError, type FinishReason, type RawSdkOutcome, type VoiceModel } from '../model-call.js';
 
 // The REAL per-voice model bridge (eval-side) — the VoiceModel the fan-out drives against
-// the actual claude-opus-4-8 for the F1/F2/F3 falsifiers. It is a SEPARATE, eval-only
+// the actual model (`ANTHROPIC_MODEL`) for the F1/F2/F3 falsifiers. It is a SEPARATE, eval-only
 // adapter; it does NOT modify the production `AnthropicLlmProvider`.
 //
 // HISTORICAL NOTE (the fix landed): this bridge originally existed because the production

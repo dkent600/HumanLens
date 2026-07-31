@@ -4,9 +4,9 @@ import { SAMPLE_UNITS } from '../../sample-units.js';
 import type { VoiceContent } from './anthropic-voice-model.js';
 
 // Shared helpers for the F1/F2/F3 real-model falsifier harnesses. These harnesses spend
-// real money against claude-opus-4-8 — they are run BY DOUG, deliberately (never on the
-// eval-agent's own initiative). Each harness prints its call count up front so the spend
-// is visible before the work happens.
+// real money against the real model (`ANTHROPIC_MODEL`) — they are run BY DOUG, deliberately
+// (never on the eval-agent's own initiative). Each harness prints its call count up front so
+// the spend is visible before the work happens.
 
 /** Every sample voice as a per-voice work item (voiceId = unit id, the provenance anchor). */
 export function sampleVoices(): VoiceContent[] {

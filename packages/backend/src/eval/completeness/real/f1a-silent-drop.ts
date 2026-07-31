@@ -8,7 +8,7 @@ import { requireClient, sampleVoices, u9FocusVoices } from './shared.js';
 // F1-a — SILENT-DROP-IMPOSSIBILITY on the REAL path (build_context.md V-3 / F1).
 //
 // Runs the u9 fixture (and, in `sample` mode, the fuller SAMPLE) through the V-1 per-voice
-// fan-out against the real claude-opus-4-8, N times. PASS = ledger TOTALITY every run:
+// fan-out against the real model (`ANTHROPIC_MODEL`), N times. PASS = ledger TOTALITY every run:
 // every voice in exactly one terminal state, ZERO unaccounted. The point: in the batched
 // Human Meaning call u9 intermittently vanished (dropped/dropped/surfaced); under per-voice
 // fan-out u9 gets its OWN call every time, so a "drop" can no longer be silent — it can
