@@ -56,6 +56,15 @@ partner and the writer of `build_approach.md`.
   occasion in the fixture) AND *false-positives / over-reach* (control voices — neutral, positive,
   or genuinely context-dependent — where the correct move is restraint: no manufactured category,
   no loaded reading, a flag not a guess). A fixture that only tests coverage rewards over-reading.
+  **WHO RUNS WHAT — two different things are called "eval", and they produce output of the same FORM.** The REAL
+  run is **Doug's, manual, in a terminal** (`npm run eval -- <lens>`) — slow and paid; **every calibration eval to
+  date has been his**. Claude Code does NOT run real evals by default, for exactly that reason; what it runs
+  automatically is the **FAKE** run, covering shape and mechanics only. **The tell:** `defaultFakeResponse` cites
+  all priors, so a fake run reports **~100% coverage and an empty residual** — a complete, plausible audit block
+  that never reached the model. **So: never ask Claude Code to run a real eval.** Ask it for the cheap exact
+  things (git diff against a commit, sampling parameters read off the source) and ask Doug for the run. **The eval
+  path is ONE HOP — Doug's terminal → this chat** — so relay-sheds-load does not govern eval evidence (no
+  intermediate chat to shed it); the empty-attachment convention does.
 - **Relay sheds load (multi-chat transmission hazard).** Knowledge moves between chats by relay; each hop can
   silently drop a load-bearing detail. Proven live: the two completeness attacks that landed (ledger durability,
   finish_reason/truncation) were BOTH in the original research survey and lost across survey→package→spec. So:
@@ -100,6 +109,15 @@ partner and the writer of `build_approach.md`.
   marker a plain label; and **"permission tracks grounding, not wave position"** cost two rounds of explanation
   before Doug's "maybe it isn't really important to state" — the concrete cases (Objective has a declared list,
   Culture Pattern doesn't, a future lens would need one) said it better and needed no slogan over them.
+- **Attachments can arrive EMPTY (multi-chat transmission hazard). Never reconstruct from expectation.** An
+  attachment sent with no accompanying inline text may arrive empty; **including at least a word of inline text
+  prevents it**. If an attachment is empty or unreadable, **say so and STOP the turn** — do not infer, reconstruct,
+  or proceed from what the content was expected to be. Proven live: an empty relay was answered TWICE from
+  expectation rather than content before Doug caught it. **The hazard is worst exactly where it matters most** —
+  relayed eval output is evidence gating a decision, so reconstructing it is not a guess about content, it is
+  **fabricating validation data**, and it would read as a normal answer. Sibling of relay-sheds-load: that
+  convention covers load lost in transit, this one covers the whole payload arriving absent while the turn
+  proceeds as though it hadn't.
 
 ## State of `build_approach.md` (as of last good edit)
 - ~1042 lines. **Reorganized into three Parts** under the title (Option A
@@ -1668,6 +1686,11 @@ invariants above). The whole project is the **case study**; its first built vers
         spend a third run to narrow it** — the finding is already made. Record the observed spread as the FLOOR,
         treat the 35% → 21% arc as partly noise, and judge the rewrite only on movements outside the observed range
         plus categorical changes.
+        **GUARD — a FAKE run would fire this rule.** ~100% coverage sits far outside 16–26%, so fake output
+        mistaken for the baseline would enter **"wide variance established"** in the log from data that never
+        reached the model. The stopping rule exists to prevent deciding AFTER seeing the number, which means it
+        fires obediently on the WRONG number. **~100% coverage with an empty residual is the fake, not a result.**
+        (Fake-vs-real and who runs which: Working conventions, lens-validation method.)
         **WHAT THE BASELINE CAN AND CANNOT OVERTURN (Doug's qualification — it governs the read).** The behavioral
         findings are CATEGORICAL and hold independent of the numbers: u32/u33/u34 moved to the residual after the
         tightness rule and STAYED there across rounds; the cross-group gate leaked in round 4 (population
@@ -1688,6 +1711,99 @@ invariants above). The whole project is the **case study**; its first built vers
         behaviors FIRST, coverage second.** Do the planted isolates stay in the residual; does the cross-group gate
         hold without over-suppressing; does a positive pattern appear; does the pattern set stay coherent. Those
         are what the calibration arc actually established, and they are the things a percentage cannot tell us.
+        **SEQUENCING — the draft PRECEDES the raw output, by design (corrected mid-relay, 2026-07-31).** The
+        obvious order — hold the rewrite until the baseline run comes back — is WRONG, and defeats the
+        write-to-the-job-not-to-the-fixture discipline one step later through a different door: the eval output is
+        35 voices with full findings, it lands whole rather than one voice at a time, and once it is in context it
+        cannot be unseen. **The two parts decouple:** the prompt artifact is what the draft cannot proceed without;
+        the variance baseline governs only how the POST-rewrite run is judged and has no bearing on what the prompt
+        should say — a wide spread and a narrow spread produce the same rewrite. Both were being treated as
+        prerequisites when only one is. **ORDER:** draft from the artifact + the settled five-output scope + the
+        behavioral findings already recorded here → THEN read the raw output → then check the draft against it,
+        revising only where a categorical behavior demands it, **each revision named and justified rather than
+        absorbed**. **The check is mechanical, which is why it is recorded rather than resolved:** if the draft
+        exists before the output is in context, the derivation is provably not from the output — checkable in a way
+        "resist the temptation" is not. **The recorded findings are sufficient to draft from** (isolates absorbed
+        until the tightness rule; the gate leaking then over-suppressing; positives producing nothing; the
+        lexical-vs-conceptual hypothesis) — that IS the distilled behavioral knowledge, and re-deriving it from raw
+        output would buy detail the drafter specifically should not have. **`culture:2` is NOT a drafting
+        dependency:** whether it returns consolidated corrects the log either way, but the seven-voice values-gap
+        is the target regardless of which round split it.
+      - *CONSOLIDATION PASS — the PROMPT ARTIFACT read (2026-07-31). Working from the artifact rather than canon
+        paid for itself: two of the findings below were invisible in the doc's description.* Obtained via relay:
+        the effective Culture Pattern system text as sent (no shared preamble, no projection template — one
+        `SYSTEM` string-array `.join('\n')`), the user-payload shape, the prompt/code boundary, and the Listening +
+        Human Meaning prompts for house-style comparison. Deliberately NOT requested: fixture text, voices, eval
+        output (see SEQUENCING above).
+        **CANON AND PROMPT ARE IN STEP — a relay-reported defect that does not exist.** The relay flagged a
+        "five/six naming residue" (comment says five outputs, list allegedly carries six). It does not: the list
+        carries **five**, exact match to `build_approach` §3 in content and order. Both code comments are
+        historically accurate in sequence (SCOPE FIX added positives as a sixth at the time; CANON SYNC then
+        removed values-vs-lived, returning it to five). **Note the DIRECTION — relay-sheds-load is written as
+        though LOSS is the only failure mode, and this hop shed load by INVENTING work rather than dropping it.**
+        Every prior instance in this project ran the other way. The convention's check (source item →
+        covered-or-consciously-excluded) catches omission; it does not catch a phantom, which is caught only by
+        going to the artifact. Worth knowing the failure is bidirectional.
+        **FINDING — the tightness rule has a NAMED MECHANISM for pushing lexical, and it is the rule's only test.**
+        R3 defines tightness entirely by a *naming* test — a pattern fails "if naming the pattern needs a category
+        wide enough to hold otherwise-unrelated material" — and **nothing in R3 says what makes two voices the same
+        dynamic**. The test measures the width of the LABEL. That structurally TAXES conceptual pairing: voices
+        sharing vocabulary are trivially nameable with a narrow label, while voices sharing a STRUCTURE (u9's
+        consequence-arriving-unnamed with u28) need an abstract label, and an abstract label reads as wide against
+        a width-only test. So the rule does not merely fail to encourage conceptual tightness — it penalizes it.
+        **This upgrades the lexical-vs-conceptual hypothesis from a correlation observed in output to a mechanism
+        named in the artifact.** Still unconfirmed, but a substantially stronger claim than what went in.
+        **HYPOTHESIS (testable, was invisible from canon) — the prompt's EXAMPLE SET fights the positives output.**
+        Four broad-bucket examples across the whole prompt; **three are positive-valence** ("things people
+        appreciate", "things that are positive", plus R6's repeat); **"things people appreciate" is the only
+        example repeated anywhere in the prompt**. A model reading this learns that positive categories are the
+        ARCHETYPE of the forbidden thing — and R6 then asks it to emit positive patterns. **Candidate explanation
+        with a visible cause for round 4's null result** (the positives scope addition, the only change in five
+        rounds to move zero distance on its own target): the scope addition was fighting the tightness rule's
+        example set, and examples outweigh instructions. Hypothesis, not finding.
+        **PROPORTION — the Q2 case, now showable from the text rather than inferred from two regressions.** The
+        cross-group cluster (R8 substance-gate + R9 individual-never-a-group + R10 same-arrangement) is **~240 of
+        ~800 rule words, ~30%** — the largest block in the prompt — and it governs an output that **cannot
+        currently fire**: no unit carries a segment attribute (O-8), so the permitted case is unreachable and only
+        the prohibition is live. The lens spends its heaviest instruction policing an output it is structurally
+        incapable of producing.
+        **ACCUMULATION, VISIBLE IN THE TEXT:** tightness stated 3× (R3, R4, R6); don't-drop-a-voice 2× (R4, R5);
+        population-comparison prohibited 3× (R8, R9, R10); anti-gaming 2× (R5 "not a quota", R6 "no balance
+        target"); anti-invention 2× (R7, R11); one clause duplicated verbatim. **~20 prohibitions against a handful
+        of positive instructions** — nearly every round added a guard and none removed one. The patch-stack
+        signature read off the artifact rather than inferred from the coverage numbers.
+        **TWO MECHANICAL GAPS — RECORD, DO NOT BUILD (per Q1, prompt-only).**
+        (1) **The two-distinct-voices floor is unenforced AND mechanically awkward to honor.** Code does not count
+        voices at all — the only post-parse gate is `validCited.length === 0` (at least ONE existing citation, not
+        two distinct voices). And `toPromptFinding` projects `{findingId, lens, content, evidenceUnitIds}` — **no
+        speaker token** — so to honor "two findings from the SAME person is still one voice" the model must join
+        findings → `evidenceUnitIds` → units → `speakerToken` itself, a multi-hop join the prompt never mentions.
+        **Consequence for the rewrite: do not lean on the floor as though it were a working constraint.** (The
+        earlier carry-forward stands: if ever made structural, count distinct speaker tokens, not findings.)
+        (2) **The payload hands the model raw `units` (full `content` + `speakerToken`) it may not need** — anchor
+        inheritance and support derivation are both CODE operations over cited findings' `evidenceLinks`, and the
+        prior findings already carry Listening's verbatims as `content`. Sits awkwardly against the evidence-funnel
+        decision (only Listening reads units; later waves read findings, units in scope as anchor TARGETS). Was
+        reported and accepted at v1 build as "a real cross-voice lens needs units to anchor and derive support" —
+        but on this artifact the code does both without the model.
+        **STANCE BLOCK — EXAMINED AND DECLINED, not carried as debt.** The opening four lines are hand-copied into
+        all three lenses with small per-lens variations ("in the material" / "across the material" / "what a voice
+        might mean"). Factoring into a shared constant would either flatten the variations — which appear
+        deliberate, each naming what that lens surfaces — or need a parameter for the one differing phrase. Real
+        risk, negligible gain. **Not a code candidate.**
+        **ABSENCE — the draft's flat prohibition ("do not assert that something is missing or was never said") is
+        DELIBERATE for v1, not an oversight.** It is narrower than O-7 permits: O-7 leaves **comparative absence**
+        available to this lens (the corpus supplies the expectation; it cites the findings it contrasts against).
+        Kept flat because O-7's gate clearance recorded ordinary-findings-only as CORRECT PERMANENT DESIGN, and
+        because cite-both-sides reaches the same material as a contradiction with both sides cited. Nothing lost in
+        practice; **enabling comparative absence would be a deliberate scope addition, not a wording fix.**
+        **VARIANCE PREMISE CONFIRMED AT CODE LEVEL.** The structural argument above (fan-out averages, one-call
+        synthesis does not) was reasoned from architecture; the relay confirms it from code — Listening and Human
+        Meaning are per-voice, receiving ONE-ELEMENT `units`/`priorFindings` lists per call, while Culture Pattern's
+        `SYSTEM` and `INSTRUCTION` are the only ones written to read the whole set at once. Premise verified, not
+        merely asserted. **Corollary for the rewrite: Culture Pattern has NO PEER to calibrate house style
+        against.** The stance block, emission instruction, and JSON-shape convention transfer from the sibling
+        lenses; the rule body does not, and matching their scale would import the wrong one.
       - *DOWNSTREAM LENS-SET REVIEW (2026-07-12) — prompted by Doug: "are the ensuing lenses, as a whole, well
         conceived?" Answer: four of five yes; the problem is concentrated at the Culture Pattern / Tension
         boundary.* Reasoning over the lens definitions — no builds, no evals.
