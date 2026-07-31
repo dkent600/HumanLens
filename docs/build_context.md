@@ -70,7 +70,10 @@ partner and the writer of `build_approach.md`.
   targets, so it fell out unanswered (found only by the parallel traceability walk). The symmetry is the lesson —
   the disposition process itself violated "totality / no silent path," the same completeness property the
   *product* enforces, missing from our *process*. Applies to any review, diff, or packet whose requested scope
-  is larger than what came back.
+  is larger than what came back — **and to EDITS: an edit that removes content must name where the content goes,
+  and if the recipient is another edit, the two are coupled and move together.** Proven live: Edit 1 shed two
+  Culture Pattern outputs as though standalone, when Edit 2's repositioning of Tension was what would receive
+  them; Doug's "if that is safe and we don't lose anything" caught it.
 - **Plain-language derivatives over-claim certainty (review heuristic; Fable).** Human-destined glosses of the
   precise design tend to quietly claim certainty the system doesn't have. Proven live: the completeness gloss's
   "what the residual asks of a human" block was corrected TWICE by Doug reading skeptically — first for reading
@@ -80,6 +83,23 @@ partner and the writer of `build_approach.md`.
   gets a deliberate skeptical human read specifically hunting for over-claimed certainty, before it's treated as
   final. The recursion is the point — the product's own thesis is "the machine delivers, the human's skeptical
   look supplies the judgment," and that same skeptical read is the working control on the docs *about* it.
+- **Derived-frame totality (apply the frame you just built).** When reasoning produces a general structure — a
+  taxonomy, a classification, a set of kinds — **walk every member through it before proposing anything
+  structural**, and state each member's placement. Proven live: the downstream lens-set review derived three kinds
+  of lens (operations / frames / postures), placed Tension and Objective in the SAME row as frame-matchers, and
+  then proposed a structure keeping them in different waves — *pairwise* reasoning (Tension measured against
+  Culture Pattern) producing a pairwise answer, when the taxonomy had already answered the grouping question
+  outright. The check is mechanical and shares disposition-totality's shape: frame → enumerate members → each
+  member's placement stated → only then propose structure. **A frame derived and not applied is the tell.**
+- **A coined term that needs explaining is a term to replace with its cases.** New shorthand — notation, slogans,
+  labels — reads as clear to whoever coined it and opaque to everyone else. **The tell is having to explain it;
+  the check is that if you are explaining a term you coined, delete the term and keep the explanation** — the
+  concrete cases usually said it better and travel without a gloss. Proven live twice: **the star character** was
+  carried for many turns meaning two different things at once (a build-acceptance marker AND the fake-empty-drop
+  defect) until Doug asked what it meant — retired entirely, the defect given a name ("the fake-empty drop"), the
+  marker a plain label; and **"permission tracks grounding, not wave position"** cost two rounds of explanation
+  before Doug's "maybe it isn't really important to state" — the concrete cases (Objective has a declared list,
+  Culture Pattern doesn't, a future lens would need one) said it better and needed no slogan over them.
 
 ## State of `build_approach.md` (as of last good edit)
 - ~1042 lines. **Reorganized into three Parts** under the title (Option A
@@ -242,8 +262,8 @@ partner and the writer of `build_approach.md`.
   `speaker_token` keeps support honest: count "N units across M sources/segments",
   never "N people".
 - Lens processing = STAGED PIPELINE. The 7 Module-1 lenses form 6 lens waves:
-  Evidence (Listening) → Meaning (Human Meaning) → Aggregate (Culture Pattern,
-  Tension) → Interpret (Inclusity Objective) → Guardrail (Facilitator
+  Evidence (Listening) → Meaning (Human Meaning) → Aggregate (Culture Pattern) →
+  Interpret (Tension, Inclusity Objective) → Guardrail (Facilitator
   Discernment) → Openings (Action Opening). Only Evidence reads the units; every
   later wave reads the findings of earlier waves (units stay in scope as anchor
   targets, not re-read as input). Each lens is a separate, versioned
@@ -861,7 +881,7 @@ invariants above). The whole project is the **case study**; its first built vers
         what can't be checked is why X was the thing looked for. Two acts hide in one claim: *noticing a silence*
         (a fact about the corpus, mechanically checkable) and *judging it significant* (interpretive, where the
         expectation problem lives).
-        **THE RESOLUTION — permission tracks the GROUNDING, not the wave:**
+        **THE RESOLUTION:**
         (a) **Free-floating PRESENCE: permitted.** Selection isn't arbitrary — the data selected it; the citations
         are both the evidence and the justification for why *this* pattern and not another. Surfacing what nobody
         thought to ask about is arguably the point of qualitative synthesis. Presence carries its own selection
@@ -1612,6 +1632,62 @@ invariants above). The whole project is the **case study**; its first built vers
         across four consecutive runs; the sixth output producing no positive pattern; the gate over-suppressing
         (u7+u28 lost); `culture:2`'s seven-voice consolidated form lost to a split; the lexical-vs-conceptual
         tightness hypothesis.
+      - *VARIANCE BASELINE — decided BEFORE the consolidation pass (Doug + owner-chat, 2026-07-31): the drift
+        numbers have never been checked against run-to-run noise.* **The inconsistency, named by Doug:** Human
+        Meaning's wobble on an UNCHANGED prompt (35/33/36 findings, u5 1→3) was recorded as *stochastic
+        distribution, not behavior change* — and Culture Pattern's coverage trend (35% → 22% → 28% → 23% → 21%)
+        was then read as drift **without the same skepticism ever being applied**. Culture Pattern has never been
+        run twice on one prompt; the arc is five n=1 measurements.
+        **Why variance should be structurally WORSE here (Doug):** Human Meaning **fans out** — 26 independent
+        calls, so per-call wobble partly averages out. Culture Pattern makes **one synthesis call over the whole
+        set**, with no such averaging: one different clustering decision cascades through every pattern in the run.
+        It is the higher-variance lens *by construction*, and we have zero measurements of it. **This generalizes:
+        every cross-voice lens is a single-call synthesis lens** (Tension, Objective, Discernment, Action Opening),
+        so single-run calibration evidence is structurally weaker for all four than for the per-voice lenses.
+        **CANDIDATE AMENDMENT to the standing lens-validation method** (which says "a real-model eval run",
+        singular, with no distinction between the two shapes) — **HELD, not proposed**, pending measurement:
+        amending the method on an unmeasured hypothesis about variance is the same move being corrected here. The
+        run supplies the first datum.
+        **DECISION: one re-run of the unchanged round-5 prompt on the unchanged 35-unit fixture, before the
+        consolidation pass drafts anything** — so the rewrite is judged against a RANGE, not a point. A
+        post-rewrite number inside the same-prompt range is uninterpretable; only a move outside it means
+        anything. Same for pattern counts.
+        **STOPPING RULE — PRE-COMMITTED before the output exists (Doug), so "close enough" cannot be decided after
+        seeing the number.** **N = 5 percentage points.** If the re-run lands within **21% ± 5 (16–26%)** AND
+        reproduces the pattern set: accept, proceed to the rewrite, judge it against a conservative band of ±5. **No
+        third run.** *Why 5 and not a guess:* (1) the only same-prompt variance measured anywhere in this project is
+        Human Meaning's finding counts, 35/33/36 — about ±4% around the mean — and that is the
+        **lower**-variance lens by construction, so ±5 for a single-call lens is a deliberately generous read of the
+        same order of magnitude; (2) ±5 is also what makes the rewrite judgeable at all — round-to-round moves in
+        the calibration arc were 6–13 points, so requiring tighter than ±5 would demand precision the instrument
+        has never shown it has.
+        **THE HONEST LABEL, pre-committed in Doug's words:** two close runs establish **"variance not shown to
+        exceed ±5," not "variance is low."** n=2 bounds the spread from below; it cannot bound it from above. The
+        record is not to say more than the evidence supports.
+        **IF IT LANDS OUTSIDE 16–26%, or the pattern set moves materially:** conclusive for wide variance. **Do not
+        spend a third run to narrow it** — the finding is already made. Record the observed spread as the FLOOR,
+        treat the 35% → 21% arc as partly noise, and judge the rewrite only on movements outside the observed range
+        plus categorical changes.
+        **WHAT THE BASELINE CAN AND CANNOT OVERTURN (Doug's qualification — it governs the read).** The behavioral
+        findings are CATEGORICAL and hold independent of the numbers: u32/u33/u34 moved to the residual after the
+        tightness rule and STAYED there across rounds; the cross-group gate leaked in round 4 (population
+        comparison, reworded) and held in round 5 after the substance-binding fix; u24 was absent → returned with
+        the counterweight → absent again. None is noise-sensitive. So a wide spread means **"the 35% → 21% arc is
+        partly noise," NOT "the calibration findings were wrong."**
+        **TWO THINGS TO RECORD BEYOND COVERAGE:** (1) **pattern-set stability** — do the same clusters reappear
+        (workload, effort-withdrawal, speaking-up, cultural-identity, outsider) or does the clustering itself move?
+        More informative than coverage: stable judgments with wobbling counts is a different lens from one that
+        re-clusters every run. (2) **whether `culture:2`'s split reproduces** — round 5 recorded the seven-voice
+        values-gap finding splitting into two thinner patterns and attributed it to the gate fix. **If it returns
+        CONSOLIDATED on an unchanged prompt, round 5 did not split it — variance did, and a recorded "regression"
+        is a misattribution to be corrected in this file.** The single most valuable thing this run can tell us: a
+        rule logged as causing something it did not cause. **This question OVERRIDES the band either way** — a
+        consolidated return is categorical regardless of where coverage lands, because a rule logged as causing
+        something it didn't is worse than a noisy percentage.
+        **PRIMARY CRITERION FOR JUDGING THE REWRITE — stated now so it isn't chosen later (Doug):** **categorical
+        behaviors FIRST, coverage second.** Do the planted isolates stay in the residual; does the cross-group gate
+        hold without over-suppressing; does a positive pattern appear; does the pattern set stay coherent. Those
+        are what the calibration arc actually established, and they are the things a percentage cannot tell us.
       - *DOWNSTREAM LENS-SET REVIEW (2026-07-12) — prompted by Doug: "are the ensuing lenses, as a whole, well
         conceived?" Answer: four of five yes; the problem is concentrated at the Culture Pattern / Tension
         boundary.* Reasoning over the lens definitions — no builds, no evals.
@@ -1648,13 +1724,32 @@ invariants above). The whole project is the **case study**; its first built vers
         **WELL CONCEIVED, no changes indicated:** Objective (clean declared frame, explicitly calibrated);
         Discernment and Action Opening (clean postures, late by design — the doc already reasons carefully about
         their ordering, e.g. Discernment never audits action openings because they are produced after it runs).
-        **PROPOSED, NOT YET DRAFTED (Edits 2 + 3, deliberately deferred):** move **Tension out of Aggregate into
-        its own position after it**, reading the accumulated pool (Listening + Human Meaning + Culture Pattern) —
-        so it names canonical tensions in what was surfaced *and* still sees one-off tensions like u9 directly from
-        the earlier findings; nothing lost by sequencing, something gained. Leaves **Culture Pattern alone in
-        Aggregate**; pipeline becomes Evidence → Meaning → Aggregate (Culture Pattern) → Tension → Interpret
-        (Objective) → Guardrail → Openings. Requires updating the wave list and the pipeline diagram (Edit 3). Take
-        up as one deliberate piece; **feeds O-9** (with this change only one wave would hold more than one lens).
+        **EDITS 2 + 3 — LANDED (recorded 2026-07-31; this block previously read "PROPOSED, NOT YET DRAFTED").
+        Tension has moved out of Aggregate.** *The proposal was:* give Tension its own position after Aggregate,
+        reading the accumulated pool (Listening + Human Meaning + Culture Pattern), leaving Culture Pattern alone
+        in Aggregate. **What landed differs in shape, and the difference is the taxonomy asserting itself:**
+        Tension went into **Interpret, alongside Objective**. On review, a solo position was *pairwise* reasoning
+        (Tension measured against Culture Pattern), while the three-kinds taxonomy above says Tension and Objective
+        are the same KIND — both **frame-matchers**, naming findings against a declared vocabulary — so they share
+        a wave. **Still six waves**, Interpret now holding two: Evidence (Listening) → Meaning (Human Meaning) →
+        Aggregate (Culture Pattern) → Interpret (Tension, Inclusity Objective) → Guardrail (Discernment) →
+        Openings (Action Opening). Canon, both diagrams, and the code (`tension-lens.ts` wave assignment +
+        pipeline tests) updated and committed.
+        **CONSEQUENCE for the Culture Pattern consolidation pass — the boundary line can be written STRONGLY**
+        rather than hedged: Tension is genuinely downstream of Aggregate and reads the accumulated pool including
+        Culture Pattern's findings, so "find contradiction as an operation; naming it against a canonical
+        vocabulary is a later lens's work, and a contradiction you surface will be seen by it" is now literally
+        true rather than a claim about a lens running in parallel.
+        **CONSEQUENCE for u9 — the gap is NOT structural, it is UNBUILT.** Tension's position exists and can see
+        u9: reading the accumulated pool means it receives u9 directly from the Listening and Human Meaning
+        findings, not only through Culture Pattern. What does not exist is Tension as a REAL lens (still a batched
+        placeholder). So u9's home exists in the architecture and will see it when the lens goes real — **"not yet
+        built," not "nowhere to go."** Accepted knowingly; the Culture Pattern rewrite is NOT to chase u9. **The
+        two readings license different decisions, which is why the distinction is recorded rather than assumed:**
+        "nowhere to go" would invite arguing whether Culture Pattern should stretch to hold u9; "not yet built"
+        means write the boundary cleanly and let u9 fall to the residual without apology.
+        **O-9 unaffected in substance:** exactly one wave still holds more than one lens — Interpret rather than
+        Aggregate.
       - *FIXTURE EXTENDED (u25–u34, 25→35 units, purely additive) + EVAL — CULTURE PATTERN on the extended fixture,
         real model, 2026-07-12.* Fixture additions: **u25** stated value ("the door is always open" at town halls —
         the anchor the corpus lacked), **u26** contradicting lived experience, **u27** aligning lived experience,
