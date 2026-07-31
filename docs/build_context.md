@@ -60,8 +60,13 @@ partner and the writer of `build_approach.md`.
   run is **Doug's, manual, in a terminal** (`npm run eval -- <lens>`) — slow and paid; **every calibration eval to
   date has been his**. Claude Code does NOT run real evals by default, for exactly that reason; what it runs
   automatically is the **FAKE** run, covering shape and mechanics only. **The tell:** `defaultFakeResponse` cites
-  all priors, so a fake run reports **~100% coverage and an empty residual** — a complete, plausible audit block
-  that never reached the model. **So: never ask Claude Code to run a real eval.** Ask it for the cheap exact
+  all priors, so a fake-path run reports **exactly 100% coverage and exactly 0 residual, deterministically, every
+  run** — a complete, plausible audit block that never reached the model. **PRIMARY CHECK: the harness DECLARES
+  its provider** (`Provider: deterministic fake (no ANTHROPIC_API_KEY found)` / `real Anthropic model (...)`), so
+  provenance is asserted, not inferred; the coverage signature is a corroborating tell, not the test. Two
+  refinements: the signature identifies **the fake path generally** (any cross-voice lens on the fake produces it),
+  not Culture Pattern; and the inversion holds — **a real-model run showing exactly 100% / 0 residual would itself
+  be suspicious**. **So: never ask Claude Code for a real-model run.** Ask it for the cheap exact
   things (git diff against a commit, sampling parameters read off the source) and ask Doug for the run. **The eval
   path is ONE HOP — Doug's terminal → this chat** — so relay-sheds-load does not govern eval evidence (no
   intermediate chat to shed it); the empty-attachment convention does.
