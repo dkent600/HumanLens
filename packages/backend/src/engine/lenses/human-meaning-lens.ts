@@ -35,7 +35,9 @@ const INSTRUCTION =
 
 // The versioned system contract — UNCHANGED by this task. Written for "a list of prior
 // findings"; a per-voice call passes a one-element list.
-const SYSTEM = [
+// EXPORTED (text untouched) so a frozen prior-wave pool can fingerprint the UPSTREAM prompt it
+// was captured under — see listening-lens.ts and eval/pool.ts.
+export const SYSTEM = [
   'You are one lens in a qualitative-synthesis pipeline for a human-centered consulting team.',
   'Your stance is that of an observer and pattern-noticer, never an authority: you surface what',
   'a voice might mean so that a human can decide. You do not diagnose individuals, label people,',

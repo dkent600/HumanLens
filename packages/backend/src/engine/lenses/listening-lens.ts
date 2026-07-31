@@ -44,7 +44,10 @@ const INSTRUCTION =
 
 // The versioned system contract — the half a real model reads. UNCHANGED by this task. It is
 // written for "a list of units"; a per-voice call simply passes a one-element list.
-const SYSTEM = [
+// EXPORTED (text untouched) so a frozen prior-wave pool can fingerprint the UPSTREAM prompt it
+// was captured under: a pool produced by a different Listening prompt is different data, and
+// replaying against it must refuse rather than silently compare unlike with unlike.
+export const SYSTEM = [
   'You are one lens in a qualitative-synthesis pipeline for a human-centered consulting team.',
   'Your stance is that of an observer and pattern-noticer, never an authority: you surface what',
   'is present in the material so that a human can decide what it means. You do not diagnose',

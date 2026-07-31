@@ -1696,6 +1696,25 @@ invariants above). The whole project is the **case study**; its first built vers
         reached the model. The stopping rule exists to prevent deciding AFTER seeing the number, which means it
         fires obediently on the WRONG number. **~100% coverage with an empty residual is the fake, not a result.**
         (Fake-vs-real and who runs which: Working conventions, lens-validation method.)
+        **STOPPING RULE REVISED — 2026-07-31, BEFORE ANY OUTPUT EXISTS. The rule above is superseded, and is left
+        standing so the change is visible rather than quietly overwritten.** **Why this is legitimate exactly
+        once:** revisiting a pre-commitment is the move the pre-commitment was built to prevent — so it is honest
+        here ONLY because **nothing has been seen**. No baseline run has been executed; no number exists to be
+        motivated by. This is a **COST-BASIS CHANGE, not a reinterpretation**: the rule was never wrong, its
+        premise stopped being true. **What changed:** "no third run" was reasoned from each run costing ~71 model
+        calls (Listening 35 + Human Meaning one-per-Listening-finding + Culture Pattern 1), so n=2 was what was
+        affordable, and bounding-from-below-only was accepted as the price. **Freeze-and-replay makes a replay
+        exactly 1 call — ~80× cheaper** — so n=5 or n=10 genuinely BOUNDS the range instead of only flooring it.
+        **Two anchoring facts also invalidated the specific numbers, independently of cost:** (1) **21% was measured
+        on a different PROMPT** — the tree prompt is round 5 PLUS the canon sync (commit 9fafc74 is the canon sync,
+        not round 5), so no same-prompt comparison to 21% exists; (2) **21% was measured on a different MODEL**
+        (claude-opus-4-8, now legacy; current constant is claude-opus-5). And (3) 21% was 18/81 with a **varying
+        denominator** — the defect freezing fixes. **REVISED RULE: raise the run count (n=5 as the working figure,
+        cheap enough to extend), and RE-ANCHOR the band to the new frozen-pool baseline once it exists — not to
+        21%, which is a point from a retired prompt on a retired model with a random denominator.** **UNCHANGED and
+        still binding:** the honest-label discipline (state what n runs actually establish, never more); categorical
+        behaviors judged FIRST and coverage second; and the requirement that the band be fixed BEFORE the
+        post-rewrite run, not after.
         **WHAT THE BASELINE CAN AND CANNOT OVERTURN (Doug's qualification — it governs the read).** The behavioral
         findings are CATEGORICAL and hold independent of the numbers: u32/u33/u34 moved to the residual after the
         tightness rule and STAYED there across rounds; the cross-group gate leaked in round 4 (population

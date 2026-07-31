@@ -74,12 +74,23 @@ export class AnthropicLlmProvider implements LlmProvider {
   // constructed when no stub is supplied — and selection only constructs this provider
   // when a key is present — so the default never runs in tests (which always inject a
   // stub) and never without a key.
-  constructor(private readonly client: AnthropicMessagesClient = new Anthropic()) {}
+  //
+  // `maxTokens` is injectable ONLY so the eval harness can deliberately force a truncation
+  // (a tiny ceiling => stop_reason `max_tokens`) to exercise the truncation path on the real
+  // model without waiting for one to happen by accident. It defaults to MAX_TOKENS, so
+  // production and every normal run are unaffected. A caller that overrides it MUST report the
+  // effective value everywhere it would otherwise print the constant — a percentage computed
+  // against the wrong ceiling is exactly the kind of true-but-misleading output this harness
+  // keeps having to stamp out.
+  constructor(
+    private readonly client: AnthropicMessagesClient = new Anthropic(),
+    private readonly maxTokens: number = MAX_TOKENS,
+  ) {}
 
   async complete(request: LlmRequest): Promise<LlmResponse> {
     const message = await this.client.messages.create({
       model: ANTHROPIC_MODEL,
-      max_tokens: MAX_TOKENS,
+      max_tokens: this.maxTokens,
       // Adaptive thinking: qualitative synthesis benefits from it. On this model thinking
       // is always on and this config is the sanctioned form (manual `type:'enabled'` +
       // budget_tokens is REJECTED with a 400 here). We read only the text blocks below, so

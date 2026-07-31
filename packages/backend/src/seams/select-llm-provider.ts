@@ -1,4 +1,9 @@
-import { FakeLlmProvider, type LlmProvider } from './llm-provider.js';
+import {
+  FakeLlmProvider,
+  defaultFakeResponse,
+  type LlmProvider,
+  type LlmStopReason,
+} from './llm-provider.js';
 import { AnthropicLlmProvider } from './anthropic-llm-provider.js';
 
 // Env-driven provider selection for a DEV / eval entry point. Deliberately NOT used by
@@ -46,6 +51,29 @@ export function providerChoice(options: { readonly forceFake?: boolean } = {}): 
  * ANTHROPIC_API_KEY is set, otherwise the fake (so a harness still runs end to end with no
  * key — it just exercises the fake, not the model).
  */
-export function selectLlmProvider(options: { readonly forceFake?: boolean } = {}): LlmProvider {
-  return providerChoice(options) === 'real' ? new AnthropicLlmProvider() : new FakeLlmProvider();
+export interface SelectProviderOptions {
+  readonly forceFake?: boolean;
+  /**
+   * Eval-only ceiling override. Used to force a truncation on the real model so the
+   * truncation path can be exercised deliberately rather than discovered during a run that
+   * mattered. Ignored by the fake, which has no ceiling.
+   */
+  readonly maxTokens?: number;
+  /**
+   * Eval-only: the finish signal the FAKE reports. Lets the non-natural routing and its print
+   * branches be exercised at zero cost, with no model call at all — the cheap rehearsal for
+   * the real truncation run.
+   */
+  readonly fakeStopReason?: LlmStopReason;
+}
+
+export function selectLlmProvider(options: SelectProviderOptions = {}): LlmProvider {
+  if (providerChoice(options) === 'real') {
+    // `undefined` for the client lets its default (a real SDK client) apply — so the ceiling
+    // can be overridden without this seam taking a dependency on the vendor SDK.
+    return new AnthropicLlmProvider(undefined, options.maxTokens);
+  }
+  return options.fakeStopReason !== undefined
+    ? new FakeLlmProvider(defaultFakeResponse, options.fakeStopReason)
+    : new FakeLlmProvider();
 }
