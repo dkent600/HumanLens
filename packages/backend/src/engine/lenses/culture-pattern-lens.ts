@@ -180,7 +180,8 @@ export class CulturePatternLens implements Lens, CrossVoiceLens {
     priorFindings: readonly Finding[],
     provider: LlmProvider,
   ): Promise<CrossVoiceSynthesis> {
-    // With no prior findings there is nothing to pattern across — stay silent.
+    // With no prior findings there is nothing to pattern across — stay silent. No model call
+    // is made, so there is no outcome to report (omitted, not faked as an empty answer).
     if (priorFindings.length === 0) {
       return { findings: [], cited: [], uncitedDefects: [] };
     }
@@ -193,9 +194,22 @@ export class CulturePatternLens implements Lens, CrossVoiceLens {
     const response = await provider.complete({ system: SYSTEM, prompt: JSON.stringify(payload) });
 
     // Non-natural finish (refusal / truncation / out-of-protocol) — do not parse. Findings-level
-    // silence; the pattern set is simply empty for this call (no ledger on the cross-voice path).
-    if (routeLlmResponse(response).kind === 'unusable') {
-      return { findings: [], cited: [], uncitedDefects: [] };
+    // silence, as ever. There is no ledger on the cross-voice path, so the disposition rides
+    // back on `outcome` instead: without it this empty pattern set would be indistinguishable
+    // from an honest one, and a `max_tokens` truncation would read as a lens-quality finding.
+    const route = routeLlmResponse(response);
+    if (route.kind === 'unusable') {
+      return {
+        findings: [],
+        cited: [],
+        uncitedDefects: [],
+        outcome: {
+          state: 'delivered-but-unusable',
+          reasonCode: route.reason,
+          ...(response.stopReason !== undefined ? { stopReason: response.stopReason } : {}),
+          ...(response.usage !== undefined ? { usage: response.usage } : {}),
+        },
+      };
     }
 
     const candidates = parseCandidates(response.text);
@@ -244,7 +258,20 @@ export class CulturePatternLens implements Lens, CrossVoiceLens {
     const cited = collectCitations(
       emittedCandidates.map((c) => ({ noticing: c.noticing, sourceFindingIds: c.sourceFindingIds, evidenceUnitIds: [] })),
     );
-    return { findings, cited, uncitedDefects };
+    // The call finished naturally, so the pattern set is the model's actual answer: patterns
+    // emitted -> answered-with-findings; none -> answered-empty (a CHOSEN silence, which on a
+    // natural finish is a truthful result about the corpus, not a fault).
+    return {
+      findings,
+      cited,
+      uncitedDefects,
+      outcome: {
+        state: findings.length > 0 ? 'answered-with-findings' : 'answered-empty',
+        reasonCode: findings.length > 0 ? 'ok' : 'chosen-empty',
+        ...(response.stopReason !== undefined ? { stopReason: response.stopReason } : {}),
+        ...(response.usage !== undefined ? { usage: response.usage } : {}),
+      },
+    };
   }
 
   // The Lens-interface entry (the staged pipeline): return just the findings; the audit and the

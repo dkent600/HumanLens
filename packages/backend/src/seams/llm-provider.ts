@@ -54,6 +54,19 @@ export interface LlmUsage {
   /** Prompt-cache reads/writes, where the provider supports caching. */
   readonly cacheReadInputTokens?: number;
   readonly cacheCreationInputTokens?: number;
+  /**
+   * How many of `outputTokens` the model spent on INTERNAL REASONING (thinking), where the
+   * provider reports it. Always <= outputTokens; `outputTokens - thinkingTokens` approximates
+   * the visible answer.
+   *
+   * Load-bearing for the output ceiling, not just for cost: on adaptive-thinking models
+   * thinking is billed as output AND counts against `max_tokens`, so a call can exhaust the
+   * ceiling while reasoning and be truncated before it writes any answer. That truncation
+   * arrives as `stopReason: 'max_tokens'` (routed delivered-but-unusable), which is
+   * indistinguishable from a chosen empty by BODY alone — the same class of mistake the
+   * fake-empty drop was. This field is how a run shows how close to the ceiling it actually ran.
+   */
+  readonly thinkingTokens?: number;
 }
 
 export interface LlmResponse {

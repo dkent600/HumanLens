@@ -121,3 +121,102 @@ describe('Culture Pattern lens — real cross-voice lens', () => {
     expect(a).toEqual(b);
   });
 });
+
+// THE FAILURE THIS GUARDS. The cross-voice path has no ledger, so a call that did not
+// usably finish yields the same VISIBLE result as a lens that honestly found nothing:
+// zero patterns, 0% coverage, everything residual, no defects. On a real run the most
+// likely cause is `max_tokens` — thinking is billed as output and counts against the
+// ceiling, so a whole-set synthesis can exhaust it while reasoning and be truncated before
+// writing any answer. Read as "the lens found no patterns", that silently costs a baseline.
+// `outcome` is the only thing separating the two, so it is worth its own tests.
+describe('Culture Pattern — cross-voice outcome on a non-natural finish', () => {
+  /** A fake that finishes on `stopReason` instead of `end_turn`. Body is irrelevant: a
+   *  non-natural finish must not be parsed at all. */
+  function unusableProvider(stopReason: 'max_tokens' | 'refusal' | 'pause_turn'): FakeLlmProvider {
+    return new FakeLlmProvider(
+      (): LensResponsePayload => ({
+        // A truncated body is typically a PARTIAL, still-valid-looking prefix — the point is
+        // that it is never reached, not that it is unparseable.
+        findings: [{ noticing: 'a half-written pattern', sourceFindingIds: ['listening:0'], evidenceUnitIds: [] }],
+      }),
+      stopReason,
+    );
+  }
+
+  it('TRUNCATION: reports delivered-but-unusable/malformed and carries stopReason max_tokens', async () => {
+    const { findings, audit, uncitedDefects, outcome } = await runCrossVoiceLens(
+      new CulturePatternLens(),
+      units,
+      prior,
+      unusableProvider('max_tokens'),
+    );
+
+    expect(findings).toHaveLength(0); // no fabricated finding from an unfinished answer
+    expect(uncitedDefects).toHaveLength(0);
+    expect(outcome).toEqual({
+      state: 'delivered-but-unusable',
+      reasonCode: 'malformed',
+      stopReason: 'max_tokens',
+    });
+    // The audit alone is INDISTINGUISHABLE from an honest empty — which is exactly why the
+    // outcome above has to exist. Asserted here so the ambiguity stays visible in the test.
+    expect(audit.cited).toEqual([]);
+    expect(audit.residual).toEqual(['listening:0', 'listening:1', 'listening:2']);
+    expect(audit.coverageRatio).toBe(0);
+  });
+
+  it('REFUSAL routes to the same state but a distinguishable reason code', async () => {
+    const { findings, outcome } = await runCrossVoiceLens(
+      new CulturePatternLens(),
+      units,
+      prior,
+      unusableProvider('refusal'),
+    );
+    expect(findings).toHaveLength(0);
+    expect(outcome).toEqual({
+      state: 'delivered-but-unusable',
+      reasonCode: 'refused',
+      stopReason: 'refusal',
+    });
+  });
+
+  it('a NATURAL empty is answered-empty — the case a truncation must never be confused with', async () => {
+    const emptyButNatural = patternsProvider([]); // well-formed, no patterns, end_turn
+    const { findings, audit, outcome } = await runCrossVoiceLens(
+      new CulturePatternLens(),
+      units,
+      prior,
+      emptyButNatural,
+    );
+
+    expect(findings).toHaveLength(0);
+    expect(outcome).toEqual({
+      state: 'answered-empty',
+      reasonCode: 'chosen-empty',
+      stopReason: 'end_turn',
+    });
+    // IDENTICAL audit to the truncation case above — same numbers, opposite meaning. The
+    // state/reasonCode/stopReason triple is the whole difference.
+    expect(audit.residual).toEqual(['listening:0', 'listening:1', 'listening:2']);
+    expect(audit.coverageRatio).toBe(0);
+  });
+
+  it('a natural finish WITH patterns is answered-with-findings/ok', async () => {
+    const { outcome } = await runCrossVoiceLens(
+      new CulturePatternLens(),
+      units,
+      prior,
+      patternsProvider([{ noticing: 'a real pattern', sourceFindingIds: ['listening:0', 'listening:1'] }]),
+    );
+    expect(outcome).toEqual({
+      state: 'answered-with-findings',
+      reasonCode: 'ok',
+      stopReason: 'end_turn',
+    });
+  });
+
+  it('reports NO outcome when no model call was made (no prior findings) — absence, not a faked empty answer', async () => {
+    const { outcome } = await runCrossVoiceLens(new CulturePatternLens(), units, [], new FakeLlmProvider());
+    expect(outcome).toBeUndefined();
+  });
+});

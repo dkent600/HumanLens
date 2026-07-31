@@ -1,13 +1,13 @@
 import type { Unit } from '../domain/types.js';
 import type { Finding } from '../domain/finding.js';
-import type { LlmProvider } from '../seams/llm-provider.js';
-import { ANTHROPIC_MODEL } from '../seams/anthropic-llm-provider.js';
-import { hasAnthropicKey, selectLlmProvider } from '../seams/select-llm-provider.js';
+import type { LlmProvider, LlmRequest, LlmResponse, LlmUsage } from '../seams/llm-provider.js';
+import { ANTHROPIC_MODEL, EFFORT, MAX_TOKENS } from '../seams/anthropic-llm-provider.js';
+import { providerChoice, selectLlmProvider } from '../seams/select-llm-provider.js';
 import { ListeningLens } from '../engine/lenses/listening-lens.js';
 import { HumanMeaningLens } from '../engine/lenses/human-meaning-lens.js';
 import { CulturePatternLens } from '../engine/lenses/culture-pattern-lens.js';
 import { runPerVoiceLens } from '../engine/completeness/per-voice-lens.js';
-import { runCrossVoiceLens } from '../engine/completeness/cross-voice-lens.js';
+import { runCrossVoiceLens, type CrossVoiceOutcome } from '../engine/completeness/cross-voice-lens.js';
 import { formatCitationAudit, type CitationAudit } from '../engine/completeness/cross-voice-audit.js';
 import { SqliteRunLedger } from '../seams/sqlite-run-ledger.js';
 import type { RunLedger } from '../seams/run-ledger.js';
@@ -42,9 +42,34 @@ interface LensRun {
     readonly lensId: string;
     readonly audit: CitationAudit;
     readonly uncitedDefects: readonly string[];
+    /** How the single call finished — separates a truncation from an honest empty. */
+    readonly outcome?: CrossVoiceOutcome;
   };
 }
 type LensRunner = (units: readonly Unit[], provider: LlmProvider) => Promise<LensRun>;
+
+/**
+ * A provider DECORATOR that records every call's usage — eval-side only, so the engine and
+ * the seam stay untouched (instrumentation belongs in the harness, not in the pipeline).
+ *
+ * It exists because thinking is now the largest and least visible part of a call: on an
+ * adaptive-thinking model the reasoning is billed as output AND counts against `max_tokens`,
+ * so a call can run out of ceiling while thinking and be truncated before writing an answer.
+ * The per-voice ledger records terminal STATES but carries no usage, so without this wrapper
+ * there is no way to see how close any individual call ran to the ceiling.
+ */
+class UsageRecordingProvider implements LlmProvider {
+  readonly calls: { usage?: LlmUsage; stopReason?: string }[] = [];
+  constructor(private readonly inner: LlmProvider) {}
+  async complete(request: LlmRequest): Promise<LlmResponse> {
+    const response = await this.inner.complete(request);
+    this.calls.push({
+      ...(response.usage !== undefined ? { usage: response.usage } : {}),
+      ...(response.stopReason !== undefined ? { stopReason: response.stopReason } : {}),
+    });
+    return response;
+  }
+}
 
 // The lenses now run through the PRODUCTION orchestrator (per-voice fan-out + four-state
 // ledger); the eval harness passes a durable ledger so every run additionally produces
@@ -94,35 +119,74 @@ const LENS_RUNNERS: Record<string, LensRunner> = {
     });
     ledger.close();
     const priorWavePool = [...listening.findings, ...meaning.findings];
-    const { findings, audit, uncitedDefects } = await runCrossVoiceLens(
+    const { findings, audit, uncitedDefects, outcome } = await runCrossVoiceLens(
       new CulturePatternLens(),
       units,
       priorWavePool,
       provider,
     );
-    return { findings, crossVoice: { lensId: 'culture', audit, uncitedDefects } };
+    return {
+      findings,
+      crossVoice: {
+        lensId: 'culture',
+        audit,
+        uncitedDefects,
+        ...(outcome !== undefined ? { outcome } : {}),
+      },
+    };
   },
 };
 
 async function main(): Promise<void> {
-  const lensName = process.argv[2] ?? 'listening';
+  // `--fake` forces the deterministic fake even when a key is present. It exists because
+  // the npm script loads .env on every invocation, so key-absence is not a repeatable way
+  // to ask for a free run. Flags are filtered out before reading the lens name, so
+  // `npm run eval -- culture --fake` and `-- --fake culture` both work.
+  const argv = process.argv.slice(2);
+  const forceFake = argv.includes('--fake');
+  const lensName = argv.find((arg) => !arg.startsWith('--')) ?? 'listening';
+
+  // The declared provenance of the run. It names not just WHICH provider but WHY, because
+  // "fake because forced" and "fake because no key found" are very different facts about a
+  // baseline — and a forced run must not look like an accident of a missing key.
+  //
+  // PRINTED BEFORE THE LENS IS RESOLVED, DELIBERATELY. This makes `--fake` verifiable at
+  // ZERO COST: an unknown lens name prints this line and then exits, having constructed no
+  // provider and made no call. That matters because the cheapest-looking way to test the
+  // flag is the most expensive way to get it wrong — `culture` runs Listening and Human
+  // Meaning live before it synthesizes, so a flag that failed to parse would bill ~71 calls,
+  // not one. Verify with a nonsense lens name first:
+  //     npm run eval -- __check__ --fake
+  const choice = providerChoice({ forceFake });
+  const usingReal = choice === 'real';
+  const providerLabel =
+    choice === 'real'
+      ? `real Anthropic model (${ANTHROPIC_MODEL})`
+      : choice === 'fake-forced'
+        ? 'deterministic fake — FORCED via --fake (any API key deliberately ignored)'
+        : 'deterministic fake (no ANTHROPIC_API_KEY found)';
+  console.log(`Lens:     ${lensName}`);
+  console.log(`Provider: ${providerLabel}`);
+
   const runner = LENS_RUNNERS[lensName];
   if (!runner) {
     console.error(`Unknown lens "${lensName}". Available: ${Object.keys(LENS_RUNNERS).join(', ')}`);
     process.exitCode = 1;
     return;
   }
-
-  const usingReal = hasAnthropicKey();
-  console.log(`Lens:     ${lensName}`);
-  console.log(`Provider: ${usingReal ? `real Anthropic model (${ANTHROPIC_MODEL})` : 'deterministic fake (no ANTHROPIC_API_KEY found)'}`);
+  if (usingReal) {
+    // Record the sampling parameters IN the run output — a baseline that does not say what
+    // it ran on cannot be compared with anything later.
+    console.log(`Params:   max_tokens ${MAX_TOKENS} | thinking adaptive | effort ${EFFORT} | temperature: model default (non-default values are rejected on this model)`);
+  }
   console.log(`Units:    ${SAMPLE_UNITS.length}`);
   for (const unit of SAMPLE_UNITS) {
     console.log(`  [${unit.unitId}] (${unit.speakerToken}, ${unit.language}) ${unit.content}`);
   }
   console.log('');
 
-  const { findings, ledger, runIds, crossVoice } = await runner(SAMPLE_UNITS, selectLlmProvider());
+  const recorder = new UsageRecordingProvider(selectLlmProvider({ forceFake }));
+  const { findings, ledger, runIds, crossVoice } = await runner(SAMPLE_UNITS, recorder);
 
   console.log(`${findings.length} finding(s):\n`);
   for (const finding of findings) {
@@ -160,6 +224,31 @@ async function main(): Promise<void> {
   // CROSS-VOICE lenses: the cited-or-residual audit + the uncited-pattern defect (surfaced,
   // never retried). A non-empty residual is expected — it is uncited findings made visible.
   if (crossVoice !== undefined) {
+    // The CALL DISPOSITION comes FIRST, before the audit. Zero patterns / 0% coverage /
+    // everything residual is what a truncation and an honest empty BOTH look like; the audit
+    // numbers are only interpretable once this line says the call actually completed.
+    const outcome = crossVoice.outcome;
+    if (outcome === undefined) {
+      console.log(`cross-voice call [${crossVoice.lensId}] — no model call made (no prior findings)`);
+    } else {
+      const truncated = outcome.stopReason === 'max_tokens';
+      console.log(
+        `cross-voice call [${crossVoice.lensId}] — ${outcome.state} / ${outcome.reasonCode}` +
+          ` (stopReason: ${outcome.stopReason ?? 'none reported'})`,
+      );
+      if (truncated) {
+        console.log(
+          `  ⚠ TRUNCATED — the ${MAX_TOKENS}-token ceiling was exhausted. The empty/short pattern set`,
+        );
+        console.log('    below is an ARTIFACT OF THE CEILING, not a finding about the lens. Raise');
+        console.log('    MAX_TOKENS and re-run before reading anything into the audit numbers.');
+      } else if (outcome.state === 'answered-empty') {
+        console.log(
+          '  (natural finish, no patterns — a genuine empty result about this corpus, not a truncation)',
+        );
+      }
+      console.log(`  ${formatUsage(outcome.usage)}`);
+    }
     console.log(formatCitationAudit(crossVoice.lensId, crossVoice.audit));
     console.log(
       `  uncited-pattern defects (cited zero existing findings): ${crossVoice.uncitedDefects.length}` +
@@ -167,6 +256,47 @@ async function main(): Promise<void> {
     );
     console.log('');
   }
+
+  // EVERY call's distance from the output ceiling — per-voice calls included (the ledger
+  // records states but carries no usage, so this wrapper is the only place they show up).
+  reportUsage(recorder.calls);
+}
+
+/** One call's token usage against the ceiling, thinking split out. */
+function formatUsage(usage: LlmUsage | undefined): string {
+  if (usage === undefined) return 'usage: not reported (fake provider)';
+  const pct = ((usage.outputTokens / MAX_TOKENS) * 100).toFixed(1);
+  const thinking =
+    usage.thinkingTokens !== undefined
+      ? `${usage.thinkingTokens} thinking + ${usage.outputTokens - usage.thinkingTokens} answer`
+      : 'thinking breakdown not reported';
+  return `usage: ${usage.inputTokens} in / ${usage.outputTokens} out (${thinking}) — ${pct}% of the ${MAX_TOKENS} ceiling`;
+}
+
+/**
+ * The run's headroom summary. The number that matters is the CLOSEST any single call came to
+ * the ceiling: an average hides the one call that truncated, and it is the individual call
+ * that gets silently lost.
+ */
+function reportUsage(calls: readonly { usage?: LlmUsage; stopReason?: string }[]): void {
+  const withUsage = calls.map((c) => c.usage).filter((u): u is LlmUsage => u !== undefined);
+  if (withUsage.length === 0) {
+    console.log(`Token usage: not reported (${calls.length} call(s), fake provider)\n`);
+    return;
+  }
+  const peak = withUsage.reduce((a, b) => (b.outputTokens > a.outputTokens ? b : a));
+  const totalOut = withUsage.reduce((sum, u) => sum + u.outputTokens, 0);
+  const totalThinking = withUsage.reduce((sum, u) => sum + (u.thinkingTokens ?? 0), 0);
+  const truncatedCount = calls.filter((c) => c.stopReason === 'max_tokens').length;
+
+  console.log(`Token usage — ${calls.length} call(s), ceiling ${MAX_TOKENS} per call:`);
+  console.log(`  total output:   ${totalOut} (${totalThinking} of it thinking)`);
+  console.log(`  closest call:   ${formatUsage(peak)}`);
+  console.log(
+    `  truncated calls (stopReason max_tokens): ${truncatedCount}` +
+      (truncatedCount > 0 ? '  ⚠ RAISE THE CEILING AND RE-RUN' : ''),
+  );
+  console.log('');
 }
 
 await main();

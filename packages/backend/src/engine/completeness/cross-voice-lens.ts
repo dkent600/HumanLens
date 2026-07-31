@@ -1,7 +1,13 @@
 import type { Unit } from '../../domain/types.js';
 import type { Finding } from '../../domain/finding.js';
-import type { LensResponseCandidate, LlmProvider } from '../../seams/llm-provider.js';
+import type {
+  LensResponseCandidate,
+  LlmProvider,
+  LlmStopReason,
+  LlmUsage,
+} from '../../seams/llm-provider.js';
 import { computeCitationAudit, type CitationAudit } from './cross-voice-audit.js';
+import type { ReasonCode, TerminalState } from './terminal-state.js';
 
 // The bridge between a CROSS-VOICE lens (Culture Pattern, Tension, …) and the cited-or-
 // residual audit. Unlike the per-voice path (fan-out), a cross-voice lens makes ONE call
@@ -19,6 +25,30 @@ export function collectCitations(candidates: readonly LensResponseCandidate[]): 
   return [...new Set(candidates.flatMap((c) => c.sourceFindingIds ?? []))];
 }
 
+/**
+ * How the ONE cross-voice call actually finished — the accounting a cross-voice lens
+ * otherwise has nowhere to put. The per-voice path records this per voice in the ledger;
+ * the cross-voice path makes a single call and has no ledger, so without this the call's
+ * disposition is simply lost.
+ *
+ * WHY IT EXISTS: an empty pattern set is AMBIGUOUS by itself. Zero patterns / 0% coverage /
+ * everything residual / no defects is what BOTH a truncated call and a genuinely
+ * pattern-less corpus look like. Reading the first as the second would attribute a token
+ * ceiling to the lens's judgment. The finish signal is the only thing that separates them —
+ * the same reason the per-voice accounting refuses to infer a state from an empty body.
+ *
+ * Uses the production four-state vocabulary (terminal-state.ts) rather than a parallel one:
+ * one call, one terminal state.
+ */
+export interface CrossVoiceOutcome {
+  readonly state: TerminalState;
+  readonly reasonCode: ReasonCode;
+  /** The raw finish signal, where the provider carries one. */
+  readonly stopReason?: LlmStopReason;
+  /** Per-call token usage, where the provider reports it — including thinking tokens. */
+  readonly usage?: LlmUsage;
+}
+
 export interface CrossVoiceSynthesis {
   readonly findings: readonly Finding[];
   /** The union of sourceFindingIds across all EMITTED findings — RAW (may include hallucinated ids). */
@@ -31,6 +61,12 @@ export interface CrossVoiceSynthesis {
    * 0% coverage with everything in residual and the audit would look healthy while catching nothing.
    */
   readonly uncitedDefects: readonly string[];
+  /**
+   * How the call finished. OPTIONAL for the same reason `stopReason` is optional on the
+   * seam: a lens that reports no disposition simply omits it, and the harness says so
+   * rather than inventing one. Culture Pattern always reports it.
+   */
+  readonly outcome?: CrossVoiceOutcome;
 }
 
 export interface CrossVoiceLens {
@@ -54,6 +90,8 @@ export interface CrossVoiceRunResult {
   readonly audit: CitationAudit;
   /** Emitted patterns that cited zero existing findings (the surfaced, never-retried defect). */
   readonly uncitedDefects: readonly string[];
+  /** How the single cross-voice call finished — what tells a truncation from an honest empty. */
+  readonly outcome?: CrossVoiceOutcome;
 }
 
 /**
@@ -70,7 +108,11 @@ export async function runCrossVoiceLens(
   provider: LlmProvider,
 ): Promise<CrossVoiceRunResult> {
   const delivered = lens.deliveredFindingIds(priorFindings);
-  const { findings, cited, uncitedDefects } = await lens.synthesize(units, priorFindings, provider);
+  const { findings, cited, uncitedDefects, outcome } = await lens.synthesize(
+    units,
+    priorFindings,
+    provider,
+  );
   const audit = computeCitationAudit(delivered, cited);
-  return { findings, audit, uncitedDefects };
+  return { findings, audit, uncitedDefects, ...(outcome !== undefined ? { outcome } : {}) };
 }

@@ -29,10 +29,33 @@ import type { LlmProvider, LlmRequest, LlmResponse } from './llm-provider.js';
 export const ANTHROPIC_MODEL = 'claude-opus-5';
 
 /**
- * Output ceiling per call. A lens emits a handful of findings — comfortably within the
- * non-streaming safety band, so a single non-streaming request is fine here.
+ * Output ceiling per call — the HARD cap on thinking + answer together.
+ *
+ * Raised 16000 -> 64000 on the move to `claude-opus-5`. On this model thinking is ALWAYS
+ * ON (not opt-in) and `effort` defaults to `high`, and thinking tokens count against
+ * `max_tokens` alongside the answer text. The binding case is the CROSS-VOICE call
+ * (Culture Pattern): one synthesis over the whole accumulated pool, the largest single
+ * call in the system, where deep reasoning is exactly what the task invites.
+ *
+ * The failure this prevents is SILENT, which is why the headroom is generous. A call that
+ * exhausts the ceiling returns `stopReason: 'max_tokens'` -> routed delivered-but-unusable
+ * -> the cross-voice path yields zero patterns. In the eval output that is
+ * indistinguishable from a lens that legitimately found nothing (0% coverage, everything
+ * residual, no defects) — so a truncation would be read as a finding about the lens.
+ *
+ * Billing is on tokens GENERATED, not on the ceiling, so unused headroom costs nothing.
+ * Opus 5 permits up to 128k; 64000 leaves room without approaching the model limit.
+ * Exported so the eval harness can report each call's distance from it.
  */
-const MAX_TOKENS = 16000;
+export const MAX_TOKENS = 64000;
+
+/**
+ * Reasoning depth. Pinned EXPLICITLY to `high` — which is the current Claude API default
+ * for this model, so this changes nothing about behavior. It is here to make the eval
+ * reproducible and self-describing: an unstated default is a parameter that can move under
+ * a baseline without the run recording that it did. Pin it, record it, compare like with like.
+ */
+export const EFFORT = 'high' as const;
 
 /**
  * The narrow slice of the Anthropic client this provider depends on. Declaring it as
@@ -57,9 +80,13 @@ export class AnthropicLlmProvider implements LlmProvider {
     const message = await this.client.messages.create({
       model: ANTHROPIC_MODEL,
       max_tokens: MAX_TOKENS,
-      // Adaptive thinking: qualitative synthesis benefits from it; `display` defaults
-      // to omitted, so thinking blocks carry no text and we read only the text blocks.
+      // Adaptive thinking: qualitative synthesis benefits from it. On this model thinking
+      // is always on and this config is the sanctioned form (manual `type:'enabled'` +
+      // budget_tokens is REJECTED with a 400 here). We read only the text blocks below, so
+      // whichever way `display` defaults, no thinking text reaches a lens.
       thinking: { type: 'adaptive' },
+      // Reasoning depth, pinned rather than inherited — see EFFORT.
+      output_config: { effort: EFFORT },
       messages: [{ role: 'user', content: request.prompt }],
       ...(request.system !== undefined ? { system: request.system } : {}),
     });
@@ -96,6 +123,12 @@ export class AnthropicLlmProvider implements LlmProvider {
           : {}),
         ...(message.usage.cache_creation_input_tokens !== null
           ? { cacheCreationInputTokens: message.usage.cache_creation_input_tokens }
+          : {}),
+        // How much of the output was internal reasoning. Optional-chained: the field is
+        // absent on models/responses that report no thinking breakdown, and a missing
+        // breakdown must not be reported as zero thinking.
+        ...(message.usage.output_tokens_details?.thinking_tokens !== undefined
+          ? { thinkingTokens: message.usage.output_tokens_details.thinking_tokens }
           : {}),
       },
     };
