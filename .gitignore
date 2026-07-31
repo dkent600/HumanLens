@@ -16,6 +16,11 @@ npm-debug.log*
 .env.*
 !.env.example
 
+# Captured eval pools — paid model output, not source. A specific pool may be
+# committed DELIBERATELY (git add -f) when it becomes the evidence behind a
+# written finding; the directory is ignored so none is committed by accident.
+eval-pools/
+
 # Editor / OS
 .DS_Store
 Thumbs.db
