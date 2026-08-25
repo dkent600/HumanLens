@@ -1,6 +1,6 @@
 # Human Lens — Module 1 (The Listening Brief)
 
-AI-assisted qualitative-synthesis tool for **Inclusity**, built by Sasha Markova Inc.
+An AI-assisted qualitative-synthesis tool for **Inclusity**, built by [Doug Kent](https://www.douglaskent.com).
 This repo holds **Module 1, the Listening Brief** — its first coded version, **V1
 ("The Trustworthy Engine")**.
 
@@ -27,6 +27,15 @@ packages/
 The frontend follows folder-by-role: `pages/` (Aurelia component pairs), `stores/` (state +
 structural derivation), `seams/` (the outward HTTP boundary + its fake), `resources/` (value
 converters). `View → ViewModel → Store → Service(seam)`.
+
+Each package documents its own purpose, code structure, and direct dependencies:
+
+- **[`packages/backend/README.md`](packages/backend/README.md)** — the Fastify front door,
+  the framework-free engine (de-id gate → the seven lenses in waves → assemble), the seams,
+  and the eval harnesses.
+- **[`packages/frontend/README.md`](packages/frontend/README.md)** — the Aurelia 2 app, the
+  `View → ViewModel → Store → Seam` chain, and why the frontend can only ever see the
+  client-safe layer.
 
 ## Prerequisites
 
