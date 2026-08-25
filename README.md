@@ -31,10 +31,6 @@ packages/
   frontend/   @humanlens/frontend — Aurelia 2 web app (pages/ · stores/ · seams/ · resources/)
 ```
 
-The frontend follows folder-by-role: `pages/` (Aurelia component pairs), `stores/` (state +
-structural derivation), `seams/` (the outward HTTP boundary + its fake), `resources/` (value
-converters). `View → ViewModel → Store → Service(seam)`.
-
 Each package documents its own purpose, code structure, and direct dependencies:
 
 - **[`packages/backend/README.md`](packages/backend/README.md)** — the Fastify front door,
