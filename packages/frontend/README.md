@@ -4,6 +4,13 @@ The browser app for **Human Lens — Module 1 (the Listening Brief)**: an Aureli
 where an Inclusity actor contributes already-de-identified material and reads back the
 assembled brief. No local install — it talks to the Fastify front door over HTTP.
 
+> ⚠️ **This app is a very incomplete draft.** What exists is a thin proving slice — enough
+> to demonstrate the architecture end to end (the layering, the seam boundaries, and
+> *client-safe ⊆ internal* visible on screen), not a usable product. The UI is unstyled and
+> unreviewed, the screens are minimal, there is no engagement selection, no human-review
+> surface, no export, and no error/empty-state design worth the name. Expect most of it to
+> change. The **structure** below is the part meant to be stable; the screens are not.
+
 > **The authoritative spec lives in [`docs/`](../../docs/).** `docs/build_approach.md` is
 > the architecture (it wins on any conflict); `docs/build_implementation.md` is the stack
 > and code structure — its *Frontend code structure* section governs this package. This

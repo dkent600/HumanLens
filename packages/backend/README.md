@@ -27,6 +27,37 @@ Everything the engine does is plain TypeScript. It runs from a Vitest test or a 
 harness with **no server running** — there is no Fastify, no database, and no LLM vendor
 inside it.
 
+## How far this is built
+
+**All six waves are structurally complete** — every one of the seven lenses is implemented,
+registered, and running in the staged pipeline, each parsing tolerantly, anchoring its
+findings to in-scope cleared units, and building through the domain factories. The
+structural invariants (anchoring, held-by-default disposition, guardrail supersede-by-id,
+engagement/actor scoping, client-safe ⊆ internal) hold across the whole pipeline.
+
+**Prompt work is complete only through the Aggregate wave.** Three lenses are *real on the
+production path* — they carry a versioned `SYSTEM` prompt, tuned against the model:
+
+| Wave | Lens | State |
+| --- | --- | --- |
+| evidence | **Listening** | ✅ real — versioned `SYSTEM` prompt, per-voice fan-out |
+| meaning | **Human Meaning** | ✅ real — versioned `SYSTEM` prompt, per-voice fan-out |
+| aggregate | **Culture Pattern** | ✅ real — versioned `SYSTEM` prompt, cross-voice |
+| interpret | **Tension** | ⬜ structural — instruction-only prompt, no versioned `SYSTEM` yet |
+| interpret | **Objective** | ⬜ structural — and its objective frame (survey domains + ADKAR) is an **empty placeholder** until the V3 context work |
+| guardrail | **Discernment** | ⬜ structural — the supersede mechanism is real and tested; the audit prompt is not written |
+| openings | **Action Opening** | ⬜ structural — instruction-only prompt |
+
+So a run past the Aggregate wave is architecturally honest but not yet behaviorally tuned:
+the four remaining lenses exercise the wiring and the invariants, not calibrated judgement.
+
+**Also not built yet:** the **export seam** (brief model → `.docx`), **human review** as a
+pipeline stage, and any **internal-brief** read path. `GET …/brief` is the only HTTP route
+that runs the pipeline; intake and the de-id scan exist but do not synthesize.
+
+For per-increment progress and the running test count, `docs/build_context.md` is the
+operational log — it is more current than this section.
+
 ## Code architecture
 
 Seam discipline is enforced by **folders**, not by package boundaries. One package, four

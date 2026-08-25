@@ -1,8 +1,15 @@
 # Human Lens — Module 1 (The Listening Brief)
 
-An AI-assisted qualitative-synthesis tool for **Inclusity**, built by [Doug Kent](https://www.douglaskent.com).
+An AI-assisted qualitative-synthesis tool for [**Inclusity**](https://www.inclusity.com), built by [Doug Kent](https://www.douglaskent.com).
 This repo holds **Module 1, the Listening Brief** — its first coded version, **V1
 ("The Trustworthy Engine")**.
+
+> **"Human Lens" is an internal working name.** It has not been cleared for use and may not
+> ultimately be available — treat it as a placeholder, not a settled product name. It is
+> fine in code, in the npm scope (`@humanlens/*`), and in internal docs; it should not go in
+> front of a client or anywhere public as though it were decided. A rename would touch the
+> package scope and the repo name, so keep it out of anything that would make changing it
+> expensive.
 
 > **The authoritative spec lives in [`docs/`](docs/).** `docs/build_approach.md` is the
 > architecture (it wins on any conflict); `docs/build_implementation.md` is the stack and
