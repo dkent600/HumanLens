@@ -1,21 +1,10 @@
 # Human Lens — Module 1 (The Listening Brief)
 
-An AI-assisted qualitative-synthesis tool for [**Inclusity**](https://www.inclusity.com), built by [Doug Kent](https://www.douglaskent.com).
-This repo holds **Module 1, the Listening Brief** — its first coded version, **V1
-("The Trustworthy Engine")**.
+Modeled on an existing DEI consultancy, turned an open-ended qualitative analysis problem into a full-stack web application wrapping a bounded, testable LLM pipeline: staged contracts between components, empirical calibration to reduce output variance, and a client-safe boundary enforced from the pipeline through to the human-review interface.
 
-> **"Human Lens" is an internal working name.** It has not been cleared for use and may not
-> ultimately be available — treat it as a placeholder, not a settled product name. It is
-> fine in code, in the npm scope (`@humanlens/*`), and in internal docs; it should not go in
-> front of a client or anywhere public as though it were decided. A rename would touch the
-> package scope and the repo name, so keep it out of anything that would make changing it
-> expensive.
+**"Human Lens" is an internal working name.** It has not been cleared for use and may not ultimately be available — treat it as a placeholder, not a settled product name. It is fine in code, in the npm scope (`@humanlens/*`), and in internal docs; it should not go in front of a client or anywhere public as though it were decided. A rename would touch the package scope and the repo name, so keep it out of anything that would make changing it expensive.
 
-> **The authoritative spec lives in [`docs/`](docs/).** `docs/build_approach.md` is the
-> architecture (it wins on any conflict); `docs/build_implementation.md` is the stack and
-> code structure. This README is operational only — how to run and work in the repo — and
-> deliberately does not restate the architecture. Agents should also read
-> [`CLAUDE.md`](CLAUDE.md) first.
+**The authoritative spec lives in [`docs/`](docs/).** `docs/build_approach.md` is the architecture (it wins on any conflict); `docs/build_implementation.md` is the stack and code structure. This README is operational only — how to run and work in the repo — and deliberately does not restate the architecture. Agents should also read [`CLAUDE.md`](CLAUDE.md) first.
 
 ## Repo layout
 
