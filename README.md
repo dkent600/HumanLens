@@ -1,6 +1,6 @@
 # Human Lens
 
-Modeled on an existing DEI consultancy, turned an open-ended qualitative analysis problem into a full-stack web application wrapping a bounded, testable LLM pipeline: staged contracts between components, empirical calibration to reduce output variance, and a client-safe boundary enforced from the pipeline through to the human-review interface.
+Full-stack web app wrapping a bounded, testable LLM pipeline for open-ended qualitative analysis: staged contracts between components, empirical calibration to reduce output variance, and a client-safe boundary enforced through to the human-review UI. Modeled on an existing DEI consultancy.
 
 **"Human Lens" is an internal working name.** It has not been cleared for use and may not ultimately be available — treat it as a placeholder, not a settled product name. It is fine in code, in the npm scope (`@humanlens/*`), and in internal docs; it should not go in front of a client or anywhere public as though it were decided. A rename would touch the package scope and the repo name, so keep it out of anything that would make changing it expensive.
 
