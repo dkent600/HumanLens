@@ -1,4 +1,4 @@
-# Human Lens — Module 1 (The Listening Brief)
+# Human Lens
 
 Modeled on an existing DEI consultancy, turned an open-ended qualitative analysis problem into a full-stack web application wrapping a bounded, testable LLM pipeline: staged contracts between components, empirical calibration to reduce output variance, and a client-safe boundary enforced from the pipeline through to the human-review interface.
 
