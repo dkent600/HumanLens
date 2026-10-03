@@ -177,7 +177,7 @@ How to build one in this codebase:
   a relaxed assertion.
 - **Ambiguous results go to the user.** A flaky property, a counterexample that
   might be "mock infidelity", or a wish to relax a property is decided by Doug.
-  Two Codex instances must not agree among themselves that it is benign.
+  Two agent instances must not agree among themselves that it is benign.
 - **New behaviors are proposed, not added silently.** A new adversarial behavior or
   property found while building is staged (for example in `PROPOSED_BEHAVIORS`)
   with a note for the spec, not slipped straight into test code.
