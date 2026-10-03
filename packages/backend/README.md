@@ -7,8 +7,8 @@ material through the staged lens pipeline and assembles the two-layer brief.
 > **The authoritative spec lives in [`docs/`](../../docs/).** `docs/build_approach.md` is
 > the architecture (it wins on any conflict); `docs/build_implementation.md` is the stack
 > and code structure. This README describes what is in this package and how to work in it —
-> it does not restate the architecture. Agents should read [`CLAUDE.md`](../../CLAUDE.md)
-> first.
+> it does not restate the architecture. Agents should read [`AGENTS.md`](../../AGENTS.md)
+> first (Claude Code loads it automatically through `CLAUDE.md`).
 
 ## Purpose
 

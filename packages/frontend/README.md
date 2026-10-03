@@ -15,8 +15,8 @@ assembled brief. No local install — it talks to the Fastify front door over HT
 > the architecture (it wins on any conflict); `docs/build_implementation.md` is the stack
 > and code structure — its *Frontend code structure* section governs this package. This
 > README describes what is in the package and how to work in it. Agents should read
-> [`CLAUDE.md`](../../CLAUDE.md) first, plus the `aurelia2` and `aurelia2-ex` skills under
-> [`.claude/skills/`](.claude/skills/).
+> [`AGENTS.md`](../../AGENTS.md) first (Claude Code loads it automatically through
+> `CLAUDE.md`), plus the `aurelia2` and `aurelia2-ex` skills under [`.agents/`](.agents/).
 
 ## Purpose
 
