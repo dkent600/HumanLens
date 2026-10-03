@@ -1,0 +1,29 @@
+{
+  "name": "humanlens",
+  "description": "Repo-local marketplace that lets Claude Code read this repository's agent-generic skills from .agents/skills/.",
+  "owner": {
+    "name": "Douglas Kent"
+  },
+  "plugins": [
+    {
+      "name": "humanlens",
+      "source": "./.agents",
+      "description": "Repo-wide Human Lens skills, from .agents/skills/."
+    },
+    {
+      "name": "humanlens-frontend",
+      "source": "./packages/frontend/.agents",
+      "description": "Frontend (Aurelia 2) skills, from packages/frontend/.agents/skills/."
+    },
+    {
+      "name": "humanlens-backend",
+      "source": "./packages/backend/.agents",
+      "description": "Backend (engine and Fastify service) skills, from packages/backend/.agents/skills/."
+    },
+    {
+      "name": "humanlens-shared",
+      "source": "./packages/shared/.agents",
+      "description": "Shared client-safe contract skills, from packages/shared/.agents/skills/."
+    }
+  ]
+}

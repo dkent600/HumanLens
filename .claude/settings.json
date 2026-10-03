@@ -17,5 +17,19 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "humanlens@humanlens": true,
+    "humanlens-frontend@humanlens": true,
+    "humanlens-backend@humanlens": true,
+    "humanlens-shared@humanlens": true
+  },
+  "extraKnownMarketplaces": {
+    "humanlens": {
+      "source": {
+        "source": "directory",
+        "path": "./"
+      }
+    }
   }
 }
